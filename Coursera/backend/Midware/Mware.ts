@@ -1,10 +1,15 @@
+
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-const { User } = require("../DB/MDB");
+import { User } from '../DB/MDB';
+
 dotenv.config();
 const { JWT_SECRET } = process.env;
+
+if (!JWT_SECRET) {
+  throw new Error("missing .env");
+}
 
 // Extend Express Request interface to include 'user'
 declare global {
@@ -23,8 +28,8 @@ async function auth(req: Request, res: Response, next: NextFunction): Promise<vo
   }
   const token = header.split(" ")[1];
   try {
-    const decoded: any = jwt.verify(token, JWT_SECRET as string);
-    const user = await User.findOne({ username: decoded.username });
+    const decoded = jwt.verify(token, JWT_SECRET as jwt.Secret) as jwt.JwtPayload;
+          const user = await User.findOne({ username: decoded.username });
     if (!user) {
       res.status(401).send("Unauthorized : User not found");
       return;
@@ -37,3 +42,4 @@ async function auth(req: Request, res: Response, next: NextFunction): Promise<vo
 }
 
 
+export default auth;

@@ -1,11 +1,13 @@
-const mongoose = require("mongoose");
-import type { ConnectOptions } from "mongoose";
-const dotenv = require("dotenv");
+import mongoose, { ConnectOptions } from 'mongoose';
+import dotenv from 'dotenv';
+
 dotenv.config();
+
 const { MONGO_URI } = process.env;
 
+
 if (!MONGO_URI) {
-  throw new Error("missing .env");
+  throw Error("missing .env");
 }
 
 mongoose.connect(MONGO_URI, {
@@ -22,17 +24,19 @@ const userSchema = new mongoose.Schema({
     password:String,
     img : String,
     skills : [String],
-    pur_courses : [{typr : mongoose.Schema.Types.ObjectId , ref: "Course"}],
+    pur_courses : [{type : mongoose.Schema.Types.ObjectId , ref: "Course"}],
     rel_courses : [{type: mongoose.Schema.Types.ObjectId,  ref: "Course" }],
-    rated : [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }]
+    rated : [{ type: mongoose.Schema.Types.ObjectId, ref: "rating" }]
     });
+    const User = mongoose.model("User", userSchema);
 const ratingSchema = new mongoose.Schema({
     course : { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     rate : Number,
     comment: String,
-    helpful: Number})
-
+    helpful: Number});
+    
+    const Rating = mongoose.model("rating", ratingSchema);
 const courseSchema = new mongoose.Schema({
     name:String,
     description:String,
@@ -40,13 +44,17 @@ const courseSchema = new mongoose.Schema({
     price:Number,
     duration:String,
     rating: [{type: ratingSchema}],
-    instructor: [{ type: mongoose.Schema.Types.ObjectId,ref: "Admin"}]
+    instructor: { type: mongoose.Schema.Types.ObjectId,ref: "User" },
+    content: [String],
+    act_users : [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    links :[String]
 });
-
-
-
-const User = mongoose.model("User", userSchema);
 const Course = mongoose.model("Course", courseSchema);
 
-module.exports = { User, Course };
+
+
+
+
+
+export { User, Course, Rating };
     
