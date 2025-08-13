@@ -1,0 +1,45 @@
+
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import type { Request, Response, NextFunction } from 'express';
+import { User } from '../DB/MDB';
+
+dotenv.config();
+const { JWT_SECRET } = process.env;
+
+if (!JWT_SECRET) {
+  throw new Error("missing .env");
+}
+
+// Extend Express Request interface to include 'user'
+declare global {
+  namespace Express {
+    interface Request {
+      user?: typeof User.prototype;
+    }
+  }
+}
+
+async function auth(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const header = req.headers.authorization;
+  if (!header) {
+    res.status(401).send("Unauthorized : header missing");
+    return;
+  }
+  const token = header.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET as jwt.Secret) as jwt.JwtPayload;
+          const user = await User.findOne({ username: decoded.username });
+    if (!user) {
+      res.status(401).send("Unauthorized : User not found");
+      return;
+    }
+    req.user = user; // Attach user to request object
+    next();
+  } catch (err) {
+    res.status(401).send("Unauthorized : Invalid token");
+  }
+}
+
+
+export default auth;
