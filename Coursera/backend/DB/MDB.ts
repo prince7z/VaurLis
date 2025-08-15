@@ -32,8 +32,8 @@ const userSchema = new mongoose.Schema({
 const ratingSchema = new mongoose.Schema({
     course : { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    rate : Number,
-    comment: String,
+    rating : Number,
+    review: String,
     helpful: Number});
     
     const Rating = mongoose.model("rating", ratingSchema);
@@ -43,7 +43,7 @@ const courseSchema = new mongoose.Schema({
     img:String,
     price:Number,
     duration:String,
-    rating: [{type: ratingSchema}],
+    rating: [{type: mongoose.Schema.Types.ObjectId, ref: "rating" }],
     instructor: { type: mongoose.Schema.Types.ObjectId,ref: "User" },
     content: [String],
     act_users : [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

@@ -16,7 +16,9 @@ export const userSelector = selector({
         "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
       }
     });
-    
+    console.log("User data fetched:", response.data);
+    localStorage.setItem("user", JSON.stringify(response.data._id));
+
     return response.data;
   },
 });
@@ -48,27 +50,33 @@ export const CourseState = atomFamily({
     key: `CourseState/${courseId}`,
     get: async ({get}) => {
       const response = await axios.get(`${Base_URL}/api/course/${courseId}`, {
+        headers: {
+          "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
+        }
+
         
       });
-      
+     // console.log("Course data fetched:", response.data);
+
       return response.data;
     },
   }),
 })
 
-// export const InstState = selector({
-// key: 'InstState',
-// get: async ({get}) => {
-//   const course = get(CourseState); // Assuming you want to get the instructor of a specific course
-//   if (!course || !course.instructor) {
-//     return null; // Handle case where course or instructor is not available
-//   }
-  
-//   const response = await axios.get(`${Base_URL}/api/inst/${course.instructor}`, {
-    
-//   });
-  
-//   return response.data;
+export const CourseReview = atomFamily({
+  key: 'CourseReview',
+  default: (courseId:string) => selector({
+    key: `CourseReview/${courseId}`,
+    get: async ({get}) => {
+      const response = await axios.get(`${Base_URL}/api/course/getreview/${courseId}`, {
+        headers: {
+          "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
+        }
 
-// }
-// });
+        
+      })
+      return response.data;
+      ;}})})
+     // console.log("Course data fetched:", response.data);
+
+      

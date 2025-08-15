@@ -20,7 +20,7 @@ export default function AppBar() {
          {user.state === "hasValue" ? (
                 <div>
                    <button  onClick={() => {
-                                    navigate("/signup")
+                                    navigate("/courses")
                                 }} >Profile</button>
                 </div>
             ) : user.state === "loading" ? (

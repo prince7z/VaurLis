@@ -13,6 +13,7 @@ export default function AuthPage() {
    
     
     setEmail(enteredEmail);
+    //alert("Email submitted: " + enteredEmail);
     try {
       const res = await axios.get("http://localhost:5000/api/user/check", {
         params: { email: enteredEmail },
@@ -20,18 +21,23 @@ export default function AuthPage() {
       setStep(res.data.exist ? "login" : "register");
     } catch (err) {
       console.error("Error checking email:", err);
-      alert("An error occurred while checking your email. Please try again.");
+      alert( "Error checking email");
     }
   };
 
   const handleLogin = async (password: string) => {
     try {
+      
       const res = await axios.post("http://localhost:5000/api/auth/login", {
         email,
         password,
       });
+     
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", res.data.user);
+
       alert("Logged in successfully!");
+      
       window.location.href = "/";
     } catch (err) {
       console.error("Login failed:", err);
@@ -105,8 +111,8 @@ function EmailForm({ onNext }: { onNext: (email: string) => void }) {
       />
       {error && <p style={{ color: "red" }}>{error}</p>}
       <br />
-      {/*<button onClick={handleNext}>Next</button>*/}
-      <button onClick={()=> onNext(email)}>Next</button>
+      <button onClick={handleNext}>Next</button>
+      {/*<button onClick={()=> onNext(email)}>Next</button>*/}
     </div>
   );
 }

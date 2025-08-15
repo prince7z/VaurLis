@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
 import { User } from '../DB/MDB';
+import { ObjectId } from 'mongodb';
 
 dotenv.config();
 const { JWT_SECRET } = process.env;
@@ -20,8 +21,13 @@ declare global {
   }
 }
 
+
 async function auth(req: Request, res: Response, next: NextFunction): Promise<void> {
+
   const header = req.headers.authorization;
+
+  
+ 
   if (!header) {
     res.status(401).send("Unauthorized : header missing");
     return;
@@ -34,8 +40,15 @@ async function auth(req: Request, res: Response, next: NextFunction): Promise<vo
       res.status(401).send("Unauthorized : User not found");
       return;
     }
-    req.user = user; // Attach user to request object
+    req.user = user;
+    //req.user._id = new ObjectId(user._id);
+    //console.log(req.user);
+
+
+     // Attach user to request object
     next();
+   
+
   } catch (err) {
     res.status(401).send("Unauthorized : Invalid token");
   }
