@@ -2,7 +2,8 @@ import { useRecoilValueLoadable } from "recoil";
 import  {CoursesState}  from "../Component/atoms/atoms";
 
 export default function Courses() {
-  const coursesLoadable = useRecoilValueLoadable(CoursesState);
+  const coursesLoadable = useRecoilValueLoadable(CoursesState("all"));
+
 
   if (coursesLoadable.state === "loading") return <p>Loading...</p>;
   if (coursesLoadable.state === "hasError") return <p>Error loading courses</p>;
@@ -28,6 +29,13 @@ export default function Courses() {
             <p>{course.description}</p>
             <p className="text-sm text-gray-500">{course.duration}</p>
             <p className="text-sm text-gray-500">{course.price}</p>
+            <p className="text-sm text-gray-500">posted on : {new Date(course.timestamp).toLocaleString('en-IN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}</p>
+
+
           </div>
         </a>
       ))}

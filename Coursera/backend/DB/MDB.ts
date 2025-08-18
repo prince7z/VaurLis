@@ -34,7 +34,10 @@ const ratingSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     rating : Number,
     review: String,
-    helpful: Number});
+    helpful: Number,
+    timestamp : {type : Date, default : Date.now}
+
+  });
     
     const Rating = mongoose.model("rating", ratingSchema);
 const courseSchema = new mongoose.Schema({
@@ -47,7 +50,8 @@ const courseSchema = new mongoose.Schema({
     instructor: { type: mongoose.Schema.Types.ObjectId,ref: "User" },
     content: [String],
     act_users : [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    links :[String]
+    links :[String],
+    timestamp : {type : Date, default : Date.now}
 });
 const Course = mongoose.model("Course", courseSchema);
 

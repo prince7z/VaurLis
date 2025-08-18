@@ -8,9 +8,12 @@ import  Course  from './pages/course';
 import  Courses  from './pages/Courses';
 import AuthPage  from './pages/Auth';
 import './index.css'
+import HomePage from './pages/Home';
 import CourseContent from './pages/CourseContent';
 import PurchaseCourse from './pages/PurchaseCourse';
 import UpdateCourse from './pages/UpdateCourse';
+import PurchasedCourses from './pages/PurchasedCourse';
+import ReleasedCourses from './pages/ReleasedCourse';
 
 
 import  Landing  from './pages/landing';
@@ -26,11 +29,14 @@ function App() {
        <div>
        
         <AppBar/>
-        <div className="container mx-auto p-4" style={{ backgroundColor: "Green" }}>
+        <div className="container mx-auto p-4" style={{ backgroundColor: "white" }}>
           
         <Routes>
-        <Route path={"/addcourse"} element={<AddCourse />} />
+         <Route path={"/Home"} element={<HomePage />} />
         <Route path={"/courses"} element={<Courses />} />
+        <Route path={"/purchasedcourses"} element={<PurchasedCourses />} />
+        <Route path={"/releasedcourses"} element={<ReleasedCourses />} />        
+        <Route path={"/addcourse"} element={<AddCourse />} />
         <Route path={"/course/:id"} element={<Course />} />
         <Route path={"/course/content/:id"} element={<CourseContent />} />
         <Route path={"/course/purchase/:id"} element={<PurchaseCourse />} />
@@ -46,9 +52,7 @@ function App() {
 
        </BrowserRouter>
      </RecoilRoot>
-      <footer className="bg-gray-800 text-white text-center py-4 bottom-0 w-full sticky">
-          <p>© 2023 Coursera Clone. All rights reserved.</p>
-        </footer>
+      
     </>
   )
 }

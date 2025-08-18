@@ -1,7 +1,7 @@
 import { useRecoilValueLoadable } from 'recoil';
 import { CourseState } from '../Component/atoms/atoms';
 import { useParams } from 'react-router-dom';
-import  { useEffect, useState } from 'react';
+import  {  useState } from 'react';
 import axios from 'axios';
 import { CourseReview } from '../Component/atoms/atoms';
 
@@ -23,6 +23,8 @@ interface resCourse{
     content: string[];
     act_users: number;
     Role: 'pur'|'!pur'|'owns';
+    timestamp:number;
+
 }
 
 interface rev{
@@ -31,6 +33,7 @@ interface rev{
     username: string;};
     review: string;
     rating: number;
+    timestamp:number;
 }
 
 
@@ -42,15 +45,19 @@ export default function Course() {
   const courseLoadable = useRecoilValueLoadable(CourseState(courseId));
   const course = courseLoadable.state === "hasValue" ? courseLoadable.contents : null;
   const reviewLoadable = useRecoilValueLoadable(CourseReview(courseId));
-  const review = reviewLoadable.state === "hasValue" ? reviewLoadable.contents : null;
+  const review  = reviewLoadable.state === "hasValue" ? reviewLoadable.contents : [];
+
 
   
   if (!courseId) return <p>Course ID is missing</p>;
   if (courseLoadable.state === "loading" ) return <p>Loading...</p>;
-  if (courseLoadable.state === "hasError" ) return <p>Error loading course</p>;
+  if (courseLoadable.state === "hasError" ) return <p>Error loading course,try loging again</p>;
   
   if (reviewLoadable.state === "hasError" ) return <p>Error loading review</p>;
   if (reviewLoadable.state === "loading" ) return <p>Loading...</p>;
+
+  
+
 
 
 
@@ -60,6 +67,11 @@ export default function Course() {
       <h2>{course.name}</h2>
       <p>Price: ₹{course.price}</p>
       <p>{course.description}</p>
+       <p className="text-sm text-gray-500">posted on : {new Date(course.timestamp).toLocaleString('en-IN', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}</p>
       <p>Duration: {course.duration}</p>
       <p>Instructor: {course.instructor.username}</p>
 
@@ -71,13 +83,20 @@ export default function Course() {
    <br/>
    <br/>
    <h2>Reviews</h2>
-   {review.map((item:rev) => (
+   { review.length > 0 && review.map((item:rev) => (
+
     <div key={item._id}>
       <img src={item.user.img} alt={item.user.username} />
       <p>{item.user.username}</p>
 
       <p>{item.review}</p>
       <p>Rating: {item.rating}</p>
+      <p>posted on : {new Date(item.timestamp).toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        
+      })}</p>
     </div>
    ))}
 
@@ -96,6 +115,7 @@ export default function Course() {
  const [review,setReview] = useState<string>('');
  const [rating,setRating] = useState<number>(0);
 
+ 
 
   return(
     <>
@@ -111,6 +131,11 @@ export default function Course() {
       })
       if(res.status===200){
         alert('Review posted successfully');
+        
+        
+      }
+      if (res.status===401){
+        alert('Error posting review, login again ,token expired');
       }
     }} className='text-white cursor-pointer bg-black rad-12px'>Submit</button>
     </>

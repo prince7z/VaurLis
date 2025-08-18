@@ -15,7 +15,7 @@ router.get ('/allcourses',  async (req: Request, res: Response) => {
     
 
     const courses = await Course.find({})
-        .select('img name description  price instructor')
+        .select('img name description  price instructor timestamp')
         .lean()
         .exec();
         
@@ -35,7 +35,10 @@ router.get('/purchased', auth, async (req: Request, res: Response)=>{
     if (!user) {
         return res.status(404).json({ error: "User not found" });
     }
-    const purchasedCourses = await Course.find({ _id: { $in: user.pur_courses } });
+    const purchasedCourses = await Course.find({ _id: { $in: user.pur_courses } }).select('img name description  price instructor timestamp')
+        .lean()
+        .exec();
+
     if (!purchasedCourses || purchasedCourses.length === 0) {
         return res.status(404).json({ error: "No purchased courses found" });
     }
@@ -43,6 +46,16 @@ router.get('/purchased', auth, async (req: Request, res: Response)=>{
 }
 )
 
+router.get('/released',auth, async (req: Request, res: Response) => {
+ const user=req.user;
+ const releasedCourses = await Course.find({ instructor: user._id }).select('img name description  price instructor timestamp')
+        .lean()
+        .exec();
+        if (!releasedCourses || releasedCourses.length === 0) {
+            return res.status(404).json({ message: "No released courses found" });
+        }
+        res.status(200).json(releasedCourses);
+    })
 interface resCourse{
     name: string;
     img: string;
@@ -56,6 +69,7 @@ interface resCourse{
     };
     content: string[];
     act_users: number;
+    timestamp:number ,
     Role: 'pur'|'!pur'|'owns';
 }
 
@@ -87,7 +101,7 @@ router.get('/:id', auth , async (req: Request, res: Response) => {
                 },
                 content: course.content,
                 act_users: course.act_users.length,
-
+                timestamp: course.timestamp?.getTime(),
                 Role,
 
             }
@@ -199,13 +213,13 @@ router.post('/upload', auth, async (req: Request, res: Response) => {
         res.status(200).json({ message: "Review posted successfully", course });
     })
 
-     router.get('/getreview/:id', async (req: Request, res: Response) => {
+ router.get('/getreview/:id', async (req: Request, res: Response) => {
 const courseId = req.params.id;
 
 const course = await Course.findById(courseId)
   .populate({
     path: 'rating',               // populate Review documents
-    select: 'rating review helpful user', // pick only these fields
+    select: 'rating review helpful user timestamp', // pick only these fields
     populate: {
       path: 'user',                // populate the user in each review
       select: 'username img -_id'  // only username and img, no _id
@@ -220,6 +234,9 @@ res.status(200).json({
   message: "Review fetched successfully",
   reviews: course.rating
 });
+
+
+
 
         // const reviewid = req.params.id;
         // const rawreview = await Rating.findById(reviewid);
