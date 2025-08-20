@@ -1,9 +1,7 @@
 import express, { Router, Request, Response } from 'express';
-import { Course } from '../DB/MDB';
 import auth  from '../Midware/Mware';
-import { ObjectId } from 'mongodb';
-import { Rating } from '../DB/MDB'; 
-import { User } from '../DB/MDB';
+import { User,Tracking,Rating,Course } from '../DB/MDB';
+
 
 
 
@@ -67,27 +65,33 @@ interface resCourse{
         img: string;
         skills: string[];
     };
-    content: string[];
+    
     act_users: number;
     timestamp:number ,
     Role: 'pur'|'!pur'|'owns';
 }
 
 router.get('/:id', auth , async (req: Request, res: Response) => {
-
+    
+    
     const courseId = req.params.id;
     try {
+        //console.log(courseId);
         
         const course = await Course.findById(courseId).select('name img description price duration instructor content act_users').lean().exec();
+      
+
         if(course) {
-           
+           // console.log(course);
+
             let Role: 'pur'|'!pur'|'owns' = '!pur';
             if(req.user.pur_courses.includes(course._id)){Role = 'pur';}
             else if((req.user?._id).toString()===(course.instructor)?.toString()){Role = 'owns';}
             else {Role = '!pur';}
             const instboj = await User.findById(course.instructor).select('username img skills').lean().exec();
                   
-            
+           
+
             const resCourse:resCourse = {
                 name: course.name || '',
                 img: course.img || '',
@@ -99,20 +103,28 @@ router.get('/:id', auth , async (req: Request, res: Response) => {
                     img: instboj?.img || '',
                     skills: instboj?.skills || [],
                 },
-                content: course.content,
-                act_users: course.act_users.length,
-                timestamp: course.timestamp?.getTime(),
+                
+                act_users: course.act_users.length || 0,
+
+                timestamp: course.timestamp?.getTime() || 0,
+
                 Role,
 
             }
 
 
         res.status(200).json(resCourse);}
+        else{
+            return res.status(404).json({ error: "Course not found" });
+        }
+
 
         
     }
     catch (error) {
+        
         return res.status(404).json({ error: "Course not found" });
+        
     }  
 })
 router.post('/upload', auth, async (req: Request, res: Response) => {
@@ -229,10 +241,74 @@ const course = await Course.findById(courseId)
 if (!course) {
   return res.status(404).json({ message: "Course not found" });
 }
+console.log(course.rating)
+
 
 res.status(200).json({
   message: "Review fetched successfully",
   reviews: course.rating
+});
+
+
+})
+
+
+interface vid{
+    id : string,
+    courseId : string,
+    userId : string,
+    name : string,
+    finished : boolean,
+    lastViewedTime : Date,  
+    link : string,
+    thumbnail : string,
+    duration : string,
+
+}
+
+router.get('/getcontent/:id', auth, async (req: Request, res: Response) => {
+  const courseId = req.params.id;
+  const user = req.user;
+ console.log(courseId);
+ res.status(200).json({
+    message: "Content fetched successfully",
+    content: '',
+   
+  })
+return
+
+//   // 1️⃣ Fetch the course
+//   const course = await Course.findById(courseId);
+//   if (!course) {
+//     return res.status(404).json({ message: "Course not found" });
+//   }
+
+//   // 2️⃣ Fetch tracking info for this user & course
+//   const tracking = await Tracking.find({ userId: user._id, courseId: courseId });
+
+//   // 3️⃣ Map content + tracking to vid interface
+//   const content: any = course.content.map(video => {
+//     // Find tracking for this video
+//     const track = tracking.find(t => t.videoId.toString() === video._id.toString());
+
+//     return {
+//       id: track?._id.toString() || '',       // Tracking record ID (empty if not watched)
+//       courseId: course._id.toString(),
+//       userId: user._id.toString(),
+//       name: video.name,
+//       finished: track?.finished || false,
+//       lastViewedTime: track?.lastViewedTime || null,
+//       link: video.link,
+//       thumbnail: video.thumbnail,
+//       duration: video.duration
+//     };
+//   });
+
+//   // 4️⃣ Send response
+//   res.status(200).json({
+//     message: "Content fetched successfully",
+//     content: content,
+//   });
 });
 
 
@@ -259,9 +335,7 @@ res.status(200).json({
         //  review : rawreview.review,
         // rating : rawreview.rating,
         // helpful : rawreview.helpful,}
-       }
-    )
-
+    
 
 
     export default router;

@@ -1,9 +1,13 @@
-import { useRecoilValueLoadable } from 'recoil';
+import { useRecoilValueLoadable,useRecoilState } from 'recoil';
+
+
 import { CourseState } from '../Component/atoms/atoms';
 import { useParams } from 'react-router-dom';
 import  {  useState } from 'react';
 import axios from 'axios';
 import { CourseReview } from '../Component/atoms/atoms';
+import { userState } from '../Component/atoms/atoms';
+
 
 
 
@@ -50,11 +54,11 @@ export default function Course() {
 
   
   if (!courseId) return <p>Course ID is missing</p>;
-  if (courseLoadable.state === "loading" ) return <p>Loading...</p>;
-  if (courseLoadable.state === "hasError" ) return <p>Error loading course,try loging again</p>;
+if (courseLoadable.state === "loading") return <p className='flex justify-center items-center min-h-screen'>Loading detail...</p>;
+  if (courseLoadable.state === "hasError" ) return <p className='flex justify-center items-center min-h-screen'>Error loading course,try loging again</p>;
   
-  if (reviewLoadable.state === "hasError" ) return <p>Error loading review</p>;
-  if (reviewLoadable.state === "loading" ) return <p>Loading...</p>;
+  if (reviewLoadable.state === "hasError" ) return <p className='flex justify-center items-center min-h-screen'>Error loading review</p>;
+  if (reviewLoadable.state === "loading" ) return <p className='flex justify-center items-center min-h-screen'>Loading review...</p>;
 
   
 
@@ -62,6 +66,7 @@ export default function Course() {
 
 
   return (
+    <div >
     <div>
       <img src={course.img} alt={course.name} />
       <h2>{course.name}</h2>
@@ -73,7 +78,15 @@ export default function Course() {
               day: 'numeric',
             })}</p>
       <p>Duration: {course.duration}</p>
-      <p>Instructor: {course.instructor.username}</p>
+      
+      <div><p>Instructor: {course.instructor.username}</p>
+      <img src={course.instructor.img} alt={course.instructor.username} />
+      <p>Skills: {course.instructor.skills.join(', ')}</p>
+
+      </div>
+      
+
+
 
      <p>Category: {course.rating}</p>
 
@@ -105,15 +118,30 @@ export default function Course() {
    {course.Role === 'pur' &&( <div><Review courseId={courseId}/></div>)}
 
     </div>
+    </div>
     
   );
 }
 
+interface userdata{
+  email: string;
+  _id: string;
+  username: string;
+  img: string;
+}
 
  function Review(props :{courseId:string}){
 
  const [review,setReview] = useState<string>('');
  const [rating,setRating] = useState<number>(0);
+ const [reviewState,SetReview] = useRecoilState(CourseReview(props.courseId));
+ const user = useRecoilValueLoadable(userState);
+const userData: userdata = user.state === "hasValue" ? (user.contents as userdata) : { email: "", _id: "", username: "", img: "" };
+ const username = userData.username;
+ const img = userData.img;
+
+
+
 
  
 
@@ -131,6 +159,19 @@ export default function Course() {
       })
       if(res.status===200){
         alert('Review posted successfully');
+        SetReview(
+          [...reviewState,
+          { _id: res.data._id,
+          user: { img,
+          username },
+          review,
+          rating,
+          timestamp:Date.now()
+
+          }]
+        
+        );
+
         
         
       }

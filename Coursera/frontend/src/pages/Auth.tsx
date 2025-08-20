@@ -69,7 +69,8 @@ export default function AuthPage() {
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", padding: 20 }}>
+    <div className=" min-h-screen flex items-center justify-center"
+    style={{ display: "flex", justifyContent: "center", padding: 20 }}>
       {step === "email" && (
         <EmailForm onNext={handleEmailSubmit} />
       )}

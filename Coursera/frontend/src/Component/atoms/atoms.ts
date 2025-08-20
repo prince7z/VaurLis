@@ -102,4 +102,29 @@ export const CourseReview = atomFamily({
       ;}})})
      // console.log("Course data fetched:", response.data);
 
+  export const courseContentState = atomFamily({
+    key:'courseContentState',
+    default: (courseId:string) => selector({
+      key: `courseContentState/${courseId}`,
+      get: async ({get}) => {
+        try {
+          
+
+          const response = await axios.get(`${Base_URL}/api/course/getcontent/${courseId}`, {
+            headers: {
+              "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
+            }
+          })
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching content:", error);
+          throw error;
+
+        }
+      }
+    })
+
+  })
+
+
       

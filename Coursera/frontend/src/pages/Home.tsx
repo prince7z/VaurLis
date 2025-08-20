@@ -161,9 +161,12 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
+    <div className="top-[80px] " style={{ backgroundColor: '#ffff' }}>
+
+
       {/* Main Container - 60% width, centered */}
-      <div style={{ width: '100%', margin: '0 auto', padding: '20px 0' }}>
+      <div style={{width: '100%', margin: '0 auto', padding: '20px 0' }}>
+
         
         {/* Hero Section */}
         <section className="relative overflow-hidden rounded-lg mb-12" style={{ height: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
