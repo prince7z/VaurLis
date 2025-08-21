@@ -1,7 +1,9 @@
 import express, { Request, Response, Router } from 'express';
-import { User } from '../DB/MDB';
+import { User, Tracking } from '../DB/MDB';
+
 import auth  from '../Midware/Mware';
 import z from 'zod';
+
 
 const router: Router = express.Router();
 
@@ -94,6 +96,41 @@ router.put('/update', auth, async (req: Request, res: Response) => {
     }
 }
 );
+router.post('/updatestats', auth, async (req: Request, res: Response) => {
+    const user = req.user;
+    try {
+
+    const {vidId, courseID, IntervalFinished} = req.body;
+    if (!vidId || !courseID || !IntervalFinished  || !user._id) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+    const tracks =  await Tracking.findOne({userId: user._id, courseId: courseID, videoId: vidId});
+    if (!tracks) {
+        return res.status(404).json({ error: "Tracking not found" });
+      }
+      if (IntervalFinished === 3) {
+        tracks.finished = true;
+      }
+
+    
+    tracks.lastViewedTime = new Date();
+
+    tracks.watchedInt = IntervalFinished ;
+    await tracks.save();
+    res.status(200).json({ message: "Stats updated successfully" });
+    } catch (error) {
+        res.status(500).json({ error: " Error saving stats" });
+    }
+}
+);
+
+
+
+
+
+
+       
+
 
 export default router;
 

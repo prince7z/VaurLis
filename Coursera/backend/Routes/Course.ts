@@ -270,45 +270,41 @@ router.get('/getcontent/:id', auth, async (req: Request, res: Response) => {
   const courseId = req.params.id;
   const user = req.user;
  console.log(courseId);
- res.status(200).json({
+ 
+
+  // 1️⃣ Fetch the course
+  const course = await Course.findById(courseId);
+  if (!course) {
+    return res.status(404).json({ message: "Course not found" });
+  }
+
+  // 2️⃣ Fetch tracking info for this user & course
+  const tracking = await Tracking.find({ userId: user._id, courseId: courseId });
+
+  // 3️⃣ Map content + tracking to vid interface
+  const content: any = course.content.map(video => {
+    // Find tracking for this video
+    const track = tracking.find(t => t.videoId.toString() === video._id.toString());
+
+    return {
+      id: track?._id.toString() || '',     // Tracking record ID (empty if not watched)
+      
+      
+      name: video.name,
+      finished: track?.finished || false,
+      lastViewedTime: track?.lastViewedTime || null,
+      link: video.link,
+      thumbnail: video.thumbnail,
+      duration: video.duration,
+      watchedInt: track?.watchedInt || 0,
+    };
+  });
+
+  // 4️⃣ Send response
+  res.status(200).json({
     message: "Content fetched successfully",
-    content: '',
-   
-  })
-return
-
-//   // 1️⃣ Fetch the course
-//   const course = await Course.findById(courseId);
-//   if (!course) {
-//     return res.status(404).json({ message: "Course not found" });
-//   }
-
-//   // 2️⃣ Fetch tracking info for this user & course
-//   const tracking = await Tracking.find({ userId: user._id, courseId: courseId });
-
-//   // 3️⃣ Map content + tracking to vid interface
-//   const content: any = course.content.map(video => {
-//     // Find tracking for this video
-//     const track = tracking.find(t => t.videoId.toString() === video._id.toString());
-
-//     return {
-//       id: track?._id.toString() || '',       // Tracking record ID (empty if not watched)
-//       courseId: course._id.toString(),
-//       userId: user._id.toString(),
-//       name: video.name,
-//       finished: track?.finished || false,
-//       lastViewedTime: track?.lastViewedTime || null,
-//       link: video.link,
-//       thumbnail: video.thumbnail,
-//       duration: video.duration
-//     };
-//   });
-
-//   // 4️⃣ Send response
-//   res.status(200).json({
-//     message: "Content fetched successfully",
-//     content: content,
-//   });
+    content: content,
+  });
 });
 
 

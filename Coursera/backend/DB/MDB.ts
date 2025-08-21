@@ -38,7 +38,7 @@ const trackingSchema = new mongoose.Schema({
 
   finished: { type: Boolean, default: false },
   lastViewedTime: { type: Date, default: Date.now },
-  watchedTime: { type: Number, default: 0 }, // in seconds
+  watchedInt: { type: Number, default: 0 }, // in seconds
 }, { timestamps: true });
 
 trackingSchema.index({ userId: 1, courseId: 1, videoId: 1 }, { unique: true });

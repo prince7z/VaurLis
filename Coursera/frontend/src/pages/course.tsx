@@ -1,19 +1,12 @@
-import { useRecoilValueLoadable,useRecoilState } from 'recoil';
-
-
-import { CourseState } from '../Component/atoms/atoms';
+import { useRecoilValueLoadable, useRecoilState } from 'recoil';
+import { CourseState, CourseReview, userState } from '../Component/atoms/atoms';
 import { useParams } from 'react-router-dom';
-import  {  useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
-import { CourseReview } from '../Component/atoms/atoms';
-import { userState } from '../Component/atoms/atoms';
 
+const BASE_URL = "http://localhost:5000";
 
-
-
-const Base_URL = "http://localhost:5000";
-
-interface resCourse{
+interface Course {
     name: string;
     img: string;
     description: string;
@@ -26,159 +19,176 @@ interface resCourse{
     };
     content: string[];
     act_users: number;
-    Role: 'pur'|'!pur'|'owns';
-    timestamp:number;
-
+    Role: 'pur' | '!pur' | 'owns';
+    timestamp: number;
 }
 
-interface rev{
+interface Review {
     _id: string;
-    user: { img: string;
-    username: string;};
+    user: {
+        img: string;
+        username: string;
+    };
     review: string;
     rating: number;
-    timestamp:number;
+    timestamp: number;
 }
 
-
-
- 
 export default function Course() {
-  const { id: courseIdParam } = useParams();
-  const courseId = courseIdParam || '';
-  const courseLoadable = useRecoilValueLoadable(CourseState(courseId));
-  const course = courseLoadable.state === "hasValue" ? courseLoadable.contents : null;
-  const reviewLoadable = useRecoilValueLoadable(CourseReview(courseId));
-  const review  = reviewLoadable.state === "hasValue" ? reviewLoadable.contents : [];
+    const { id: courseIdParam } = useParams();
+    const courseId = courseIdParam || '';
+    const courseLoadable = useRecoilValueLoadable(CourseState(courseId));
+    const course = courseLoadable.state === "hasValue" ? courseLoadable.contents : null;
+    const reviewLoadable = useRecoilValueLoadable(CourseReview(courseId));
+    const reviews = reviewLoadable.state === "hasValue" ? reviewLoadable.contents : [];
 
+    if (!courseId) return <div className="flex justify-center items-center min-h-screen">Course ID is missing</div>;
+    if (courseLoadable.state === "loading") return <div className="flex justify-center items-center min-h-screen">Loading details...</div>;
+    if (courseLoadable.state === "hasError") return <div className="flex justify-center items-center min-h-screen">Error loading course. Please try logging in again.</div>;
+    if (reviewLoadable.state === "hasError") return <div className="flex justify-center items-center min-h-screen">Error loading reviews</div>;
+    if (reviewLoadable.state === "loading") return <div className="flex justify-center items-center min-h-screen">Loading reviews...</div>;
 
-  
-  if (!courseId) return <p>Course ID is missing</p>;
-if (courseLoadable.state === "loading") return <p className='flex justify-center items-center min-h-screen'>Loading detail...</p>;
-  if (courseLoadable.state === "hasError" ) return <p className='flex justify-center items-center min-h-screen'>Error loading course,try loging again</p>;
-  
-  if (reviewLoadable.state === "hasError" ) return <p className='flex justify-center items-center min-h-screen'>Error loading review</p>;
-  if (reviewLoadable.state === "loading" ) return <p className='flex justify-center items-center min-h-screen'>Loading review...</p>;
+    return (
+        <div className="max-w-4xl mx-auto p-6">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <img src={course.img} alt={course.name} className="w-full h-64 object-cover" />
+                <div className="p-6">
+                    <h1 className="text-3xl font-bold mb-4">{course.name}</h1>
+                    <p className="text-2xl font-semibold mb-4">₹{course.price}</p>
+                    <p className="text-gray-600 mb-4">{course.description}</p>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Posted on: {new Date(course.timestamp).toLocaleString('en-IN', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                        })}
+                    </p>
+                    <p className="text-gray-700 mb-6">Duration: {course.duration}</p>
 
-  
+                    <div className="border-t border-gray-200 pt-6 mb-6">
+                        <div className="flex items-center mb-4">
+                            <img src={course.instructor.img} alt={course.instructor.username} className="w-12 h-12 rounded-full mr-4" />
+                            <div>
+                                <h3 className="font-semibold">Instructor: {course.instructor.username}</h3>
+                                <p className="text-gray-600">Skills: {course.instructor.skills.join(', ')}</p>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div className="flex gap-4 mb-8">
+                        {course.Role === 'pur' && <a href={`/course/content/${courseId}`} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">View Content</a>}
+                        {course.Role === '!pur' && <a href={`/course/purchase/${courseId}`} className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Enroll Now</a>}
+                        {course.Role === 'owns' && <a href={`/course/update/${courseId}`} className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">Update Course</a>}
+                    </div>
 
-
-
-  return (
-    <div >
-    <div>
-      <img src={course.img} alt={course.name} />
-      <h2>{course.name}</h2>
-      <p>Price: ₹{course.price}</p>
-      <p>{course.description}</p>
-       <p className="text-sm text-gray-500">posted on : {new Date(course.timestamp).toLocaleString('en-IN', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}</p>
-      <p>Duration: {course.duration}</p>
-      
-      <div><p>Instructor: {course.instructor.username}</p>
-      <img src={course.instructor.img} alt={course.instructor.username} />
-      <p>Skills: {course.instructor.skills.join(', ')}</p>
-
-      </div>
-      
-
-
-
-     <p>Category: {course.rating}</p>
-
-    {course.Role === 'pur' && <a href={`/course/content/${courseId}`} className='text-white bg-black rad-12px'>See content</a>}
-    {course.Role === '!pur' && <a href={`/course/purchase/${courseId}`} className='text-white bg-black rad-12px'>Enroll now</a>}
-    {course.Role === 'owns' && <a href={`/course/update/${courseId}`} className='text-white bg-black rad-12px'>Update</a>}
-   <br/>
-   <br/>
-   <h2>Reviews</h2>
-   { review.length > 0 && review.map((item:rev) => (
-
-    <div key={item._id}>
-      <img src={item.user.img} alt={item.user.username} />
-      <p>{item.user.username}</p>
-
-      <p>{item.review}</p>
-      <p>Rating: {item.rating}</p>
-      <p>posted on : {new Date(item.timestamp).toLocaleString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        
-      })}</p>
-    </div>
-   ))}
-
-
-   <br/>
-   {course.Role === 'pur' &&( <div><Review courseId={courseId}/></div>)}
-
-    </div>
-    </div>
-    
-  );
+                    <div className="border-t border-gray-200 pt-6">
+                        <h2 className="text-2xl font-bold mb-6">Reviews</h2>
+                        <div className="space-y-6">
+                            {reviews.length > 0 ? reviews.map((item: Review) => (
+                                <div key={item._id} className="bg-gray-50 p-4 rounded-lg">
+                                    <div className="flex items-center mb-3">
+                                        <img src={item.user.img} alt={item.user.username} className="w-10 h-10 rounded-full mr-3" />
+                                        <div>
+                                            <p className="font-semibold">{item.user.username}</p>
+                                            <p className="text-yellow-500">{"★".repeat(item.rating)}{"☆".repeat(5-item.rating)}</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 mb-2">{item.review}</p>
+                                    <p className="text-sm text-gray-500">
+                                        Posted on: {new Date(item.timestamp).toLocaleString('en-IN', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })}
+                                    </p>
+                                </div>
+                            )) : <p className="text-gray-500">No reviews yet</p>}
+                        </div>
+                        {course.Role === 'pur' && <div className="mt-8"><Review courseId={courseId}/></div>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
-interface userdata{
-  email: string;
-  _id: string;
-  username: string;
-  img: string;
+interface UserData {
+    email: string;
+    _id: string;
+    username: string;
+    img: string;
 }
 
- function Review(props :{courseId:string}){
+function Review({ courseId }: { courseId: string }) {
+    const [review, setReview] = useState<string>('');
+    const [rating, setRating] = useState<number>(0);
+    const [reviewState, setReviewState] = useRecoilState(CourseReview(courseId));
+    const user = useRecoilValueLoadable(userState);
+    const userData: UserData = user.state === "hasValue" ? (user.contents as UserData) : { email: "", _id: "", username: "", img: "" };
 
- const [review,setReview] = useState<string>('');
- const [rating,setRating] = useState<number>(0);
- const [reviewState,SetReview] = useRecoilState(CourseReview(props.courseId));
- const user = useRecoilValueLoadable(userState);
-const userData: userdata = user.state === "hasValue" ? (user.contents as userdata) : { email: "", _id: "", username: "", img: "" };
- const username = userData.username;
- const img = userData.img;
+    const handleSubmit = async () => {
+        try {
+            const res = await axios.post(
+                `${BASE_URL}/api/course/postreview/${courseId}`,
+                { review, rating },
+                { headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }}
+            );
 
+            if (res.status === 200) {
+                alert('Review posted successfully');
+                setReviewState([
+                    ...reviewState,
+                    {
+                        _id: res.data._id,
+                        user: {
+                            img: userData.img,
+                            username: userData.username
+                        },
+                        review,
+                        rating,
+                        timestamp: Date.now()
+                    }
+                ]);
+                setReview('');
+                setRating(0);
+            }
+        } catch (error) {
+            alert('Error posting review. Please login again as your token may have expired.');
+        }
+    };
 
-
-
- 
-
-  return(
-    <>
-    <h2>Review</h2>
-    <br/>
-    <input value={rating} onChange={(e) => setRating(Number(e.target.value))} type='number' placeholder='Rating'/>
-    <input value={review} onChange={(e) => setReview(e.target.value)} type='text' placeholder='Write a review'/>
-    
-    <br/>
-    <button onClick={async () => {
-      const res= await axios.post(`${Base_URL}/api/course/postreview/${props.courseId}`,{ review,rating, }
-        ,{headers: { "Authorization": `Bearer ${localStorage.getItem("token")}`, }
-      })
-      if(res.status===200){
-        alert('Review posted successfully');
-        SetReview(
-          [...reviewState,
-          { _id: res.data._id,
-          user: { img,
-          username },
-          review,
-          rating,
-          timestamp:Date.now()
-
-          }]
-        
-        );
-
-        
-        
-      }
-      if (res.status===401){
-        alert('Error posting review, login again ,token expired');
-      }
-    }} className='text-white cursor-pointer bg-black rad-12px'>Submit</button>
-    </>
-  )
+    return (
+        <div className="bg-gray-50 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4">Write a Review</h2>
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-gray-700 mb-2">Rating (1-5)</label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="5"
+                        value={rating}
+                        onChange={(e) => setRating(Number(e.target.value))}
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+                <div>
+                    <label className="block text-gray-700 mb-2">Your Review</label>
+                    <textarea
+                        value={review}
+                        onChange={(e) => setReview(e.target.value)}
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows={4}
+                        placeholder="Share your thoughts about this course..."
+                    />
+                </div>
+                <button
+                    onClick={handleSubmit}
+                    className="w-full px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                    Submit Review
+                </button>
+            </div>
+        </div>
+    );
 }
