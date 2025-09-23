@@ -14,6 +14,8 @@ import PurchaseCourse from './pages/PurchaseCourse';
 import UpdateCourse from './pages/UpdateCourse';
 import PurchasedCourses from './pages/PurchasedCourse';
 import ReleasedCourses from './pages/ReleasedCourse';
+import Certificate from './pages/cert';
+import Instructor from './pages/instructor';
 
 
 import  Landing  from './pages/landing';
@@ -38,9 +40,11 @@ function App() {
         <Route path={"/releasedcourses"} element={<ReleasedCourses />} />        
         <Route path={"/addcourse"} element={<AddCourse />} />
         <Route path={"/course/:id"} element={<Course />} />
+        <Route path={"/course/certificate/:id"} element={<Certificate />} />
         <Route path={"/course/content/:id"} element={<CourseContent />} />
         <Route path={"/course/purchase/:id"} element={<PurchaseCourse />} />
         <Route path={"/course/update/:id"} element={<UpdateCourse />} />
+        <Route path={"/:username"} element={<Instructor />} />
         
        {authPaths.map((path) => (
     <Route key={path} path={path} element={<AuthPage />} />

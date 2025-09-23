@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useHref, useParams } from "react-router-dom";
 import { useRecoilValueLoadable } from "recoil";
 import { CourseState } from "../Component/atoms/atoms";
 import axios from 'axios';
@@ -48,7 +48,10 @@ export default function PurchaseCourse() {
       });
       console.log(res);
       showToast('Purchase successful!', 'success');
-      setTimeout(() => navigate('/course/' + id), 2000);
+      setTimeout(() => {
+        navigate('/course/' + id);
+        window.location.reload();
+      }, 2000);
     } catch (error: any) {
       if (error.response) {
         if (error.response.status === 400) {

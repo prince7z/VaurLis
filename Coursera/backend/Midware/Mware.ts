@@ -1,4 +1,3 @@
-
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
@@ -22,7 +21,7 @@ declare global {
 }
 
 
-async function auth(req: Request, res: Response, next: NextFunction): Promise<void> {
+export async function auth(req: Request, res: Response, next: NextFunction): Promise<void> {
 
   const header = req.headers.authorization;
 
@@ -55,4 +54,29 @@ async function auth(req: Request, res: Response, next: NextFunction): Promise<vo
 }
 
 
-export default auth;
+export async function authlite(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const header = req.headers.authorization;
+
+  if (!header || !header.startsWith("Bearer ") || header.split(" ").length < 2) {
+    console.log("No valid auth header, proceeding as guest");
+    req.user = { username: "guest" };
+    return next();
+  }
+  const token = header.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET as jwt.Secret) as jwt.JwtPayload;
+    const user = await User.findOne({ username: decoded.username });
+    if (!user) {
+      req.user = { username: "guest" };
+      return next();
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    req.user = { username: "guest" };
+    next();
+  }
+}
+
+
+

@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from 'express';
-import auth  from '../Midware/Mware';
-import { User,Tracking,Rating,Course } from '../DB/MDB';
+import {auth}  from '../Midware/Mware';
+import { User,Tracking,Rating,Course , Certificate } from '../DB/MDB';
 
 
 
@@ -13,7 +13,7 @@ router.get ('/allcourses',  async (req: Request, res: Response) => {
     
 
     const courses = await Course.find({})
-        .select('img name description  price instructor timestamp')
+        .select('img name description  price instructor timestamp').populate({path : 'instructor', select: 'username img' } )
         .lean()
         .exec();
         
@@ -28,6 +28,17 @@ router.get ('/allcourses',  async (req: Request, res: Response) => {
     }
     res.status(200).json(coursess);
 })
+
+router.get('/cert/:id', auth, async (req: Request, res: Response) => {
+    const courseId = req.params.id;
+    const user = req.user;
+    const cert = await Certificate.findOne({ 'user.id': user._id, 'courseId.id': courseId }).lean();
+    if (!cert) {
+        return res.status(404).json({ error: "Certificate not found" });
+    }
+    res.status(200).json(cert);
+})
+
 router.get('/purchased', auth, async (req: Request, res: Response)=>{
     const user = req.user;
     if (!user) {
@@ -61,6 +72,7 @@ interface resCourse{
     price: number;
     duration: string;
     instructor: {
+        _id: string;
         username: string;
         img: string;
         skills: string[];
@@ -99,6 +111,7 @@ router.get('/:id', auth , async (req: Request, res: Response) => {
                 price: course.price || 0,
                 duration: course.duration || '',
                 instructor: {
+                    _id: instboj?._id.toString() || '',
                     username: instboj?.username || '',
                     img: instboj?.img || '',
                     skills: instboj?.skills || [],
@@ -196,6 +209,12 @@ router.post('/upload', auth, async (req: Request, res: Response) => {
     await user.save();
     course.act_users.push(user._id);
     await course.save();
+    const instructor  = await User.findById(course.instructor).select('username').exec();
+    const newCert = new Certificate({
+      user: { id: user._id, name: user.username },
+      courseId: { id: course._id, name: course.name, instructor: instructor?.username, duration: course.duration },
+    });
+    await newCert.save();
     res.status(200).json({ message: "Course purchased successfully", course });
     })
 
@@ -216,7 +235,7 @@ router.post('/upload', auth, async (req: Request, res: Response) => {
         };
          const newRating = new Rating(newReview);
           await newRating.save();
-          console.log (newReview)
+      //    console.log (newReview)
         course.rating.push(newRating._id);    
          user.rated.push(newRating._id);
         await user.save();
@@ -241,7 +260,7 @@ const course = await Course.findById(courseId)
 if (!course) {
   return res.status(404).json({ message: "Course not found" });
 }
-console.log(course.rating)
+//console.log(course.rating)
 
 
 res.status(200).json({
@@ -269,7 +288,8 @@ interface vid{
 router.get('/getcontent/:id', auth, async (req: Request, res: Response) => {
   const courseId = req.params.id;
   const user = req.user;
- console.log(courseId);
+  
+// console.log(courseId);
  
 
   // 1️⃣ Fetch the course

@@ -46,11 +46,15 @@ export default function AppBar() {
                                     navigate("/courses")
                                 }} className="hover:bg-gray-100 p-2 rounded cursor-pointer">Courses</li>
                         <li  onClick={() => {
-                                    navigate("/purchased")
+                                    navigate("/purchasedcourses")
                                 }} className="hover:bg-gray-100 p-2 rounded cursor-pointer">Purchased </li>
                         <li  onClick={() => {
-                                    navigate("/released")
+                                    navigate("/addcourse")
+                                }} className="hover:bg-gray-100 p-2 rounded cursor-pointer">Add Course</li>        
+                        <li  onClick={() => {
+                                    navigate("/releasedcourses")
                                 }} className="hover:bg-gray-100 p-2 rounded cursor-pointer">Released </li>
+                               
                         <li  onClick={() => {
                                     navigate("/settings")
                                 }} className="hover:bg-gray-100 p-2 rounded cursor-pointer">Settings</li>

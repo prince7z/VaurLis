@@ -24,7 +24,14 @@ const userSchema = new mongoose.Schema({
     },
     password:String,
     img : String,
+    bgimg: String,
     skills : [String],
+    socialLinks:{
+      github : String,
+      linkedin : String,
+      X:String,
+      mail:String
+    },
     pur_courses : [{type : mongoose.Schema.Types.ObjectId , ref: "Course"}],
     rel_courses : [{type: mongoose.Schema.Types.ObjectId,  ref: "Course" }],
     rated : [{ type: mongoose.Schema.Types.ObjectId, ref: "rating" }]
@@ -75,11 +82,20 @@ const courseSchema = new mongoose.Schema({
 });
 const Course = mongoose.model("Course", courseSchema);
 
+const CertSchema = new mongoose.Schema({
+  user: { id : {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+   name: String },
+  
+  courseId: {id:{ type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true}, 
+  name: String,
+  instructor: String ,
+  duration: String },
+  issuedAt: { type: Date, default: Date.now }
+});
 
+const Certificate = mongoose.model("Certificate", CertSchema);
 
+export { User, Course, Rating, Tracking, Certificate };
 
-export { User, Course, Rating, Tracking };
-
-//export { User, Course, Rating ,Tracking};
 
     

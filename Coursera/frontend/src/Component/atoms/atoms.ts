@@ -77,8 +77,8 @@ export const CourseState = atomFamily({
 
         
       });
-     // console.log("Course data fetched:", response.data);
-
+      // console.log("Course data fetched:", response.data.instructor);
+       
       return response.data;
     },
   }),
@@ -130,4 +130,4 @@ export const CourseReview = atomFamily({
   })
 
 
-      
+

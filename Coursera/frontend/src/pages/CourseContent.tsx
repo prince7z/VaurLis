@@ -1,6 +1,5 @@
 import { useRecoilValueLoadable } from "recoil";
 import { useState ,useEffect } from "react";
-
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 const BASE_URL = "http://localhost:5000";
@@ -90,6 +89,7 @@ else{}
   
   return (
     <>
+
     <div className="w-full flex justify-center ">
 
 
@@ -97,40 +97,8 @@ else{}
 
        <h1 className="text-3xl font-bold text-gray-800 mb-4">Now Playing</h1>
       
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold text-gray-700">
-          {vidtoplay?.name}
-        </h2>
+         <Player vidtoplay={vidtoplay}/>
 
-        <div className="relative aspect-video rounded-lg overflow-hidden">
-          <img 
-            src={vidtoplay?.thumbnail} 
-            alt={vidtoplay?.name} 
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-600">Status:</span>
-            <span className={`px-3 py-1 rounded-full text-sm ${
-              vidtoplay?.finished 
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
-            }`}>
-              {vidtoplay?.finished ? 'Completed' : 'In Progress'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-600">Last Viewed:</span>
-            <span className="text-gray-700">
-              {vidtoplay?.lastViewedTime 
-                ? vidtoplay.lastViewedTime.toLocaleString()
-                : 'Never viewed'}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
     <div>
@@ -155,7 +123,17 @@ else{}
       ))}
     </div>
 
-    </div>
+    
+    </>
+  );
+}
+
+function Player(props: any) {
+  const vidtoplay = props.vidtoplay;
+
+  return (
+    <>
+    
     </>
   );
 }

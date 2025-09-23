@@ -2,6 +2,7 @@ import { useRecoilValueLoadable, useRecoilState } from 'recoil';
 import { CourseState, CourseReview, userState } from '../Component/atoms/atoms';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
+import ReviewItem from '../Component/review';
 import axios from 'axios';
 
 const BASE_URL = "http://localhost:5000";
@@ -34,8 +35,11 @@ interface Review {
     timestamp: number;
 }
 
+
+
 export default function Course() {
     const { id: courseIdParam } = useParams();
+
     const courseId = courseIdParam || '';
     const courseLoadable = useRecoilValueLoadable(CourseState(courseId));
     const course = courseLoadable.state === "hasValue" ? courseLoadable.contents : null;
@@ -47,7 +51,7 @@ export default function Course() {
     if (courseLoadable.state === "hasError") return <div className="flex justify-center items-center min-h-screen">Error loading course. Please try logging in again.</div>;
     if (reviewLoadable.state === "hasError") return <div className="flex justify-center items-center min-h-screen">Error loading reviews</div>;
     if (reviewLoadable.state === "loading") return <div className="flex justify-center items-center min-h-screen">Loading reviews...</div>;
-
+    if (!course) return <div className="flex justify-center items-center min-h-screen">Course not found</div>;
     return (
         <div className="max-w-4xl mx-auto p-6">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -68,40 +72,27 @@ export default function Course() {
                     <div className="border-t border-gray-200 pt-6 mb-6">
                         <div className="flex items-center mb-4">
                             <img src={course.instructor.img} alt={course.instructor.username} className="w-12 h-12 rounded-full mr-4" />
-                            <div>
+                            <li >
+                                <a href={`/instructor/${course.instructor._id}`}>
                                 <h3 className="font-semibold">Instructor: {course.instructor.username}</h3>
                                 <p className="text-gray-600">Skills: {course.instructor.skills.join(', ')}</p>
-                            </div>
+                            </a>
+                          </li>
                         </div>
                     </div>
 
                     <div className="flex gap-4 mb-8">
                         {course.Role === 'pur' && <a href={`/course/content/${courseId}`} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">View Content</a>}
-                        {course.Role === '!pur' && <a href={`/course/purchase/${courseId}`} className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Enroll Now</a>}
+                        {course.Role === '!pur' && <a href={`/course/purchase/${courseId}`}  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Enroll Now</a>}
                         {course.Role === 'owns' && <a href={`/course/update/${courseId}`} className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">Update Course</a>}
+                        {course.Role ==='pur'&& <a href={`/course/certificate/${courseId}`} className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Claim Certificate</a>}
                     </div>
 
                     <div className="border-t border-gray-200 pt-6">
                         <h2 className="text-2xl font-bold mb-6">Reviews</h2>
                         <div className="space-y-6">
                             {reviews.length > 0 ? reviews.map((item: Review) => (
-                                <div key={item._id} className="bg-gray-50 p-4 rounded-lg">
-                                    <div className="flex items-center mb-3">
-                                        <img src={item.user.img} alt={item.user.username} className="w-10 h-10 rounded-full mr-3" />
-                                        <div>
-                                            <p className="font-semibold">{item.user.username}</p>
-                                            <p className="text-yellow-500">{"★".repeat(item.rating)}{"☆".repeat(5-item.rating)}</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-gray-700 mb-2">{item.review}</p>
-                                    <p className="text-sm text-gray-500">
-                                        Posted on: {new Date(item.timestamp).toLocaleString('en-IN', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                        })}
-                                    </p>
-                                </div>
+                                <ReviewItem key={item._id} item={item} />
                             )) : <p className="text-gray-500">No reviews yet</p>}
                         </div>
                         {course.Role === 'pur' && <div className="mt-8"><Review courseId={courseId}/></div>}
@@ -122,6 +113,7 @@ interface UserData {
 function Review({ courseId }: { courseId: string }) {
     const [review, setReview] = useState<string>('');
     const [rating, setRating] = useState<number>(0);
+    const [helpful, setHelpful] = useState<boolean | null>();
     const [reviewState, setReviewState] = useRecoilState(CourseReview(courseId));
     const user = useRecoilValueLoadable(userState);
     const userData: UserData = user.state === "hasValue" ? (user.contents as UserData) : { email: "", _id: "", username: "", img: "" };
