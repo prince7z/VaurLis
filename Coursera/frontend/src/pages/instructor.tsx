@@ -3,17 +3,34 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import CourseCard from "../Component/coursecard";
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
+import { Button } from "@mui/material";
+import { Edit } from "lucide-react";
+import { useRecoilState } from "recoil";
+import { avatarState,bannerState,usernameState,socialLinksState,bioState, skillsState } from "../Component/atoms/atoms";
+import EditProfileDialog from "../Component/EditProfileDialog";
+const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp&f=y";
 
 const BASEURL = "http://localhost:5000";
 
 export default function Instructor() {
     const { username } = useParams();
     const [instructorDetails, setInstructorDetails] = useState<any>(null);
+    const [Avatar, setAvatar] = useRecoilState(avatarState);
+    const [banner, setBanner] = useRecoilState(bannerState);    
+    const [bio, setBio] = useRecoilState(bioState);
+    const [skills, setSkills] = useRecoilState(skillsState);
+    const [socialLinks, setSocialLinks] = useRecoilState(socialLinksState);
+    const [uname, setUname] = useRecoilState(usernameState);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [rel,Setrel] = useState([]);
     const [pur,Setpur] = useState([]);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
     const id = username || '';
+
+
+    
+       
 
     useEffect(() => {
         const fetchInstructorDetails = async (id: string) => {
@@ -26,8 +43,28 @@ export default function Instructor() {
                     }
                 });
                 setInstructorDetails(response.data);
-                Setrel(response.data.rel_courses);
-                if (response.data.pur_courses){
+                if (response.data.img){
+                    setAvatar(response.data.img);
+                }
+                if (response.data.bgimg){
+                    setBanner(response.data.bgimg);
+                }
+                if (response.data.bio){
+                    setBio(response.data.bio);
+                }
+                if (response.data.username){
+                    setUname(response.data.username);
+                }
+                if (response.data.socialLinks){
+                    setSocialLinks(response.data.socialLinks);
+                }
+                if (response.data.skills){
+                    setSkills(response.data.skills);
+                }
+                if (response.data.rel_courses){
+                    Setrel(response.data.rel_courses);
+                }
+                if (response.data.role==="owns"){
                     Setpur(response.data.pur_courses);
                 }
             } catch (error) {
@@ -77,31 +114,36 @@ export default function Instructor() {
                     <div className="relative">
                         {instructorDetails.bgimg ? (
                             <div className="w-full h-48 bg-gradient-to-r from-blue-400 to-purple-500">
-                                <img src={instructorDetails.bgimg} alt="Background" className="w-full h-full object-cover" />
+                                <img src={banner} alt="Background" className="w-full h-full object-cover" />
                             </div>
                         ) : (
                             <div className="w-full h-48 bg-gradient-to-r from-blue-400 to-purple-500"></div>
                         )}
                         
                         {/* Profile image */}
-                        <div className="absolute -bottom-16 left-8">
+                        <div className="absolute -bottom-16 left-0 right-0 px-8 flex justify-between items-center">
                             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white">
-                                <img src={instructorDetails.img} alt={instructorDetails.username} className="w-full h-full object-cover" />
+                                <img src={Avatar || instructorDetails.img || defaultAvatar} alt={instructorDetails.username} className="w-full h-full object-cover" />
                             </div>
+                           {instructorDetails.role === "owns" && ( <Button onClick={() => {setEditDialogOpen(true);}} variant="contained" color="primary">
+                                Edit Profile
+                            </Button>)}
                         </div>
+                        <EditProfileDialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}   />
+                    
                     </div>
                     
                     {/* Profile Info */}
                     <div className="pt-20 pb-6 px-8">
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                             <div className="mb-4">
-                                <h1 className="text-3xl font-bold text-gray-900 mb-2">{instructorDetails.username}</h1>
-                                <p className="text-lg text-gray-600 mb-3">Professional Instructor</p>
-                                
+                                <h1 className="text-3xl font-bold text-gray-900 mb-2">{uname || instructorDetails.username}</h1>
+                                <p className="text-lg text-gray-600 mb-3">{bio || instructorDetails.bio}</p>
+
                                 {/* Social links */}
                                 <div className="flex flex-wrap gap-3 mb-4">
                                     {instructorDetails.socialLinks &&
-                                        Object.entries(instructorDetails.socialLinks).map(([key, value]) => (
+                                        Object.entries(socialLinks).map(([key, value]) => (
                                             <a
                                                 key={key}
                                                 href={key === "mail" ? `mailto:${String(value)}` : String(value)}
@@ -122,7 +164,7 @@ export default function Instructor() {
                             <h3 className="text-lg font-semibold text-gray-800 mb-3">Skills & Expertise</h3>
                             <div className="flex flex-wrap gap-2">
                                 {instructorDetails.skills && instructorDetails.skills.length > 0 ? (
-                                    instructorDetails.skills.map((skill: string, idx: number) => (
+                                    skills.map((skill: string, idx: number) => (
                                         <span key={idx} className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium border border-blue-200">
                                             {skill}
                                         </span>

@@ -19,6 +19,7 @@ import Instructor from './pages/instructor';
 
 
 import  Landing  from './pages/landing';
+import Rough from './pages/Rough';
 
 function App() {
   const authPaths = ["/signin", "/signup", "/login", "/register"];
@@ -45,6 +46,7 @@ function App() {
         <Route path={"/course/purchase/:id"} element={<PurchaseCourse />} />
         <Route path={"/course/update/:id"} element={<UpdateCourse />} />
         <Route path={"/:username"} element={<Instructor />} />
+        <Route path ={"/rough"} element ={<Rough/>} />
         
        {authPaths.map((path) => (
     <Route key={path} path={path} element={<AuthPage />} />

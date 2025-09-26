@@ -73,7 +73,7 @@ export default function Course() {
                         <div className="flex items-center mb-4">
                             <img src={course.instructor.img} alt={course.instructor.username} className="w-12 h-12 rounded-full mr-4" />
                             <li >
-                                <a href={`/instructor/${course.instructor._id}`}>
+                                <a href={`/${course.instructor.username}`}>
                                 <h3 className="font-semibold">Instructor: {course.instructor.username}</h3>
                                 <p className="text-gray-600">Skills: {course.instructor.skills.join(', ')}</p>
                             </a>

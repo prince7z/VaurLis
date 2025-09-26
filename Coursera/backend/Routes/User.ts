@@ -3,7 +3,9 @@ import { User, Tracking, Rating } from '../DB/MDB';
 
 import { auth, authlite } from '../Midware/Mware';
 import z from 'zod';
-import path from 'path';
+import multer from 'multer';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 
 
 const router: Router = express.Router();
@@ -70,7 +72,8 @@ const uname = req.params.id;
 
 
     if (req.user.username === uname) {
-    const userData= await User.findById(req.user._id).select('username email img bgimg socialLinks skills pur_courses rel_courses ').populate({
+        
+    const userData= await User.findById(req.user._id).select('username bio email img bgimg socialLinks skills pur_courses rel_courses ').populate({
         path: 'rel_courses',
         select: 'img name description price instructor timestamp'
     }).populate({
@@ -78,20 +81,21 @@ const uname = req.params.id;
         select: 'img name description price instructor timestamp'
     }).lean().exec();
     
-    res.status(200).json(userData);
+    const instructorWithRole = { ...userData, role: "owns" };
+    res.status(200).json(instructorWithRole);
+
     }
 
-
-    else if (req.user.username === "guest") {
-
-        const instructor = await User.findOne({ username: uname }).select('username img bgimg skills socialLinks rel_courses').populate({
+    else {
+        const instructor = await User.findOne({ username: uname }).select('username bio img bgimg skills socialLinks rel_courses').populate({
         path: 'rel_courses',
         select: 'img name description price instructor timestamp'
     }).lean().exec();
     if (!instructor) {
         return res.status(404).json({ error: "Instructor not found" });
     }
-    res.status(200).json(instructor);
+    const instructorWithRole = { ...instructor, role: "guest" };
+    res.status(200).json(instructorWithRole);
 
     }
  
@@ -115,27 +119,7 @@ router.get('/rated', auth, async (req: Request, res: Response) => {
     res.status(200).json(ratings);
     }
 );
-router.put('/update', auth, async (req: Request, res: Response) => {
-    const user = req.user;
-    if (!user) {
-        return res.status(404).json({ error: "User not found" });
-    }
-    const { username, email, img, skills } = req.body;
-    if (email && !/^[^@]+@[^@]+\.[cC][oO][mM]$/.test(email)) {
-        return res.status(400).json({ error: "Invalid email format" });
-    }  user.username = username || user.username;
-    user.email = email || user.email;
-    user.img = img || user.img;
-    user.skills = skills || user.skills;
-  
-    try {
-      await user.save();
-      res.status(200).json({ message: " Profile updated successfully", user });
-    } catch (error) {
-      res.status(500).json({ error: " Error saving user" });
-    }
-}
-);
+
 router.post('/updatestats', auth, async (req: Request, res: Response) => {
     const user = req.user;
     try {
@@ -165,8 +149,58 @@ router.post('/updatestats', auth, async (req: Request, res: Response) => {
 );
 
 
+router.get("/check-username",auth, async (req, res) => {
+
+  const { username } = req.query;
+  if (username===req.user.username) {
+    return res.json({ available: true });
+  }
+  const user = await User.findOne({ username });
+  res.json({ available: !user }); // true if username is available
+});
 
 
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        // @ts-ignore
+        folder: 'profile_pics',
+        allowed_formats: ['jpg', 'png', 'jpeg'],
+    },
+});
+
+const upload = multer({ storage: storage });
+
+
+
+
+
+router.post('/update',auth, upload.fields(
+        [{ name: 'profileImage', maxCount: 1 }, 
+        { name: 'bannerImage', maxCount: 1 }]), 
+        async (req: Request, res: Response) => {
+            try{
+                const userid=req.user.id;
+                if (!userid){               
+                  return res.status(401).json({ error: 'Unauthorized' });
+
+            }
+            
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+        const profileImage = files?.profileImage?.[0];
+        const bannerImage = files?.bannerImage?.[0];
+            
+        const { username, bio, skills, socialLinks } = req.body;
+
+        console.log("Received data:", { username, bio, skills, socialLinks, profileImage, bannerImage });
+                }
+                catch(e){
+                    console.log("error",e)
+                    return res.status(402).json({massage:"error"+e})
+                }
+
+        })
 
 
        

@@ -78,8 +78,8 @@ export default function AppBar() {
            <div>
          {user.state === "hasValue" ? (
                 <div>
-                   <button  onClick={() => {
-                                    navigate("/courses")
+                   <button className="text-lg bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-full" onClick={() => {
+                                    navigate(`/${user.contents.username}`)
                                 }} >Profile</button>
                 </div>
             ) : user.state === "loading" ? (

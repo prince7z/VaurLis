@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
         match: /^[^@]+@[^@]+\.[cC][oO][mM]$/
     },
     password:String,
+    bio: String,
     img : String,
     bgimg: String,
     skills : [String],

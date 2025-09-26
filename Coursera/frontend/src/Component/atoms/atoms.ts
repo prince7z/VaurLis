@@ -130,4 +130,32 @@ export const CourseReview = atomFamily({
   })
 
 
-
+export const avatarState = atom({
+  key: 'avatarState',
+  default: '',
+});
+export const skillsState = atom({
+  key: 'skillsState',
+  default: [] as string[],
+});
+export const bannerState = atom({
+  key: 'bannerState',
+  default: '',
+});
+export const bioState = atom({
+  key: 'bioState',
+  default: '',
+});
+export const usernameState = atom({
+  key: 'usernameState',
+  default: '',
+});
+export const socialLinksState = atom({
+  key: 'socialLinksState',
+  default: {
+    github: '',
+    linkedin: '',
+    twitter: '',
+    email: '',
+  },
+});

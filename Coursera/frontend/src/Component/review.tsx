@@ -45,13 +45,15 @@ export default function ReviewItem({ item }: { item: any }) {
 
     return (
         <div className="bg-gray-50 p-4 rounded-lg" key={item._id}>
-            <div className="flex items-center mb-3">
+            <li className="flex items-center mb-3">
+                <a href={`/${item.user.username}` } className="flex items-center">
                 <img src={item.user.img} alt={item.user.username} className="w-10 h-10 rounded-full mr-3" />
                 <div>
                     <p className="font-semibold">{item.user.username}</p>
                     <p className="text-yellow-500">{"★".repeat(item.rating)}{"☆".repeat(5 - item.rating)}</p>
                 </div>
-            </div>
+                </a>
+            </li>
             <p className="text-gray-700 mb-2">{item.review}</p>
             <li>
                 <button

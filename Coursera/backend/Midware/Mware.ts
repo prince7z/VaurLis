@@ -40,11 +40,7 @@ export async function auth(req: Request, res: Response, next: NextFunction): Pro
       return;
     }
     req.user = user;
-    //req.user._id = new ObjectId(user._id);
-    //console.log(req.user);
 
-
-     // Attach user to request object
     next();
    
 

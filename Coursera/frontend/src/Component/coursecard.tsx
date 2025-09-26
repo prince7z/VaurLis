@@ -16,8 +16,9 @@ export default function CourseCard({ course }: { course: any }) {
             className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
             style={{ textDecoration: "none", color: "inherit" }}
         >
+            
             <div className="p-0">
-                <img src={course.image} alt={course.name} className="w-full h-40 object-cover" />
+                <img src={course.img} alt={course.name} className="w-full h-40 object-cover" />
                 
                 <div className="p-4">
                     <h2 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{course.name}</h2>
