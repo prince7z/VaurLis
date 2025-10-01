@@ -1,5 +1,5 @@
 import express, { Request, Response, Router } from 'express';
-import { User, Tracking, Rating } from '../DB/MDB';
+import { User, Tracking, Rating, Certificate } from '../DB/MDB';
 
 import { auth, authlite } from '../Midware/Mware';
 import z from 'zod';
@@ -149,7 +149,7 @@ router.post('/updatestats', auth, async (req: Request, res: Response) => {
 );
 
 
-router.get("/check-username",auth, async (req, res) => {
+router.get("/check-username",authlite, async (req, res) => {
 
   const { username } = req.query;
   if (username===req.user.username) {
@@ -203,7 +203,20 @@ router.post('/update',auth, upload.fields(
         })
 
 
-       
+       router.get('/verify/:certid', async (req: Request, res: Response) => {
+        const certid = req.params.certid;
+
+        try {
+            const certificate = await Certificate.findById(certid).populate({ path: "user.id", select: "username img" });
+            if (!certificate) {
+                return res.status(404).json({ error: "Certificate not found" });
+            }
+            res.status(200).json(certificate);
+        } catch (error) {
+            console.error("Error fetching certificate:", error);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    })
 
 
 export default router;

@@ -113,7 +113,7 @@ export default function Instructor() {
                     {/* Banner */}
                     <div className="relative">
                         {instructorDetails.bgimg ? (
-                            <div className="w-full h-48 bg-gradient-to-r from-blue-400 to-purple-500">
+                            <div className="w-full h-35 bg-gradient-to-r from-blue-400 to-purple-500">
                                 <img src={banner} alt="Background" className="w-full h-full object-cover" />
                             </div>
                         ) : (

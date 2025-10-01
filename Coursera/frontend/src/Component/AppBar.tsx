@@ -3,8 +3,11 @@ import React from "react";
 import { useRecoilValueLoadable } from "recoil";
 import { useNavigate } from "react-router-dom";
 import {userSelector}  from "./atoms/atoms"; 
-import { AlignLeft } from "lucide-react";
-import logo from "/VS/coursera/Coursera/Coursera/frontend/src/assets/logo.svg";;
+import { AlignLeft, Icon } from "lucide-react";
+import { IconButton, Button, Avatar } from "@mui/material";
+
+import logo from "/VS/coursera/Coursera/Coursera/frontend/src/assets/logo.svg";import { set } from "zod";
+;
 
 
 
@@ -12,6 +15,7 @@ import logo from "/VS/coursera/Coursera/Coursera/frontend/src/assets/logo.svg";;
 export default function AppBar() {
     const user = useRecoilValueLoadable(userSelector);
     const navigate = useNavigate();
+    const [dropdownOpen, setDropdownOpen] = React.useState(false);
     
     return ( 
       
@@ -78,9 +82,44 @@ export default function AppBar() {
            <div>
          {user.state === "hasValue" ? (
                 <div>
-                   <button className="text-lg bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-full" onClick={() => {
-                                    navigate(`/${user.contents.username}`)
-                                }} >Profile</button>
+                                       <Avatar src={user.contents.img} className="inline-block mr-2 cursor-pointer border-2 border-gray-500" onClick={() => setDropdownOpen(!dropdownOpen)} alt="User" />
+                                                    {/* User dropdown menu */}
+                                                    <div className="relative">
+                                                        {/* State to control dropdown visibility */}
+                                                        {dropdownOpen && (
+                                                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        navigate(`/${user.contents.username}`);
+                                                                        setDropdownOpen(false);
+                                                                    }}
+                                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                                >
+                                                                    Profile
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        navigate('/settings');
+                                                                        setDropdownOpen(false);
+                                                                    }}
+                                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                                >
+                                                                    Settings
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        localStorage.removeItem("token");
+                                                                        navigate("/signin");
+                                                                        setDropdownOpen(false);
+                                                                        window.location.reload();
+                                                                    }}
+                                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                                >
+                                                                    Sign out
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
                 </div>
             ) : user.state === "loading" ? (
                 <div>Loading...</div>
@@ -126,7 +165,7 @@ export default function AppBar() {
                     </li>
                     <li 
                     onClick={() => {
-                                    navigate("/purchased")
+                                    navigate("/purchasedcourses")
                                 }}
                     className="hover:bg-gray-100 p-2 rounded cursor-pointer flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

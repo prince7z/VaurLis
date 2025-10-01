@@ -16,6 +16,7 @@ import PurchasedCourses from './pages/PurchasedCourse';
 import ReleasedCourses from './pages/ReleasedCourse';
 import Certificate from './pages/cert';
 import Instructor from './pages/instructor';
+import Verify from './pages/Verify';
 
 
 import  Landing  from './pages/landing';
@@ -28,12 +29,8 @@ function App() {
     <>
      <RecoilRoot>
       <BrowserRouter>
-       
-       <div>
-       
-        <AppBar/>
-        <div className="container mx-auto p-4" style={{ backgroundColor: "white" }}>
-          
+       <AppBar/>
+       <div className="pt-20"> 
         <Routes>
          <Route path={"/Home"} element={<HomePage />} />
         <Route path={"/courses"} element={<Courses />} />
@@ -46,6 +43,7 @@ function App() {
         <Route path={"/course/purchase/:id"} element={<PurchaseCourse />} />
         <Route path={"/course/update/:id"} element={<UpdateCourse />} />
         <Route path={"/:username"} element={<Instructor />} />
+        <Route path ={"/verify/:certId"} element ={<Verify/>} />
         <Route path ={"/rough"} element ={<Rough/>} />
         
        {authPaths.map((path) => (
@@ -54,15 +52,10 @@ function App() {
         <Route path={"/"} element={<Landing />} />
         </Routes>
        </div>
-              </div>
-
        </BrowserRouter>
      </RecoilRoot>
-      
     </>
   )
 }
-
-
 
 export default App

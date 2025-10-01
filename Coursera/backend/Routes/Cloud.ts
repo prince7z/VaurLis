@@ -5,23 +5,41 @@ import { auth, authlite } from '../Midware/Mware';
 import {User} from '../DB/MDB';
 import cloudinary from "../config/cloudinary";
 
-const storage = new CloudinaryStorage({
+// Storage for PROFILE images (square 1:1)
+const profileStorage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         // @ts-ignore
         folder: 'profile_pics',
         allowed_formats: ['jpg', 'png', 'jpeg'],
         transformation: [
-            { width: 400, height: 400, crop: 'fill' },
+            { width: 400, height: 400, crop: 'fill' }, // Square for profile
         ],
     },
 });
 
-const upload = multer({ 
-    storage: storage,
-    limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
-    }
+// Storage for BANNER images (wide 4:1)
+const bannerStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        // @ts-ignore
+        folder: 'banner_pics',
+        allowed_formats: ['jpg', 'png', 'jpeg'],
+        transformation: [
+            { width: 1200, height: 300, crop: 'fill' }, // Wide rectangle for banner
+        ],
+    },
+});
+
+// Create separate upload handlers
+const profileUpload = multer({ 
+    storage: profileStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }
+});
+
+const bannerUpload = multer({ 
+    storage: bannerStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 // Helper function to extract public_id from Cloudinary URL
@@ -60,10 +78,88 @@ const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
 
 const router: Router = express.Router();
 
-router.post('/update', auth, upload.fields([
-    { name: 'profileImage', maxCount: 1 }, 
-    { name: 'bannerImage', maxCount: 1 }
-]), async (req: Request, res: Response) => {
+// Custom middleware to handle different file types with different storages
+const uploadMiddleware = (req: any, res: any, next: any) => {
+    // Create a combined upload handler
+    const upload = multer().fields([
+        { name: 'profileImage', maxCount: 1 },
+        { name: 'bannerImage', maxCount: 1 }
+    ]);
+    
+    upload(req, res, async (err: any) => {
+        if (err) {
+            return res.status(400).json({ error: 'File upload failed', details: err.message });
+        }
+        
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+        const profileFile = files?.profileImage?.[0];
+        const bannerFile = files?.bannerImage?.[0];
+        
+        // Upload profile image to Cloudinary with square dimensions
+        if (profileFile) {
+            try {
+
+                const result = await new Promise<any>((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream({
+                        folder: 'profile_pics',
+                        transformation: [{ width: 400, height: 400, crop: 'fill' }],
+                        resource_type: 'auto',
+                        format: 'jpg'
+                    }, (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    });
+                    
+                    uploadStream.end(profileFile.buffer);
+                });
+                
+                // Add Cloudinary result to request
+                req.cloudinaryResults = req.cloudinaryResults || {};
+                req.cloudinaryResults.profileImage = {
+                    path: result.secure_url,
+                    public_id: result.public_id
+                };
+            } catch (error) {
+                console.log("profile upload error:", error);
+                return res.status(500).json({ error: 'Profile image upload failed' });
+            }
+        }
+        
+        // Upload banner image to Cloudinary with wide dimensions
+        if (bannerFile) {
+            try {
+ 
+                    const result = await new Promise<any>((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream({
+                        folder: 'banner_pics',
+                        transformation: [{ width: 1200, height: 300, crop: 'fill' }],
+                        resource_type: 'auto',
+                        format: 'jpg'
+                    }, (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    });
+                    
+                    uploadStream.end(bannerFile.buffer);
+                });
+                
+                // Add Cloudinary result to request
+                req.cloudinaryResults = req.cloudinaryResults || {};
+                req.cloudinaryResults.bannerImage = {
+                    path: result.secure_url,
+                    public_id: result.public_id
+                };
+            } catch (error) {
+                console.log("banner upload error:", error);
+                return res.status(500).json({ error: 'Banner image upload failed', });
+            }
+        }
+        
+        next();
+    });
+};
+
+router.post('/update', auth, uploadMiddleware, async (req: Request, res: Response) => {
     try {
         const userid = req.user?.id;
         if (!userid) {               
@@ -76,42 +172,39 @@ router.post('/update', auth, upload.fields([
             return res.status(404).json({ error: 'User not found' });
         }
         
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-        const profileImage = files?.profileImage?.[0];
-        const bannerImage = files?.bannerImage?.[0];
-        
         const { username, bio, skills, socialLinks } = req.body;
+        const cloudinaryResults = (req as any).cloudinaryResults || {};
 
         const updateData: any = {};
 
         // Handle profile image
-        if (profileImage) {
+        if (cloudinaryResults.profileImage) {
             // New file uploaded - replace old image
             if (currentUser.img) {
                 await deleteFromCloudinary(currentUser.img);
             }
-            updateData.img = profileImage.path;
+            updateData.img = cloudinaryResults.profileImage.path;
         } else if (req.body.profileImage === "Remove") {
             // User wants to remove profile image
             if (currentUser.img) {
                 await deleteFromCloudinary(currentUser.img);
             }
-            updateData.img = ""; // Set to empty string
+            updateData.img = "";
         }
         
         // Handle banner image
-        if (bannerImage) {
+        if (cloudinaryResults.bannerImage) {
             // New file uploaded - replace old image
             if (currentUser.bgimg) {
                 await deleteFromCloudinary(currentUser.bgimg);
             }
-            updateData.bgimg = bannerImage.path;
+            updateData.bgimg = cloudinaryResults.bannerImage.path;
         } else if (req.body.bannerImage === "Remove") {
             // User wants to remove banner image
             if (currentUser.bgimg) {
                 await deleteFromCloudinary(currentUser.bgimg);
             }
-            updateData.bgimg = ""; // Set to empty string
+            updateData.bgimg = "";
         }
 
         // Handle other form data

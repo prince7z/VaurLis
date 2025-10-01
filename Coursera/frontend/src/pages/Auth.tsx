@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import axios from "axios";
 import z from "zod";
+import { Button, TextField } from "@mui/material";
 
 
 type Step = "email" | "login" | "register";
@@ -11,7 +12,7 @@ export default function AuthPage() {
 
   const handleEmailSubmit = async (enteredEmail: string) => {
    
-    
+   
     setEmail(enteredEmail);
     //alert("Email submitted: " + enteredEmail);
     try {
@@ -104,15 +105,29 @@ function EmailForm({ onNext }: { onNext: (email: string) => void }) {
   return (
     <div>
       <h3>Enter your Email</h3>
-      <input
+      <TextField
+        label="Email"
         type="email"
-        placeholder="example@mail.com"
+        fullWidth
+        variant="outlined"
+        margin="normal"
+        placeholder="Email"
+        helperText={error}
+        color={emailSchema.safeParse(email).success ? "primary" : "error"}
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+          {emailSchema.safeParse(e.target.value).success ? setError("") : setError("enter a valid email")};
+        }}
       />
-      {error && <p style={{ color: "red" }}>{error}</p>}
       <br />
-      <button onClick={handleNext}>Next</button>
+      <Button
+        disabled={!email || emailSchema.safeParse(email).success === false}
+        variant="contained"
+        onClick={handleNext}
+      >
+        Next
+      </Button>
       {/*<button onClick={()=> onNext(email)}>Next</button>*/}
     </div>
   );
@@ -125,14 +140,14 @@ function LoginForm({ email, onLogin }: { email: string; onLogin: (password: stri
   return (
     <div>
       <h3>Welcome back, {email}</h3>
-      <input
+      <TextField
+        label="Password"
         type="password"
-        placeholder="Enter password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
       <br />
-      <button onClick={() => onLogin(password)}>Login</button>
+      <Button onClick={() => onLogin(password)}>Login</Button>
     </div>
   );
 }
@@ -148,32 +163,78 @@ function RegisterForm({
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPass, setConfirmPass] = useState<string>("");
+    const [available, setAvailable] = useState<boolean | null>(true);
+
+    const BASE_URL = "http://localhost:5000";
+
+    useEffect(() => {
+        if (username.length > 3) {
+            const fetchUsername = async () => {
+                try {
+                    const exist = await axios.get(`${BASE_URL}/api/user/check-username?username=${username}`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    setAvailable(exist.data.available);
+                } catch (error) {
+                    console.error('Error checking username:', error);
+                    setAvailable(false);
+                }
+            };
+            fetchUsername();
+        }
+    }, [username]);
+
 
   return (
     <div>
       <h3>Create account with {email}</h3>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <br />
-      <input
+                <div style={{ padding: '20px', marginTop: '30px' }}>
+                    <TextField
+                        label="Username"
+                        color={username.length < 4 ? "error" : available ? "primary" : "error"}
+                        helperText={username.length < 4 ? "Username must be at least 4 characters" : available ? "Username is available" : "Username is taken"}
+                        fullWidth
+                        variant="outlined"
+                        margin="normal"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+     
+      <TextField
+        label="Password"
         type="password"
+        color = {password.length < 6 ? "error" : "primary"}
+        helperText={password.length < 6 ? "Password must be at least 6 characters" : ""}
+        fullWidth
+        variant="outlined"
+        margin="normal"
         placeholder="Password"
+        
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
       <br />
-      <input
+      <TextField
+        label="Confirm Password"
         type="password"
+        color = {confirmPass!==password ? "error" : "primary"}
+        helperText={confirmPass===password ? "" : "Passwords do not match"}
+        fullWidth
+        variant="outlined"
+        margin="normal"
         placeholder="Confirm Password"
         value={confirmPass}
         onChange={(e) => setConfirmPass(e.target.value)}
       />
       <br />
-      <button onClick={() => onRegister(username, password, confirmPass)}>Register</button>
+<Button
+        onClick={() => onRegister(username, password, confirmPass)}
+        variant="contained"
+        disabled={username.length < 4 || !available || password.length < 6 || confirmPass !== password}
+      >
+        Register
+      </Button>    
+    </div>
     </div>
   );
 }
