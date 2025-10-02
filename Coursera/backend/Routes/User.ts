@@ -1,5 +1,5 @@
 import express, { Request, Response, Router } from 'express';
-import { User, Tracking, Rating, Certificate } from '../DB/MDB';
+import { User, Tracking, Rating, Certificate, LiveClass ,Course} from '../DB/MDB';
 
 import { auth, authlite } from '../Midware/Mware';
 import z from 'zod';
@@ -218,6 +218,58 @@ router.post('/update',auth, upload.fields(
         }
     })
 
+    router.post('/schedule/liveclass/:id', auth, async (req: Request, res: Response) => {
+    const { title, description, scheduledAt, duration } = req.body;
+    const courseId = req.params.id;
+
+    const instructorId: any = await Course.findById(courseId).select('instructor').lean().exec();
+    if (!instructorId) {
+        return res.status(404).json({ error: "Course not found" });
+    }
+    if (instructorId.instructor.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ error: "Forbidden: You are not authorized to schedule live classes for this course" });
+    }
+
+    try {
+        const liveClass = new LiveClass({
+            courseId,
+            title,
+            description,
+            scheduledAt,
+            duration,
+                       
+            instructorId: req.user._id
+        });
+        await liveClass.save();
+        res.status(201).json({ message: "Live class scheduled successfully", liveClass });
+    } catch (error) {
+        console.error("Error scheduling live class:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+ router.get('/liveclass/:id', auth, async (req: Request, res: Response) => {
+    const courseId = req.params.id;
+    let Role="!pur";
+    const user = req.user;
+   
+    if (user.pur_courses.includes(courseId)) {
+        Role = "pur";
+    } if (user.rel_courses.includes(courseId)) {
+        Role = "owns";
+    }
+    try {
+        const liveClass = await LiveClass.findOne({ courseId }).select('title description scheduledAt duration link courseId instructorId').populate({ path: 'instructorId', select: 'username img' }).populate({path: 'courseId', select: 'name img'}).lean().exec();
+        if (!liveClass) {
+            return res.status(250).json({ Role,message: "Live class not found" });
+        }
+
+        res.status(200).json({ Role, liveClass });
+    } catch (error) {
+        console.error("Error fetching live class:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
 
 export default router;
 

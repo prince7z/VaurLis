@@ -82,11 +82,14 @@ export default function Course() {
                     </div>
 
                     <div className="flex gap-4 mb-8">
-                        {course.Role === 'pur' && <a href={`/course/content/${courseId}`} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">View Content</a>}
+                        {(course.Role === 'pur' || course.Role === 'owns') && <a href={`/course/content/${courseId}`} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">View Recorded Content</a>}
+                         {course.Role ==='pur'&& <a href={`/course/live/${courseId}`} className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Go Live</a>}
                         {course.Role === '!pur' && <a href={`/course/purchase/${courseId}`}  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Enroll Now</a>}
                         {course.Role === 'owns' && <a href={`/course/update/${courseId}`} className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">Update Course</a>}
+                        {course.Role === 'owns' && <a href={`/course/live/${courseId}`} className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Shedule LiveClass</a>}
                         {course.Role ==='pur'&& <a href={`/course/certificate/${courseId}`} className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Claim Certificate</a>}
                     </div>
+                        {course.Role === 'pur' && <div className="mt-8"><Review courseId={courseId}/></div>}
 
                     <div className="border-t border-gray-200 pt-6">
                         <h2 className="text-2xl font-bold mb-6">Reviews</h2>
@@ -95,7 +98,6 @@ export default function Course() {
                                 <ReviewItem key={item._id} item={item} />
                             )) : <p className="text-gray-500">No reviews yet</p>}
                         </div>
-                        {course.Role === 'pur' && <div className="mt-8"><Review courseId={courseId}/></div>}
                     </div>
                 </div>
             </div>

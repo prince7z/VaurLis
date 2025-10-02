@@ -42,6 +42,8 @@ export default function UpdateCourse() {
       setContentLink(course.links?.[0] || "");
     }
   }, [course]);
+       
+
 
   async function handleUpdate() {
     // Validation
@@ -86,13 +88,19 @@ export default function UpdateCourse() {
   if (courseLoadable.state === "loading") return <p>Loading...</p>;
   if (courseLoadable.state === "hasError") return <p>Error loading course</p>;
 
-if (currentUser !== course.instructor) {
-  return <p>You are not authorized to update this course</p>;
+if (currentUser !== course.instructor._id) {
+  return (
+    <>
+      <p>You are not authorized to update this course</p>
+    </>
+  );
 }
 
 
   return (
+
     <div className="p-4">
+      
       <h1 className="text-xl font-bold mb-4">Update Course</h1>
       <input
         value={title}
@@ -134,7 +142,8 @@ if (currentUser !== course.instructor) {
         value={contentLink}
         onChange={(e) => setContentLink(e.target.value)}
         type="text"
-        placeholder="Course Content Link"
+        disabled
+        placeholder="Course Content cant be update"
         className={`border p-2 mb-4 w-full ${
           errors.contentLink ? "border-red-500" : "border-gray-300"
         }`}

@@ -97,9 +97,12 @@ router.get('/:id', auth , async (req: Request, res: Response) => {
            // console.log(course);
 
             let Role: 'pur'|'!pur'|'owns' = '!pur';
-            if(req.user.pur_courses.includes(course._id)){Role = 'pur';}
-            else if((req.user?._id).toString()===(course.instructor)?.toString()){Role = 'owns';}
+            if((req.user?._id).toString()===(course.instructor)?.toString()){Role = 'owns';}
+            else  if(req.user.pur_courses.includes(course._id)){Role = 'pur';}
+           
             else {Role = '!pur';}
+
+
             const instboj = await User.findById(course.instructor).select('username img skills').lean().exec();
                   
            
@@ -289,21 +292,15 @@ router.get('/getcontent/:id', auth, async (req: Request, res: Response) => {
   const courseId = req.params.id;
   const user = req.user;
   
-// console.log(courseId);
- 
 
-  // 1️⃣ Fetch the course
   const course = await Course.findById(courseId);
   if (!course) {
     return res.status(404).json({ message: "Course not found" });
   }
 
-  // 2️⃣ Fetch tracking info for this user & course
   const tracking = await Tracking.find({ userId: user._id, courseId: courseId });
 
-  // 3️⃣ Map content + tracking to vid interface
   const content: any = course.content.map(video => {
-    // Find tracking for this video
     const track = tracking.find(t => t.videoId.toString() === video._id.toString());
 
     return {

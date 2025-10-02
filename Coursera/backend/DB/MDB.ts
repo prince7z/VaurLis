@@ -1,6 +1,5 @@
 import mongoose, { ConnectOptions } from 'mongoose';
 import dotenv from 'dotenv';
-import { finished } from 'stream';
 
 dotenv.config();
 
@@ -11,9 +10,27 @@ if (!MONGO_URI) {
   throw Error("missing .env");
 }
 
+// Fix: Remove unsupported options
 mongoose.connect(MONGO_URI, {
-  dbName: "Coursera"
+  dbName: "Coursera",
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000
+  // Removed: bufferCommands and bufferMaxEntries (not supported in newer versions)
 } as ConnectOptions);
+
+// Add connection event listeners
+mongoose.connection.on('connected', () => {
+  console.log('✅ MongoDB connected successfully');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️ MongoDB disconnected');
+});
 
 const userSchema = new mongoose.Schema({
     username:String,
@@ -36,8 +53,8 @@ const userSchema = new mongoose.Schema({
     pur_courses : [{type : mongoose.Schema.Types.ObjectId , ref: "Course"}],
     rel_courses : [{type: mongoose.Schema.Types.ObjectId,  ref: "Course" }],
     rated : [{ type: mongoose.Schema.Types.ObjectId, ref: "rating" }]
-    });
-    const User = mongoose.model("User", userSchema);
+});
+const User = mongoose.model("User", userSchema);
 
 const trackingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -94,9 +111,20 @@ const CertSchema = new mongoose.Schema({
   issuedAt: { type: Date, default: Date.now }
 });
 
+const liveClassSchema = new mongoose.Schema({
+  courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  instructorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  scheduledAt: { type: Date, required: true },
+  duration: { type: Number, required: true }, // in minutes
+  link: { type: String } // Made required since it was causing errors
+});
+
+const LiveClass = mongoose.model("LiveClass", liveClassSchema);
+
 const Certificate = mongoose.model("Certificate", CertSchema);
 
-export { User, Course, Rating, Tracking, Certificate };
+export { User, Course, Rating, Tracking, LiveClass, Certificate };
 
 
-    

@@ -1,0 +1,16 @@
+{
+  "watch": ["backend/**/*"],
+  "ext": "ts,js,json",
+  "ignore": [
+    "node_modules/**/*",
+    "frontend/**/*",
+    "dist/**/*",
+    "*.log",
+    ".git/**/*"
+  ],
+  "delay": "1000",
+  "exec": "ts-node backend/Server.ts",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

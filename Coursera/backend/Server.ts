@@ -4,7 +4,6 @@ import USER from './Routes/User';
 import COURSE from './Routes/Course';
 import CLOUD from './Routes/Cloud'
 import cors from 'cors';
-import router from './Midware/logs';
 
 const app = express();
 app.use(express.json());
@@ -12,6 +11,11 @@ app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }));
+
+// Add a simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.status(200).json({ message: "Server is running!", timestamp: new Date().toISOString() });
+});
 
 app.use('/api/auth', LOGS);
 app.use("/api/user",USER);

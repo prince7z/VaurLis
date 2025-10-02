@@ -17,6 +17,7 @@ import ReleasedCourses from './pages/ReleasedCourse';
 import Certificate from './pages/cert';
 import Instructor from './pages/instructor';
 import Verify from './pages/Verify';
+import LiveClass from './pages/LiveClass';
 
 
 import  Landing  from './pages/landing';
@@ -45,6 +46,7 @@ function App() {
         <Route path={"/:username"} element={<Instructor />} />
         <Route path ={"/verify/:certId"} element ={<Verify/>} />
         <Route path ={"/rough"} element ={<Rough/>} />
+        <Route path ={"/course/live/:id"} element ={<LiveClass />} />
         
        {authPaths.map((path) => (
     <Route key={path} path={path} element={<AuthPage />} />
