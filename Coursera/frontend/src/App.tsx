@@ -22,6 +22,8 @@ import LiveClass from './pages/LiveClass';
 
 import  Landing  from './pages/landing';
 import Rough from './pages/Rough';
+import Sender from './pages/LiveSender';
+import Reciever from './pages/LiveReciever';
 
 function App() {
   const authPaths = ["/signin", "/signup", "/login", "/register"];
@@ -47,7 +49,9 @@ function App() {
         <Route path ={"/verify/:certId"} element ={<Verify/>} />
         <Route path ={"/rough"} element ={<Rough/>} />
         <Route path ={"/course/live/:id"} element ={<LiveClass />} />
-        
+        <Route path ={"/live/sender/:roomId"} element ={<Sender />} /> 
+        <Route path ={"/live/receiver/:roomId"} element ={<Reciever />} />
+
        {authPaths.map((path) => (
     <Route key={path} path={path} element={<AuthPage />} />
   ))}

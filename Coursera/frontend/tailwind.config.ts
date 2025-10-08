@@ -3,7 +3,11 @@
 module.exports = {
   content: ["./src/**/*.{ts,tsx,js,jsx,html}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'glacial': ['"Glacial Indifference"', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 };

@@ -24,7 +24,6 @@ declare global {
 export async function auth(req: Request, res: Response, next: NextFunction): Promise<void> {
 
   const header = req.headers.authorization;
-
   
  
   if (!header) {
@@ -45,6 +44,8 @@ export async function auth(req: Request, res: Response, next: NextFunction): Pro
    
 
   } catch (err) {
+          console.log("JWT Verification Error:", err);
+
     res.status(401).send("Unauthorized : Invalid token");
   }
 }

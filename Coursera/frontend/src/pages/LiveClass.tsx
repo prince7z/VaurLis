@@ -1,6 +1,6 @@
 import axios from "axios";
 import {useState , useEffect} from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { 
     TextField, 
     Button, 
@@ -20,6 +20,7 @@ const Base_url = 'http://localhost:5000';
 
 export default function LiveClass() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [liveClass, setLiveClass] = useState<any>(null);
     const [title, setTitle] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -136,7 +137,7 @@ export default function LiveClass() {
                                 textTransform: 'none'
                             }}
                             onClick={() => {
-                                console.log("Starting live class...");
+                                navigate(`/live/sender/${liveClass._id}`);
                             }}
                         >
                             Start Live Class
@@ -155,7 +156,7 @@ export default function LiveClass() {
                                 textTransform: 'none'
                             }}
                             onClick={() => {
-                                console.log("joining live class...");
+                                navigate(`/live/receiver/${liveClass._id}`);
                             }}
                         >
                             Join Live Class

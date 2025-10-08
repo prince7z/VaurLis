@@ -2,7 +2,7 @@ import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import express, { Request, Response, Router } from 'express';
 import { auth, authlite } from '../Midware/Mware';
-import {User} from '../DB/MDB';
+import {User,Course} from '../DB/MDB';
 import cloudinary from "../config/cloudinary";
 
 // Storage for PROFILE images (square 1:1)
@@ -29,6 +29,40 @@ const bannerStorage = new CloudinaryStorage({
             { width: 1200, height: 300, crop: 'fill' }, // Wide rectangle for banner
         ],
     },
+});
+
+const thumbnailStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        // @ts-ignore
+        folder: 'thumbnail_pics',
+        allowed_formats: ['jpg', 'png', 'jpeg'],
+        transformation: [
+            { width: 400, height: 300, crop: 'fill' }, // Thumbnail dimensions
+        ],
+    },
+});
+
+const contentThumbnailStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        // @ts-ignore
+        folder: 'content_thumbnails',
+        allowed_formats: ['jpg', 'png', 'jpeg'],
+        transformation: [
+            { width: 320, height: 180, crop: 'fill' }, // 16:9 for video thumbnails
+        ],
+    },
+});
+
+const thumbnailUpload = multer({ 
+    storage: thumbnailStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }
+});
+
+const courseUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 // Create separate upload handlers
@@ -158,6 +192,128 @@ const uploadMiddleware = (req: any, res: any, next: any) => {
         next();
     });
 };
+
+router.post('/upload', auth, courseUpload.any(), async (req: Request, res: Response) => {
+    try {
+        const userid = req.user?.id;
+        if (!userid) {
+            return res.status(401).json({ error: 'Unauthorized' });
+        }
+
+        const files = req.files as Express.Multer.File[];
+        if (!files || files.length === 0) {
+            return res.status(400).json({ error: 'At least one thumbnail is required' });
+        }
+
+        // Find the main course thumbnail
+        const mainThumbnailFile = files.find(f => f.fieldname === 'thumbnail');
+        if (!mainThumbnailFile) {
+            return res.status(400).json({ error: 'Course thumbnail is required' });
+        }
+
+        // Upload main course thumbnail to Cloudinary
+        const mainThumbnailResult = await new Promise<any>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream({
+                folder: 'thumbnail_pics',
+                transformation: [{ width: 400, height: 300, crop: 'fill' }],
+                resource_type: 'auto',
+                format: 'jpg'
+            }, (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            });
+            uploadStream.end(mainThumbnailFile.buffer);
+        });
+
+        // Parse contentLink data from request body
+        const contentLinkData = req.body.contentLink;
+        let contentArray: any[] = [];
+
+        if (contentLinkData) {
+            // Handle the nested array structure from FormData
+            if (typeof contentLinkData === 'string') {
+                try {
+                    contentArray = JSON.parse(contentLinkData);
+                } catch (e) {
+                    // Handle as form data structure
+                    const contentMap = new Map();
+                    Object.keys(req.body).forEach(key => {
+                        const match = key.match(/contentLink\[(\d+)\]\[(\w+)\]/);
+                        if (match) {
+                            const index = parseInt(match[1]);
+                            const field = match[2];
+                            if (!contentMap.has(index)) {
+                                contentMap.set(index, {});
+                            }
+                            contentMap.get(index)[field] = req.body[key];
+                        }
+                    });
+                    contentArray = Array.from(contentMap.values());
+                }
+            }
+        }
+
+        // Upload content thumbnails and build content array
+        const content = await Promise.all(
+            contentArray.map(async (item, index) => {
+                const contentThumbnailFile = files.find(
+                    f => f.fieldname === `contentLink[${index}][thumbnail]`
+                );
+
+                let thumbnailUrl = '';
+                if (contentThumbnailFile) {
+                    const thumbnailResult = await new Promise<any>((resolve, reject) => {
+                        const uploadStream = cloudinary.uploader.upload_stream({
+                            folder: 'content_thumbnails',
+                            transformation: [{ width: 320, height: 180, crop: 'fill' }],
+                            resource_type: 'auto',
+                            format: 'jpg'
+                        }, (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        });
+                        uploadStream.end(contentThumbnailFile.buffer);
+                    });
+                    thumbnailUrl = thumbnailResult.secure_url;
+                }
+
+                return {
+                    name: item.name || '',
+                    link: item.link || '',
+                    thumbnail: thumbnailUrl,
+                    duration: parseInt(item.duration) || 0
+                };
+            })
+        );
+
+        // Create new course with the schema structure
+        const newCourse = new Course({
+            name: req.body.title,
+            description: req.body.description,
+            duration: req.body.duration,
+            price: parseFloat(req.body.price) || 0,
+            img: mainThumbnailResult.secure_url,
+            content: content,
+            instructor: userid,
+            rating: [],
+            act_users: [],
+            links: []
+        });
+
+        await newCourse.save();
+        
+        res.status(201).json({ 
+            message: 'Course created successfully', 
+            course: newCourse 
+        });
+    } catch (error) {
+        console.error("Error creating course:", error);
+        res.status(500).json({ 
+            error: 'Internal server error',
+            details: error instanceof Error ? error.message : String(error)
+        });
+    }
+});
 
 router.post('/update', auth, uploadMiddleware, async (req: Request, res: Response) => {
     try {

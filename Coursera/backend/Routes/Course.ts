@@ -143,32 +143,6 @@ router.get('/:id', auth , async (req: Request, res: Response) => {
         
     }  
 })
-router.post('/upload', auth, async (req: Request, res: Response) => {
-    const user = req.user;
-    
-
-    if (!user) {
-        return res.status(404).json({ error: "User not found" });
-    }
-    const { name,description,duration,img, content } = req.body;
-    const same = await Course.findOne({name});
-    if (same) {
-        return res.status(400).json({ error: "Course already exists" });
-    }
-
-    const newCourse = new Course({
-        name,
-        description,
-        duration,
-        img,
-        content,
-        instructor: user._id,
-    });
-    await newCourse.save();
-    user.rel_courses.push(newCourse._id);
-    await user.save();
-    res.status(201).json({ message: "Course uploaded successfully", course: newCourse });
-    })
 
     router.put('/update/:id', auth, async (req: Request, res: Response) => {
     const courseId = req.params.id;
@@ -275,53 +249,60 @@ res.status(200).json({
 })
 
 
-interface vid{
-    id : string,
-    courseId : string,
-    userId : string,
-    name : string,
-    finished : boolean,
-    lastViewedTime : Date,  
-    link : string,
-    thumbnail : string,
-    duration : string,
-
-}
-
 router.get('/getcontent/:id', auth, async (req: Request, res: Response) => {
-  const courseId = req.params.id;
-  const user = req.user;
-  
+  try {
+    const courseId = req.params.id;
+    const user = req.user;
+    
+    // 1️⃣ Fetch course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
 
-  const course = await Course.findById(courseId);
-  if (!course) {
-    return res.status(404).json({ message: "Course not found" });
+    // 2️⃣ Check if user has access (purchased or owns the course)
+    const isPurchased = user.pur_courses.some((id: any) => id.toString() === courseId);
+    const isOwner = course.instructor?.toString() === user._id.toString();
+    
+    if (!isPurchased && !isOwner) {
+      return res.status(403).json({ message: "You need to purchase this course to access the content" });
+    }
+
+    // 3️⃣ Fetch tracking data for this user and course
+    const tracking = await Tracking.find({ 
+      userId: user._id, 
+      courseId: courseId 
+    });
+
+    // 4️⃣ Map content with tracking data
+    const content = course.content.map((video: any) => {
+      const track = tracking.find(t => t.videoId.toString() === video._id.toString());
+
+      return {
+        videoId: video._id.toString(),           // Content item ID (needed for tracking)
+        trackingId: track?._id.toString() || '', // Tracking record ID (empty if not watched)
+        name: video.name,
+        link: video.link,
+        thumbnail: video.thumbnail || '',
+        duration: video.duration || 0,
+        finished: track?.finished || false,
+        lastViewedTime: track?.lastViewedTime || null,
+        watchedInt: track?.watchedInt || 0,
+      };
+    });
+
+    // 5️⃣ Send response
+    res.status(200).json({
+      message: "Content fetched successfully",
+      content: content,
+    });
+  } catch (error) {
+    console.error("Error fetching content:", error);
+    res.status(500).json({ 
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : String(error)
+    });
   }
-
-  const tracking = await Tracking.find({ userId: user._id, courseId: courseId });
-
-  const content: any = course.content.map(video => {
-    const track = tracking.find(t => t.videoId.toString() === video._id.toString());
-
-    return {
-      id: track?._id.toString() || '',     // Tracking record ID (empty if not watched)
-      
-      
-      name: video.name,
-      finished: track?.finished || false,
-      lastViewedTime: track?.lastViewedTime || null,
-      link: video.link,
-      thumbnail: video.thumbnail,
-      duration: video.duration,
-      watchedInt: track?.watchedInt || 0,
-    };
-  });
-
-  // 4️⃣ Send response
-  res.status(200).json({
-    message: "Content fetched successfully",
-    content: content,
-  });
 });
 
 

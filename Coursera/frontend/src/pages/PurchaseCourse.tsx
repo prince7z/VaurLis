@@ -1,4 +1,4 @@
-import { useHref, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useRecoilValueLoadable } from "recoil";
 import { CourseState } from "../Component/atoms/atoms";
 import axios from 'axios';
@@ -6,12 +6,116 @@ const BaseUrl = 'http://localhost:5000';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
 interface ToastProps {
   message: string;
   type: 'success' | 'error';
   isVisible: boolean;
 }
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+
+const loadscript = (src: string) => {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src=src;
+    script.onload = () => {
+      resolve(true);
+    }
+    script.onerror = () => {
+      reject(new Error(`Failed to load script: ${src}`));
+    };
+    document.body.appendChild(script);
+  });
+};
+
+const handlePayment = async (courseId: string, navigate: any, showToast: any) => {
+
+  const res = await loadscript('https://checkout.razorpay.com/v1/checkout.js');
+
+  if (!res) {
+    alert("Razorpay SDK failed to load. check your internet connection");
+    return; 
+  }
+  try {
+    // 1️⃣ Create order on backend
+    const res = await axios.get(`${BaseUrl}/api/secure/create-order/${courseId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`, // if using auth
+      },
+    });
+
+    // Check if user is already enrolled (free course)
+    if (res.data.alreadyEnrolled) {
+      showToast("You are enrolled in the course.", 'success');
+      setTimeout(() => window.location.href = `/course/${courseId}`, 1500);
+      return;
+    }
+    
+    const { key, order } = res.data;
+
+    // 2️⃣ Open Razorpay checkout
+    const options = {
+      key: key,
+      amount: order.amount,
+      currency: order.currency,
+      name: "VaurLis",
+      description: order.notes.courseName,
+      order_id: order.id,
+      handler: async function (response:any) {
+        const res = await axios.post(`${BaseUrl}/api/secure/verify-payment`, {
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_signature: response.razorpay_signature,
+          courseId: courseId,
+          
+          
+        },{
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}`, // if using auth
+          }
+        });
+        console.log("Payment verification response:", res);
+        if (res.status === 200 ) {
+          showToast("Payment successful! You are now enrolled in the course.", 'success');
+          setTimeout(() => {
+            window.location.href = `/course/${courseId}`;
+          }, 1500);
+        } else {
+          showToast("Payment verification failed. Please contact support.", 'error');
+        }
+      },
+      prefill: {
+        email: order.notes.email,
+      },
+      theme: { color: "#3399cc" },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+
+  } catch (err: any) {
+    console.error(err);
+    
+    // Handle specific error cases
+    if (err.response?.status === 409) {
+      showToast("You have already purchased this course.", 'error');
+      setTimeout(() => {
+            window.location.href = `/course/${courseId}`;
+          }, 1500);
+    } else if (err.response?.status === 404) {
+      showToast("Course not found.", 'error');
+    } else if (err.response?.status === 401) {
+      showToast("Please login to purchase this course.", 'error');
+    } else {
+      showToast(err.response?.data?.error || "Something went wrong during payment!", 'error');
+    }
+  }
+};
+
 
 export default function PurchaseCourse() {
   const navigate = useNavigate();
@@ -41,29 +145,13 @@ export default function PurchaseCourse() {
 
   async function purchaseCourse(id: string) {
     try {
-      const res = await axios.get(`${BaseUrl}/api/course/purchase/${id}`, {
-        headers: {
-          "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
-        }
-      });
-      console.log(res);
-      showToast('Purchase successful!', 'success');
-      setTimeout(() => {
-        navigate('/course/' + id);
-        window.location.reload();
-      }, 2000);
+      await handlePayment(id, navigate, showToast);
     } catch (error: any) {
-      if (error.response) {
-        if (error.response.status === 400) {
-          showToast('Course already purchased', 'error');
-        } else {
-          showToast(`Error: ${error.response.data?.message || 'Something went wrong'}`, 'error');
-        }
-      } else {
-        showToast('Network error', 'error');
-      }
-    }
+      console.error("Purchase failed:", error);
+      showToast(error?.response?.data?.error || "Purchase failed. Please try again.", 'error');
+      return;
   }
+}
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
