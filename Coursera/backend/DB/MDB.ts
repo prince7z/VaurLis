@@ -96,7 +96,9 @@ const courseSchema = new mongoose.Schema({
   }],
     act_users : [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     links :[String],
-    timestamp : {type : Date, default : Date.now}
+    timestamp : {type : Date, default : Date.now},
+    tags : [String]
+    
 });
 const Course = mongoose.model("Course", courseSchema);
 

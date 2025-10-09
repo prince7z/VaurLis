@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-
+import React, { useState, useRef, useEffect, use } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 interface PeerConnection {
   receiverId: string;
   connection: RTCPeerConnection;
@@ -12,8 +12,7 @@ interface ChatMessage {
   senderId: string;
   timestamp: number;
 }
-
-const LiveSender: React.FC = () => {
+export default function LiveSender() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const [peerConnections, setPeerConnections] = useState<PeerConnection[]>([]);
@@ -21,11 +20,63 @@ const LiveSender: React.FC = () => {
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [messageInput, setMessageInput] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [courseId, setCourseId] = useState<string | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const peerConnectionsRef = useRef<PeerConnection[]>([]); // Add ref to avoid closure issues
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { roomId } = useParams();
+  const Base_URL = 'http://localhost:5000'; // Replace with your backend URL
+
+
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await axios.get(`${Base_URL}/api/user/checkLive`, {
+          params: { LID: roomId, role: 'sender' },
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        });
+        
+        if (res.status === 200) {
+          console.log('Auth check passed:', res.data);
+          setIsAuthChecking(false);
+        }
+      } catch (error: any) {
+        console.error('Error checking auth:', error);
+        
+        if (error.response) {
+          if (error.response.status === 401) {
+            window.location.href = '/login';
+            return;
+          }
+          if (error.response.status === 403) {
+            setAuthError('Room not created yet');
+            setIsAuthChecking(false);
+            return;
+          }
+          if (error.response.status === 402) {
+            setAuthError('You are not the instructor for this course');
+            setCourseId(error.response.data?.courseId || null);
+            setIsAuthChecking(false);
+            return;
+          }
+        }
+        
+        setAuthError('Authentication failed. Please try again.');
+        setIsAuthChecking(false);
+      }
+    }
+
+    checkAuth();
+  }, [roomId]);
+
+
+
 
   const createPeerConnectionForReceiver = (receiverId: string, currentStream?: MediaStream): RTCPeerConnection => {
     const peerConnection = new RTCPeerConnection({
@@ -373,6 +424,47 @@ const LiveSender: React.FC = () => {
     };
   }, []);
 
+  // Show loading state while checking auth
+  if (isAuthChecking) {
+    return (
+      <div className="flex h-screen bg-gray-900 items-center justify-center">
+        <div className="text-center text-white">
+          <div className="text-6xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold mb-2">Checking Access...</h2>
+          <p className="text-gray-300">Verifying your instructor permissions</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if auth failed
+  if (authError) {
+    return (
+      <div className="flex h-screen bg-gray-900 items-center justify-center">
+        <div className="text-center text-white max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-2">{authError}</h2>
+          {courseId && (
+            <a 
+              href={`/course/${courseId}`} 
+              className="mt-4 inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              View Course
+            </a>
+          )}
+          {!courseId && (
+            <a 
+              href="/" 
+              className="mt-4 inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Go to Home
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-900">
       {/* Left side - Video and Controls */}
@@ -505,5 +597,5 @@ const LiveSender: React.FC = () => {
   );
 };
 
-export default LiveSender;
+
 

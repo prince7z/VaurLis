@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
@@ -17,11 +18,75 @@ export default function Reciver() {
     const [receiverId, setReceiverId] = useState<string | null>(null);
     const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
     const [messageInput, setMessageInput] = useState('');
+    const [authError, setAuthError] = useState<string | null>(null);
+    const [courseId, setCourseId] = useState<string | null>(null);
+    const [isAuthChecking, setIsAuthChecking] = useState(true);
     const pcRef = useRef<RTCPeerConnection | null>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const {roomId} = useParams();
     const LID = roomId;
+    const Base_URL = "http://localhost:5000";
+
+
+
+
+      useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await axios.get(`${Base_URL}/api/user/checkLive`, {
+          params: {
+            LID: LID,
+            role: 'receiver'
+          },
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        });
+        
+        if (res.status === 200) {
+          console.log('Auth check passed:', res.data);
+          setIsAuthChecking(false);
+        }
+      } catch (error: any) {
+        console.error('Error checking auth:', error);
+        
+        if (error.response) {
+          if (error.response.status === 401) {
+            window.location.href = '/login';
+            return;
+          }
+          if (error.response.status === 403) {
+            setAuthError('Room not created yet');
+            setIsAuthChecking(false);
+            return;
+          }
+          if (error.response.status === 402) {
+            setAuthError('Course not purchased yet');
+            setCourseId(error.response.data?.courseId || null);
+            setIsAuthChecking(false);
+            return;
+          }
+        }
+        
+        setAuthError('Authentication failed. Please try again.');
+        setIsAuthChecking(false);
+      }
+    }
+
+    checkAuth();
+  }, [LID]);
+
+
+
+
+
+
     useEffect(() => {
+        // Don't initialize WebSocket if auth check failed
+        if (authError || isAuthChecking) {
+            return;
+        }
+        
         let mounted = true;
 
         const initializeConnection = async () => {
@@ -107,7 +172,7 @@ export default function Reciver() {
                 pcRef.current = null;
             }
         };
-    }, [LID]); // Only depend on roomId, not pc
+    }, [LID, authError, isAuthChecking]); // Add dependencies
 
     const handleOffer = async (offerSdp: RTCSessionDescriptionInit, receiverIdFromOffer: string, websocket: WebSocket) => {
         try {
@@ -371,14 +436,6 @@ export default function Reciver() {
             console.error('Error handling offer:', error);
         }
     };
-
-    const startReceiving = () => {
-        if (!isConnected) {
-            console.log('WebSocket not connected');
-            return;
-        }
-        console.log('Ready to receive. Waiting for sender...');
-    };
     
     const sendChatMessage = () => {
         if (messageInput.trim() && socket) {
@@ -399,6 +456,47 @@ export default function Reciver() {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
     }, [chatMessages]);
+
+    // Show loading state while checking auth
+    if (isAuthChecking) {
+        return (
+            <div className="flex h-screen bg-gray-900 items-center justify-center">
+                <div className="text-center text-white">
+                    <div className="text-6xl mb-4">🔒</div>
+                    <h2 className="text-2xl font-bold mb-2">Checking Access...</h2>
+                    <p className="text-gray-300">Verifying your permissions</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state if auth failed
+    if (authError) {
+        return (
+            <div className="flex h-screen bg-gray-900 items-center justify-center">
+                <div className="text-center text-white max-w-md">
+                    <div className="text-6xl mb-4">⚠️</div>
+                    <h2 className="text-2xl font-bold mb-2">{authError}</h2>
+                    {courseId && (
+                        <a 
+                            href={`/course/${courseId}`} 
+                            className="mt-4 inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            Purchase Course
+                        </a>
+                    )}
+                    {!courseId && (
+                        <a 
+                            href="/" 
+                            className="mt-4 inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            Go to Home
+                        </a>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex h-screen bg-gray-900">

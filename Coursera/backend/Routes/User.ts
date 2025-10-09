@@ -10,6 +10,8 @@ import { v2 as cloudinary } from 'cloudinary';
 
 const router: Router = express.Router();
 
+
+
 router.get('/check',async (req: Request, res: Response) => {
    
     try 
@@ -267,6 +269,44 @@ router.post('/update',auth, upload.fields(
         res.status(200).json({ Role, liveClass });
     } catch (error) {
         console.error("Error fetching live class:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+
+router.get('/checkLive', auth, async (req: Request, res: Response) => {
+    const { LID, role } = req.query;
+
+    if (!LID || !role) {
+        return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    try {
+        const room = await LiveClass.findById(LID);
+        if (!room) {
+            return res.status(403).json({ error: "Room not found" });
+        }
+
+
+        if (role === 'sender') {
+            // Check if the user is the sender
+            if (room.instructorId.toString() !== req.user._id.toString()) {
+                return res.status(402).json({ error: "Forbidden: You are not the sender" });
+            }
+        } else if (role === 'receiver') {
+            const course:any = await Course.findById(room.courseId).select('act_users').lean().exec();
+            // Check if the user is a participant - convert ObjectIds to strings for comparison
+            const userIdString = req.user._id.toString();
+            const isParticipant = course.act_users.some((userId: any) => userId.toString() === userIdString);
+            
+            if (!isParticipant) {
+                return res.status(402).json({ courseId: room.courseId, message: "Forbidden: You are not a participant" });
+            }
+        }
+
+        res.status(200).json({ message: "User is authorized", room });
+    } catch (error) {
+        console.error("Error checking live room:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

@@ -13,15 +13,24 @@ router.get ('/allcourses',  async (req: Request, res: Response) => {
     
 
     const courses = await Course.find({})
-        .select('img name description  price instructor timestamp').populate({path : 'instructor', select: 'username img' } )
+        .select('img name description  price rating tag instructor timestamp').populate({path : 'instructor', select: 'username img' } ).populate({path : 'rating', select: 'rating' })
         .lean()
         .exec();
         
+    // Calculate average rating for each course
+    const rating = courses.map(course => {
+      if (course.rating && course.rating.length > 0) {
+        const totalRating = course.rating.reduce((sum: number, r: any) => sum + r.rating, 0);
+        return (totalRating / course.rating.length).toFixed(1);
+      }
+      return 0;
+    });
     
     const coursess = courses.map(course => ({
         ...course,
-        reviewCount: course.rating ? course.rating.length : 0
-    }));
+        rating: rating[courses.indexOf(course)] || 0, // Assign average rating or 0 if no ratings
+        }
+    ));
 
     if (!courses) {
         return res.status(404).json({ error: "No courses found" });
