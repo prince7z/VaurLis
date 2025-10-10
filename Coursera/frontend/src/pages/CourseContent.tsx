@@ -16,17 +16,7 @@ interface vid {
 }
 
 
-//  {
-//     "videoId": "68a610ee362cacd31f680cce",
-//     "trackingId": "",
-//     "name": "corroboro concedo accusator",
-//     "link": "https://www.youtube.com/watch?v=f0QDPllYdTo",
-//     "thumbnail": "https://picsum.photos/seed/ZEKzr/1274/2319",
-//     "duration": 28,
-//     "finished": false,
-//     "lastViewedTime": null,
-//     "watchedInt": 0
-//   },
+
 export default function CourseContent() {
   const courseId = useParams().id;
 
