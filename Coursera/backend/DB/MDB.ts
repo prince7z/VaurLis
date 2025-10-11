@@ -1,7 +1,7 @@
 import mongoose, { ConnectOptions } from 'mongoose';
-import dotenv from 'dotenv';
 
-dotenv.config();
+
+
 
 const { MONGO_URI } = process.env;
 
@@ -10,16 +10,13 @@ if (!MONGO_URI) {
   throw Error("missing .env");
 }
 
-// Fix: Remove unsupported options
 mongoose.connect(MONGO_URI, {
-  dbName: "Coursera",
+  dbName: "VaurLis",
   maxPoolSize: 10,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000
-  // Removed: bufferCommands and bufferMaxEntries (not supported in newer versions)
 } as ConnectOptions);
 
-// Add connection event listeners
 mongoose.connection.on('connected', () => {
   console.log('✅ MongoDB connected successfully');
 });

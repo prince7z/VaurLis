@@ -1,11 +1,9 @@
 import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
 import express, { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../DB/MDB';
 
 
-dotenv.config();
 
 const router: Router = express.Router();
 
@@ -35,20 +33,17 @@ async function verifyPassword(password: string | null | undefined, hash: string)
 router.post('/login', async (req: Request, res: Response) => {
   
   const { email, password } = req.body //as { username: string; password: string };
-  console.log("Login attempt for username:", email ,password);
   const user = await User.findOne({ email: email });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
   const ismatch :boolean = await verifyPassword(password,  user.password as string );
-  console.log("Password match result:", ismatch);
   if (!ismatch) {
-    console.log("real password:", user.password ,"provided password:", password);
     return res.status(401).json({ error: "Invalid password" });
   }
     const token : string= jwt.sign({ username: user.username }, JWT_SECRET as string, { expiresIn: '24h' });
     res.header('Authorization', `Bearer ${token}`);
-    res.status(200).json({ message: "Login successful",token : token });
+    res.status(200).json({ message: "Login successful",token : token, });
 });
 
 router.post('/signup', async (req: Request, res: Response) => {

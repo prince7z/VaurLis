@@ -102,10 +102,12 @@ const uname = req.params.id;
     }
  
 })
-router.get('/me', auth,async (req: Request, res: Response) => {
+router.get('/me', authlite,async (req: Request, res: Response) => {
 
     const user = req.user;
-  //  console.log("User found:", user);
+  if (user.username === "guest") {
+    return res.status(200).json({ username: "guest" });
+  }
     const data ={_id : user._id ,username: user.username, email: user.email, img: user.img};
    
     res.status(200).json(data);

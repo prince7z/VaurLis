@@ -1,10 +1,8 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
 import { User } from '../DB/MDB';
 import { ObjectId } from 'mongodb';
 
-dotenv.config();
 const { JWT_SECRET } = process.env;
 
 if (!JWT_SECRET) {

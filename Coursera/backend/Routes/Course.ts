@@ -1,5 +1,5 @@
 import express, { Router, Request, Response } from 'express';
-import {auth}  from '../Midware/Mware';
+import {auth , authlite}  from '../Midware/Mware';
 import { User,Tracking,Rating,Course , Certificate } from '../DB/MDB';
 
 
@@ -9,7 +9,7 @@ const router: Router = express.Router();
 
 
 
-router.get ('/allcourses',  async (req: Request, res: Response) => {
+router.get ('/allcourses', authlite,  async (req: Request, res: Response) => {
     
 
     const courses = await Course.find({})
