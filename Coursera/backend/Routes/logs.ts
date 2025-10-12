@@ -29,6 +29,24 @@ async function verifyPassword(password: string | null | undefined, hash: string)
 }
 
 
+router.post('/send-otp',async(req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+
+
+})
+
+router.post('/verify-otp', async (req: Request, res: Response) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ error: "Email and OTP are required" });
+  }
+
+})
+
 
 router.post('/login', async (req: Request, res: Response) => {
   
