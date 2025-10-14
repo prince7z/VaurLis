@@ -2,10 +2,13 @@ import bcrypt from 'bcrypt';
 import express, { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../DB/MDB';
-
+import { genotp, storeOtp, verifyOtp ,res} from '../utlis/otpstore';
+import { sendOTPEmail } from '../config/emailService';
+import { ca } from 'zod/v4/locales/index.cjs';
 
 
 const router: Router = express.Router();
+
 
 
 const { JWT_SECRET } = process.env;
@@ -35,18 +38,83 @@ router.post('/send-otp',async(req: Request, res: Response) => {
     return res.status(400).json({ error: "Email is required" });
   }
 
-
-
-})
+  const otp = genotp();
+  storeOtp(email, otp);
+  const emailResult  = await sendOTPEmail(email, otp);
+  if(emailResult.success){
+    return res.status(200).json({ message: "OTP sent successfully" });
+  }
+  return res.status(500).json({ error: "Failed to send OTP" });
+});
 
 router.post('/verify-otp', async (req: Request, res: Response) => {
-  const { email, otp } = req.body;
+  const { email, otp, username, password } = req.body;
   if (!email || !otp) {
     return res.status(400).json({ error: "Email and OTP are required" });
   }
-
-})
-
+  
+  try {
+    const result: res = verifyOtp(email, otp);
+    
+    if (result === "VALID") {
+      // Case 1: Registration (username and password provided)
+      if (username && password) {
+        const existingUser = await User.find({ email: email });
+        if (existingUser.length) {
+          return res.status(400).json({ error: "Email already exists" });
+        }
+        
+        // Hash the password before saving
+        const hashedPassword = await hashPassword(password);
+        const newUser = new User({ email, username, password: hashedPassword });
+        await newUser.save();
+        
+        const token: string = jwt.sign({ username: newUser.username }, JWT_SECRET as string, { expiresIn: '24h' });
+        res.header('Authorization', `Bearer ${token}`);
+        
+        return res.status(200).json({ 
+          message: "OTP Verified, User registered successfully",
+          token: token 
+        });
+      } 
+      // Case 2: Login with OTP (no username/password provided)
+      else {
+        const user = await User.findOne({ email: email });
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        
+        const token: string = jwt.sign({ username: user.username }, JWT_SECRET as string, { expiresIn: '24h' });
+        res.header('Authorization', `Bearer ${token}`);
+        
+        return res.status(200).json({ 
+          message: "OTP Verified, Login successful",
+          token: token 
+        });
+      }
+    }
+    
+    if (result === "NOT_FOUND") {
+      return res.status(404).json({ error: "No OTP found for this email" });
+    }
+    if (result === "EXPIRED") {
+      return res.status(410).json({ error: "OTP has expired" });
+    }
+    if (result === "EXCEEDED_ATTEMPTS") {
+      return res.status(429).json({ error: "Exceeded maximum OTP verification attempts" });
+    }
+    if (result === "INVALID_OTP") {
+      return res.status(401).json({ error: "Invalid OTP" });
+    }
+    
+    // Fallback (shouldn't reach here)
+    return res.status(500).json({ error: "Unexpected error occurred" });
+    
+  } catch(err) { 
+    console.log({ err });
+    return res.status(400).json({ error: err });
+  }
+});
 
 router.post('/login', async (req: Request, res: Response) => {
   
