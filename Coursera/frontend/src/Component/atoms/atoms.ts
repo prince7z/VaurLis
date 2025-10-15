@@ -1,18 +1,12 @@
 import axios from 'axios';
 import { atom, atomFamily, selector, selectorFamily } from 'recoil';
-
-//import dotenv from 'dotenv';
-//dotenv.config();
-const  Base_URL  = "http://localhost:5000"; 
-if (!Base_URL) {
-  throw new Error('Base_URL is not defined in the environment variables');
-    }
+import { API_URL } from '../../config/api';
 
 
 export const userSelector = selector({
   key: 'userSelector',
   get: async ({get}) => {
-    const response = await axios.get(`${Base_URL}/api/user/me`, {
+    const response = await axios.get(`${API_URL}/api/user/me`, {
       headers: {
         "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
       }
@@ -56,7 +50,7 @@ export const CoursesState = selectorFamily({
       endpoint = "/api/course/released";
     }
     console.log(endpoint)
-    const response = await axios.get(`${Base_URL}${endpoint}`,{
+    const response = await axios.get(`${API_URL}${endpoint}`,{
       headers: {
         "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
       }
@@ -70,7 +64,7 @@ export const CourseState = atomFamily({
   default: (courseId:string) => selector({
     key: `CourseState/${courseId}`,
     get: async ({get}) => {
-      const response = await axios.get(`${Base_URL}/api/course/${courseId}`, {
+      const response = await axios.get(`${API_URL}/api/course/${courseId}`, {
         headers: {
           "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
         }
@@ -89,7 +83,7 @@ export const CourseReview = atomFamily({
   default: (courseId:string) => selector({
     key: `CourseReview/${courseId}`,
     get: async ({get}) => {
-      const response = await axios.get(`${Base_URL}/api/course/getreview/${courseId}`, {
+      const response = await axios.get(`${API_URL}/api/course/getreview/${courseId}`, {
         headers: {
           "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
         }
@@ -110,7 +104,7 @@ export const CourseReview = atomFamily({
         try {
           
 
-          const response = await axios.get(`${Base_URL}/api/course/getcontent/${courseId}`, {
+          const response = await axios.get(`${API_URL}/api/course/getcontent/${courseId}`, {
             headers: {
               "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
             }

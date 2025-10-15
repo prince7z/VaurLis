@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import certTemplate from "../component/cert/0002.png";
 import signature from "../component/cert/signature.png";
-const BASE_URL = "http://localhost:5000";
+import { API_URL } from '../config/api';
 
 
 const CERT_POSITIONS = {
@@ -227,7 +227,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             
                             
                            
-                            {BASE_URL}
+                            {API_URL}
                         </p>
                     </div>
                     {/* Signature */}
@@ -258,7 +258,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                     >
                         <div className="bg-white p-2 ">
                             <QRCode 
-                                value={`${BASE_URL}/verify/cert/${props._id}`} 
+                                value={`${API_URL}/verify/cert/${props._id}`} 
                                 size={80}
                                 style={{ background: 'white' }}
                                 fgColor="#000000" 
@@ -289,7 +289,7 @@ export default function Certificate() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await axios.get(`${BASE_URL}/api/course/cert/${courseIdParam}`, {
+                const response = await axios.get(`${API_URL}/api/course/cert/${courseIdParam}`, {
                     headers: {
                         "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
                     }

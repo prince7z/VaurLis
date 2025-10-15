@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { API_URL } from '../config/api';
 
 interface ContentLink {
   name: string;
@@ -26,8 +27,6 @@ export default function CreateCourse() {
     price: false,
     
   });
-
-  const Base_URL = "http://localhost:5000";
 
   const handleCreate = async () => {
     const newErrors = {
@@ -57,7 +56,7 @@ export default function CreateCourse() {
       formdata.append("thumbnail", thumbnail);
     }
     try {
-      await axios.post(`${Base_URL}/api/cloud/upload`, formdata,  {
+      await axios.post(`${API_URL}/api/cloud/upload`, formdata,  {
         headers: { Authorization: "Bearer " + (localStorage.getItem("token") ?? "") }
       });
 

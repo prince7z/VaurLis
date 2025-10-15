@@ -15,8 +15,7 @@ import {
     Container
 } from "@mui/material";
 import { AccessTime, Person, PlayArrow, Schedule } from "@mui/icons-material";
-
-const Base_url = 'http://localhost:5000';
+import { API_URL } from '../config/api';
 
 export default function LiveClass() {
     const { id } = useParams();
@@ -30,8 +29,8 @@ export default function LiveClass() {
     useEffect(() => {
         const fetchLiveClass = async () => {
             try {
-                const response = await axios.get(`${Base_url}/api/user/liveclass/${id}`, {
-                    headers: {
+                const response = await axios.get(`${API_URL}/api/user/liveclass/${id}`, {
+                    headers:{ 
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 });
@@ -52,7 +51,7 @@ export default function LiveClass() {
 
     const settLiveClassData = async (data: {title: string, description: string,scheduledAt: Date,duration: number }) => {
         try {
-            const res = await axios.post(`${Base_url}/api/user/schedule/liveclass/${id}`, data, {
+            const res = await axios.post(`${API_URL}/api/user/schedule/liveclass/${id}`, data, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }

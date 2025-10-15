@@ -1,10 +1,11 @@
 import sgMail from '@sendgrid/mail';
 
-const SENDGRID_API_KEY = "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"
-const FROM_EMAIL = "princesahu17125@gmail.com";
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+const FROM_EMAIL = process.env.FROM_EMAIL || '';
 
 if (!SENDGRID_API_KEY) {
   console.warn('SENDGRID_API_KEY not found in .env');
+  throw new Error('SENDGRID_API_KEY is required in .env file');
 }
 
 sgMail.setApiKey(SENDGRID_API_KEY || '');

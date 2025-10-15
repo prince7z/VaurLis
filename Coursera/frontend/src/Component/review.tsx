@@ -1,7 +1,7 @@
 import { atomFamily, useRecoilState } from "recoil";
 import { useState } from "react";
 import axios from "axios";
-const BASE_URL = "http://localhost:5000";
+import { API_URL } from '../config/api';
 
 const reviewHelpfulState = atomFamily({
     key: 'reviewHelpfulState',
@@ -16,7 +16,7 @@ export default function ReviewItem({ item }: { item: any }) {
         if (clicked) {
             setHelpfulCount(helpfulCount - 1);
             try {
-                await axios.put(`${BASE_URL}/api/user/cmnt/helpful/${item._id}`, {
+                await axios.put(`${API_URL}/api/user/cmnt/helpful/${item._id}`, {
                     helpful: false
                 }, {
                     headers: {
@@ -29,7 +29,7 @@ export default function ReviewItem({ item }: { item: any }) {
         } else {
             setHelpfulCount(helpfulCount + 1);
             try {
-                await axios.put(`${BASE_URL}/api/user/cmnt/helpful/${item._id}`, {
+                await axios.put(`${API_URL}/api/user/cmnt/helpful/${item._id}`, {
                     helpful: true
                 }, {
                     headers: {

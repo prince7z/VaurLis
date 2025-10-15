@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useRecoilValueLoadable } from "recoil";
 import { CourseState } from "../Component/atoms/atoms";
 import axios from 'axios';
-const BaseUrl = 'http://localhost:5000';
+import { API_URL } from '../config/api';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,7 +43,7 @@ const handlePayment = async (courseId: string, navigate: any, showToast: any) =>
   }
   try {
     // 1️⃣ Create order on backend
-    const res = await axios.get(`${BaseUrl}/api/secure/create-order/${courseId}`, {
+    const res = await axios.get(`${API_URL}/api/secure/create-order/${courseId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`, // if using auth
       },
@@ -67,7 +67,7 @@ const handlePayment = async (courseId: string, navigate: any, showToast: any) =>
       description: order.notes.courseName,
       order_id: order.id,
       handler: async function (response:any) {
-        const res = await axios.post(`${BaseUrl}/api/secure/verify-payment`, {
+        const res = await axios.post(`${API_URL}/api/secure/verify-payment`, {
           razorpay_payment_id: response.razorpay_payment_id,
           razorpay_order_id: response.razorpay_order_id,
           razorpay_signature: response.razorpay_signature,

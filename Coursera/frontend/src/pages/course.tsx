@@ -4,8 +4,7 @@ import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import ReviewItem from '../Component/review';
 import axios from 'axios';
-
-const BASE_URL = "http://localhost:5000";
+import { API_URL } from '../config/api';
 
 interface Course {
     name: string;
@@ -123,7 +122,7 @@ function Review({ courseId }: { courseId: string }) {
     const handleSubmit = async () => {
         try {
             const res = await axios.post(
-                `${BASE_URL}/api/course/postreview/${courseId}`,
+                `${API_URL}/api/course/postreview/${courseId}`,
                 { review, rating },
                 { headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }}
             );

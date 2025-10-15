@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { API_URL } from '../config/api';
 
 interface ChatMessage {
     message: string;
@@ -25,15 +26,11 @@ export default function Reciver() {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const {roomId} = useParams();
     const LID = roomId;
-    const Base_URL = "http://localhost:5000";
-
-
-
 
       useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await axios.get(`${Base_URL}/api/user/checkLive`, {
+        const res = await axios.get(`${API_URL}/api/user/checkLive`, {
           params: {
             LID: LID,
             role: 'receiver'

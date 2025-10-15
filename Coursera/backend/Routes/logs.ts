@@ -48,7 +48,7 @@ router.post('/send-otp',async(req: Request, res: Response) => {
 });
 
 router.post('/verify-otp', async (req: Request, res: Response) => {
-  const { email, otp, username, password } = req.body;
+  const { email, otp, username, password,work } = req.body;
   if (!email || !otp) {
     return res.status(400).json({ error: "Email and OTP are required" });
   }
@@ -57,8 +57,31 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
     const result: res = verifyOtp(email, otp);
     
     if (result === "VALID") {
-      // Case 1: Registration (username and password provided)
+      
+      // Case 1: Password Reset
+      if (work === "reset") {
+        if (!password || password.length < 6) {
+          return res.status(400).json({ error: "Password must be at least 6 characters" });
+        }
+        
+        const user = await User.findOne({ email: email });
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        
+        const hashedPassword = await hashPassword(password);
+        user.password = hashedPassword;
+        await user.save();
+        
+        return res.status(200).json({ message: "Password reset successfully" });
+      }
+
+      // Case 2: Registration
       if (username && password) {
+        if (password.length < 6) {
+          return res.status(400).json({ error: "Password must be at least 6 characters" });
+        }
+        
         const existingUser = await User.find({ email: email });
         if (existingUser.length) {
           return res.status(400).json({ error: "Email already exists" });
@@ -76,22 +99,11 @@ router.post('/verify-otp', async (req: Request, res: Response) => {
           message: "OTP Verified, User registered successfully",
           token: token 
         });
-      } 
-      // Case 2: Login with OTP (no username/password provided)
-      else {
-        const user = await User.findOne({ email: email });
-        if (!user) {
-          return res.status(404).json({ error: "User not found" });
-        }
-        
-        const token: string = jwt.sign({ username: user.username }, JWT_SECRET as string, { expiresIn: '24h' });
-        res.header('Authorization', `Bearer ${token}`);
-        
-        return res.status(200).json({ 
-          message: "OTP Verified, Login successful",
-          token: token 
-        });
       }
+      
+      // If neither reset nor registration, return error
+      return res.status(400).json({ error: "Invalid request. Please provide required fields." });
+    
     }
     
     if (result === "NOT_FOUND") {

@@ -1,105 +1,292 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import z from "zod";
 import { Button, TextField } from "@mui/material";
+import { useRecoilState } from "recoil";
+import { useNavigate } from "react-router-dom";
+import { atom } from "recoil";
+import { motion, AnimatePresence } from 'framer-motion';
+import { API_URL } from "../config/api";
 
+interface ToastProps {
+  message: string;
+  type: 'success' | 'error';
+  isVisible: boolean;
+}
 
-type Step = "email" | "login" | "register";
+const ErrorAtom = atom<number | null>({
+  key: "errorAtom",
+  default: null,
+});
+
+const RateLimitAtom = atom<number | null>({
+  key: "rateLimitAtom",
+  default: null,
+});
+
+type Step = "email" | "login" | "register" | "reset";
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPass, setConfirmPass] = useState<string>("");
+  const [otp, setOtp] = useState<string>("");
+  
+  const [toast, setToast] = useState<ToastProps>({ message: '', type: 'success', isVisible: false });
+  const [Error, SetError] = useRecoilState(ErrorAtom);
+  const [rateLimitExpiry, setRateLimitExpiry] = useRecoilState(RateLimitAtom);
+  
+  // Shared toast function
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type, isVisible: true });
+    setTimeout(() => setToast(prev => ({ ...prev, isVisible: false })), 3000);
+  };
 
+  // Check if email exists
   const handleEmailSubmit = async (enteredEmail: string) => {
-   
-   
     setEmail(enteredEmail);
-    //alert("Email submitted: " + enteredEmail);
     try {
-      const res = await axios.get("http://localhost:5000/api/user/check", {
+      const res = await axios.get(`${API_URL}/api/user/check`, {
         params: { email: enteredEmail },
       });
       setStep(res.data.exist ? "login" : "register");
     } catch (err) {
       console.error("Error checking email:", err);
-      alert( "Error checking email");
+      showToast("Error checking email. Try again.", "error");
     }
   };
 
-  const handleLogin = async (password: string) => {
+  // Handle password login
+  const handleLogin = async () => {
     try {
-      
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password,
       });
-     
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", res.data.user);
-
-      alert("Logged in successfully!");
       
-      window.location.href = "/";
-    } catch (err) {
+      if (res.status === 200) {
+        localStorage.setItem("token", res.data.token);
+        showToast("Logged in successfully!", "success");
+        setTimeout(() => window.location.href = '/', 1000);
+      }
+    } catch (err: any) {
       console.error("Login failed:", err);
-      alert("Invalid password.");
+      
+      if (err.response?.status === 429) {
+        const expiryTime = Date.now() + 2 * 60 * 1000;
+        setRateLimitExpiry(expiryTime);
+        showToast("Too many attempts. Please wait 2 minutes.", "error");
+      } else if (err.response?.status === 401) {
+        SetError(401);
+        showToast("Invalid password.", "error");
+      } else {
+        showToast("Login failed. Please try again.", "error");
+      }
     }
   };
 
-  const handleRegister = async (username: string, password: string, confirmPass: string) => {
-    if (password !== confirmPass) {
-      alert("Passwords do not match.");
-      return;
-    }
-
+  // Send OTP
+  const handleSendOTP = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", {
+      const res = await axios.post(`${API_URL}/api/auth/send-otp`, { email });
+      
+      if (res.status === 200) {
+        showToast("OTP sent to your email!", "success");
+        
+      }
+    } catch (err: any) {
+      console.error("Error sending OTP:", err);
+      
+      if (err.response?.status === 404) {
+        showToast("Email not registered.", "error");
+      } else if (err.response?.status === 429) {
+        const expiryTime = Date.now() + 2 * 60 * 1000;
+        setRateLimitExpiry(expiryTime);
+        showToast("Too many requests. Please wait 2 minutes.", "error");
+      } else {
+        showToast("Failed to send OTP. Try again.", "error");
+      }
+    }
+  };
+
+  // Verify OTP
+  const handleVerifyOTP = async () => {
+    try {
+      if (step === "register" && (username.length >= 4 && password.length >= 6 && confirmPass === password)) {
+        
+      }
+      const res = await axios.post(`${API_URL}/api/auth/verify-otp`, {
         email,
         username,
         password,
+        otp,
+        work: step
+
       });
-      if (res.status !== 201) {
-        throw new Error("Registration failed");}
-        localStorage.setItem("token", res.data.token);  
-      //alert("Registration successful!");
-      window.location.href = "/";
-    } catch (err) {
-      console.error("Registration failed:", err);
-      alert("Try again.");
+
+      
+      if (res.status === 200 && step !== "reset") {
+        // Get token from response body (not headers)
+        const token = res.data.token;
+        localStorage.setItem("token", token);
+        showToast("OTP verified successfully!", "success");
+
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
+      }
+      if (step === "reset" && res.status === 200) {
+        showToast("Password reset successfully!", "success");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (err: any) {
+      
+      if (err.response?.status === 401) {
+        showToast("Invalid OTP. Please try again.", "error");
+      } else if (err.response?.status === 404) {
+        showToast("OTP not found or expired.", "error");
+      } else if (err.response?.status === 410) {
+        showToast("OTP expired. Request a new one.", "error");
+      } else if (err.response?.status === 429) {
+        showToast("Too many attempts. Request a new OTP.", "error");
+        const expiryTime = Date.now() + 2 * 60 * 1000;
+        setRateLimitExpiry(expiryTime);
+
+      } else if (err.response?.status === 400) {
+        showToast(err.response?.data?.error || "Verification failed.", "error");
+      } else {
+        showToast("Verification failed. Try again.", "error");
+      }
     }
   };
-
+    
+        
   return (
-    <div className=" min-h-screen flex items-center justify-center"
-    style={{ display: "flex", justifyContent: "center", padding: 20 }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ padding: 20 }}>
       {step === "email" && (
-        <EmailForm onNext={handleEmailSubmit} />
+        <EmailForm 
+          email={email}
+          setEmail={setEmail}
+          onNext={handleEmailSubmit} 
+        />
       )}
+      
       {step === "login" && (
-        <LoginForm email={email} onLogin={handleLogin} />
+        <LoginForm 
+          email={email}
+          password={password}
+          setStep={setStep}
+          setPassword={setPassword}
+          onLogin={handleLogin}
+          onSendOTP={handleSendOTP}
+          rateLimitExpiry={rateLimitExpiry}
+          error={Error}
+          setError={SetError}
+        />
       )}
+      {step === "reset" && (
+        <ResetForm
+          email={email}
+          password={password}
+          setPassword={setPassword}
+          otp={otp}
+          setOtp={setOtp}
+          onResetPassword={handleVerifyOTP}
+          onSendOTP={handleSendOTP}
+          rateLimitExpiry={rateLimitExpiry}
+        />
+      )}
+
       {step === "register" && (
-        <RegisterForm email={email} onRegister={handleRegister} />
+        <RegisterForm 
+          email={email}
+          username={username}
+          setUsername={setUsername}
+          password={password}
+          setPassword={setPassword}
+          confirmPass={confirmPass}
+          setConfirmPass={setConfirmPass}
+          onRegister={handleSendOTP}
+          rateLimitExpiry={rateLimitExpiry}
+        />
       )}
+
+
+
+      <AnimatePresence>
+        {toast.isVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+              toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white z-50`}
+          >
+            {toast.message}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
+
 const emailSchema = z.string().email("Invalid email address");
 
-function EmailForm({ onNext }: { onNext: (email: string) => void }) {
-  const [email, setEmail] = useState<string>("");
-    const [error, setError] = useState<string>("");
+// Reusable timer hook
+function useRateLimitTimer(rateLimitExpiry: number | null) {
+  const [remainingTime, setRemainingTime] = useState<number>(0);
+
+  useEffect(() => {
+    if (!rateLimitExpiry) {
+      setRemainingTime(0);
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const remaining = Math.max(0, rateLimitExpiry - now);
+      setRemainingTime(remaining);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [rateLimitExpiry]);
+
+  const formatTime = (ms: number) => {
+    const seconds = Math.ceil(ms / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return { remainingTime, formatTime, isRateLimited: remainingTime > 0 };
+}
+
+interface EmailFormProps {
+  email: string;
+  setEmail: (email: string) => void;
+  onNext: (email: string) => void;
+}
+
+function EmailForm({ email, setEmail, onNext }: EmailFormProps) {
+  const [error, setError] = useState<string>("");
 
   const handleNext = () => {
     const result = emailSchema.safeParse(email);
-    console.log("Email validation result:", result);
     if (!result.success) {
-      setError("Invalid Email"); // show Zod error
+      setError("Invalid Email");
       return;
     }
-    setError(""); // clear error
-    onNext(result.data); // result.data is the validated email
+    setError("");
+    onNext(result.data);
   };
 
   return (
@@ -117,25 +304,44 @@ function EmailForm({ onNext }: { onNext: (email: string) => void }) {
         value={email}
         onChange={(e) => {
           setEmail(e.target.value);
-          {emailSchema.safeParse(e.target.value).success ? setError("") : setError("enter a valid email")};
+          setError(emailSchema.safeParse(e.target.value).success ? "" : "Enter a valid email");
         }}
       />
       <br />
       <Button
-        disabled={!email || emailSchema.safeParse(email).success === false}
+        disabled={!email || !emailSchema.safeParse(email).success}
         variant="contained"
         onClick={handleNext}
       >
         Next
       </Button>
-      {/*<button onClick={()=> onNext(email)}>Next</button>*/}
     </div>
   );
 }
 
-
-function LoginForm({ email, onLogin }: { email: string; onLogin: (password: string) => void }) {
-  const [password, setPassword] = useState<string>("");
+interface LoginFormProps {
+  email: string;
+  password: string;
+  setPassword: (password: string) => void;
+  onLogin: () => void;
+  onSendOTP: () => void;
+  rateLimitExpiry: number | null;
+  error: number | null;
+  setError: (error: number | null) => void;
+  setStep: (step: Step) => void;
+}
+interface ResetFormProps {
+  email: string;
+  password: string;
+  setPassword: (password: string) => void;
+  otp: string;
+  setOtp: (otp: string) => void;
+  onResetPassword: () => void;
+  onSendOTP: () => void;
+  rateLimitExpiry: number | null;
+}
+function LoginForm({ email, password, setPassword, onLogin, onSendOTP, rateLimitExpiry, error, setError, setStep }: LoginFormProps) {
+  const { remainingTime, formatTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
 
   return (
     <div>
@@ -143,98 +349,218 @@ function LoginForm({ email, onLogin }: { email: string; onLogin: (password: stri
       <TextField
         label="Password"
         type="password"
+        color={password.length < 6 || error !== null || isRateLimited ? "error" : "primary"}
+        helperText={
+          isRateLimited 
+            ? `Too many attempts. Retry in ${formatTime(remainingTime)}` 
+            : password.length < 6 
+              ? "Password must be at least 6 characters" 
+              : error === 401
+                ? "Incorrect Password" 
+                : ""
+        }
+        fullWidth
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          setError(null);
+        }}
+        disabled={isRateLimited}
       />
       <br />
-      <Button onClick={() => onLogin(password)}>Login</Button>
+      <Button 
+        onClick={onLogin}
+        disabled={isRateLimited || password.length < 6}
+        variant="contained"
+        fullWidth
+        style={{ marginTop: 10 }}
+      >
+        {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'Login'}
+      </Button>
+      <Button 
+        onClick={()=>{onSendOTP()
+          setStep("reset")
+        }}
+        disabled={isRateLimited}
+        variant="outlined"
+        fullWidth
+        style={{ marginTop: 10 }}
+      >
+        Forget Password..
+      </Button>
     </div>
   );
 }
 
+interface RegisterFormProps {
+  email: string;
+  username: string;
+  setUsername: (username: string) => void;
+  password: string;
+  setPassword: (password: string) => void;
+  confirmPass: string;
+  setConfirmPass: (confirmPass: string) => void;
+  onRegister: () => void;
+  rateLimitExpiry: number | null;
+}
 
 function RegisterForm({
   email,
+  username,
+  setUsername,
+  password,
+  setPassword,
+  confirmPass,
+  setConfirmPass,
   onRegister,
-}: {
-  email: string;
-  onRegister: (username: string, password: string, confirmPass: string) => void;
-}) {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPass, setConfirmPass] = useState<string>("");
-    const [available, setAvailable] = useState<boolean | null>(true);
+  rateLimitExpiry,
+}: RegisterFormProps) {
+  const [available, setAvailable] = useState<boolean | null>(true);
+  const { remainingTime, formatTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
 
-    const BASE_URL = "http://localhost:5000";
-
-    useEffect(() => {
-        if (username.length > 3) {
-            const fetchUsername = async () => {
-                try {
-                    const exist = await axios.get(`${BASE_URL}/api/user/check-username?username=${username}`, {
-                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                    });
-                    setAvailable(exist.data.available);
-                } catch (error) {
-                    console.error('Error checking username:', error);
-                    setAvailable(false);
-                }
-            };
-            fetchUsername();
+  useEffect(() => {
+    if (username.length > 3) {
+      const fetchUsername = async () => {
+        try {
+          const exist = await axios.get(`${API_URL}/api/user/check-username?username=${username}`);
+          setAvailable(exist.data.available);
+        } catch (error) {
+          console.error('Error checking username:', error);
+          setAvailable(false);
         }
-    }, [username]);
+      };
+      fetchUsername();
+    }
+  }, [username]);
 
+  const isValid = username.length >= 4 && available && password.length >= 6 && confirmPass === password && !isRateLimited;
 
   return (
     <div>
       <h3>Create account with {email}</h3>
-                <div style={{ padding: '20px', marginTop: '30px' }}>
-                    <TextField
-                        label="Username"
-                        color={username.length < 4 ? "error" : available ? "primary" : "error"}
-                        helperText={username.length < 4 ? "Username must be at least 4 characters" : available ? "Username is available" : "Username is taken"}
-                        fullWidth
-                        variant="outlined"
-                        margin="normal"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-     
-      <TextField
-        label="Password"
-        type="password"
-        color = {password.length < 6 ? "error" : "primary"}
-        helperText={password.length < 6 ? "Password must be at least 6 characters" : ""}
-        fullWidth
-        variant="outlined"
-        margin="normal"
-        placeholder="Password"
+      <div style={{ padding: '20px', marginTop: '30px' }}>
+        <TextField
+          label="Username"
+          color={username.length < 4 || isRateLimited ? "error" : available ? "primary" : "error"}
+          helperText={
+            isRateLimited 
+              ? `Too many attempts. Retry in ${formatTime(remainingTime)}`
+              : username.length < 4 
+                ? "Username must be at least 4 characters" 
+                : available 
+                  ? "Username is available" 
+                  : "Username is taken"
+          }
+          fullWidth
+          variant="outlined"
+          margin="normal"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          disabled={isRateLimited}
+        />
         
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <br />
-      <TextField
-        label="Confirm Password"
-        type="password"
-        color = {confirmPass!==password ? "error" : "primary"}
-        helperText={confirmPass===password ? "" : "Passwords do not match"}
-        fullWidth
-        variant="outlined"
-        margin="normal"
-        placeholder="Confirm Password"
-        value={confirmPass}
-        onChange={(e) => setConfirmPass(e.target.value)}
-      />
-      <br />
-<Button
-        onClick={() => onRegister(username, password, confirmPass)}
-        variant="contained"
-        disabled={username.length < 4 || !available || password.length < 6 || confirmPass !== password}
-      >
-        Register
-      </Button>    
-    </div>
+        <TextField
+          label="Password"
+          type="password"
+          color={password.length < 6 || isRateLimited ? "error" : "primary"}
+          helperText={password.length < 6 ? "Password must be at least 6 characters" : ""}
+          fullWidth
+          variant="outlined"
+          margin="normal"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={isRateLimited}
+        />
+        
+        <TextField
+          label="Confirm Password"
+          type="password"
+          color={confirmPass !== password || isRateLimited ? "error" : "primary"}
+          helperText={confirmPass === password ? "" : "Passwords do not match"}
+          fullWidth
+          variant="outlined"
+          margin="normal"
+          placeholder="Confirm Password"
+          value={confirmPass}
+          onChange={(e) => setConfirmPass(e.target.value)}
+          disabled={isRateLimited}
+        />
+        
+        <Button
+          onClick={() => {onRegister();}}
+          variant="contained"
+          fullWidth
+          disabled={!isValid}
+          style={{ marginTop: 10 }}
+        >
+          {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'next'}
+        </Button>
+      </div>
     </div>
   );
 }
+
+
+function ResetForm({ email, password, setPassword, otp, setOtp, onResetPassword, onSendOTP, rateLimitExpiry }: ResetFormProps) {
+  const [newPassword, setNewPassword] = useState<string>("");
+  const { remainingTime, formatTime: formatRateLimitTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
+
+  return (
+    <div className="flex flex-col">
+      <div>Reset Form</div>
+      <h3>Reset Password for {email}</h3>
+      <h4>OTP has been sent</h4>
+      <TextField
+        label="New Password"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <TextField
+        label="Confirm Password"
+        variant="outlined"
+        fullWidth
+        color={password === newPassword ? "primary" : "error"}
+        margin="normal"
+        type="password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+      />
+      <TextField
+        label="OTP"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+      />
+      {isRateLimited && (
+        <div>Too many attempts. Try again later in {formatRateLimitTime(remainingTime)}</div>
+      )}
+      <Button
+        onClick={onResetPassword}
+        variant="contained"
+        fullWidth
+        disabled={isRateLimited || password.length < 6 || password !== newPassword || otp.length < 6}
+        style={{ marginTop: 10 }}
+      >
+        Reset Password
+      </Button>
+      <Button
+        onClick={onSendOTP}
+        variant="outlined"
+        color="primary"
+        fullWidth
+        style={{ marginTop: 10 }}
+      >
+        Resend OTP
+      </Button>
+      </div>
+    
+  );
+}
+

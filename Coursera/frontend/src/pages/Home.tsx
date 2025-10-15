@@ -1,7 +1,7 @@
 import React, {  useEffect, useState } from 'react';
 import { Home, Search, ShoppingCart, User, ChevronLeft, ChevronRight, Book, Beaker, Infinity, FileText, Camera, Gamepad2, Play, Clock, Star, Calendar } from 'lucide-react';
 import axios from 'axios';
-const Base_URL = 'http://localhost:3000';
+import { API_URL } from '../config/api';
 
 const heroSlides1 = [
   {
@@ -138,7 +138,7 @@ export default function HomePage() {
 
     const fetchData = async ()=>{
       try{
-        const res = await axios.get(`${Base_URL}/api/home`);
+        const res = await axios.get(`${API_URL}/api/home`);
         if(res.status===200){
           setHeroSlides(res.data.heroSlides);
           setCategories(res.data.categories);

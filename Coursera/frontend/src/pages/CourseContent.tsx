@@ -2,7 +2,7 @@ import { useRecoilValueLoadable } from "recoil";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-const BASE_URL = "http://localhost:5000";
+import { API_URL } from '../config/api';
 
 import { courseContentState } from "../Component/atoms/atoms";
 
@@ -66,7 +66,7 @@ export default function CourseContent() {
   }
 
   useEffect(() => {
-    axios.post(`${BASE_URL}/api/user/updatestats`,
+    axios.post(`${API_URL}/api/user/updatestats`,
       {
         Headers: {
           authorization: `Bearer ${localStorage.getItem('token')}`

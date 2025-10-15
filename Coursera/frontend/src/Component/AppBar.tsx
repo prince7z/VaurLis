@@ -13,7 +13,8 @@ import logo from "/VS/coursera/Coursera/Coursera/frontend/src/assets/logo.svg";i
 
 
 export default function AppBar() {
-    const user = useRecoilValueLoadable(userSelector);
+    const user :any = useRecoilValueLoadable(userSelector);
+
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = React.useState(false);
     
@@ -80,7 +81,7 @@ export default function AppBar() {
         </div>
            
            <div>
-         {user.state === "hasValue" ? (
+         {user.state === "hasValue" && user.contents?.username !== "guest" ? (
                 <div>
                                        <Avatar src={user.contents.img} className="inline-block mr-2 cursor-pointer border-2 border-gray-500" onClick={() => setDropdownOpen(!dropdownOpen)} alt="User" />
                                                     {/* User dropdown menu */}
@@ -123,7 +124,7 @@ export default function AppBar() {
                 </div>
             ) : user.state === "loading" ? (
                 <div>Loading...</div>
-            ) : user.state === "hasError" ? (
+            ) : user.state === "hasError" || user.contents?.username === "guest" ? (
                 <div className=" text-lg bg-black text-white px-2 mx-4 rounded-full">
 
 

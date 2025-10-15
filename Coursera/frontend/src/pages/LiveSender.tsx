@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, use } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../config/api';
+
 interface PeerConnection {
   receiverId: string;
   connection: RTCPeerConnection;
@@ -28,14 +30,11 @@ export default function LiveSender() {
   const peerConnectionsRef = useRef<PeerConnection[]>([]); // Add ref to avoid closure issues
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { roomId } = useParams();
-  const Base_URL = 'http://localhost:5000'; // Replace with your backend URL
-
-
 
   useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await axios.get(`${Base_URL}/api/user/checkLive`, {
+        const res = await axios.get(`${API_URL}/api/user/checkLive`, {
           params: { LID: roomId, role: 'sender' },
           headers: {
             'Authorization': 'Bearer ' + localStorage.getItem('token')

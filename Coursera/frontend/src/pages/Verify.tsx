@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-const Base_url =  'http://localhost:5000';
+import { API_URL } from '../config/api';
+
 interface VerificationData {
   user: {
     id: {
@@ -31,7 +32,7 @@ export default function Verify() {
     useEffect(() => {
         const detail = async () => {
             try {
-                const response = await axios.get(`${Base_url}/api/user/verify/${certId}`);
+                const response = await axios.get(`${API_URL}/api/user/verify/${certId}`);
                 setData(response.data);
                 console.log(response.data);
             } catch (err) {

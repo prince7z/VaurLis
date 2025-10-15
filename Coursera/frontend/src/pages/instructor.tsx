@@ -8,9 +8,9 @@ import { Edit } from "lucide-react";
 import { useRecoilState } from "recoil";
 import { avatarState,bannerState,usernameState,socialLinksState,bioState, skillsState } from "../Component/atoms/atoms";
 import EditProfileDialog from "../Component/EditProfileDialog";
-const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp&f=y";
+import { API_URL } from '../config/api';
 
-const BASEURL = "http://localhost:5000";
+const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp&f=y";
 
 export default function Instructor() {
     const { username } = useParams();
@@ -37,7 +37,7 @@ export default function Instructor() {
             try {
                 setLoading(true);
                 setError(null);
-                const response = await axios.get(`${BASEURL}/api/user/instructor/${id}`, {
+                const response = await axios.get(`${API_URL}/api/user/instructor/${id}`, {
                     headers: {
                         "Authorization": "Bearer " + (localStorage.getItem("token") ?? "")
                     }

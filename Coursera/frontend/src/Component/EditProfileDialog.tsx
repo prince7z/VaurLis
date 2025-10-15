@@ -7,8 +7,7 @@ import { avatarState, bannerState, bioState, skillsState, usernameState, socialL
 import axios from 'axios';
 import { Trash } from 'lucide-react';
 import ImageCropDialog from './cropimg';
-
-const BASE_URL = "http://localhost:5000";
+import { API_URL } from '../config/api';
 
 export default function EditProfileDialog(props: any) {
     const [avatar, setAvatar] = useState(useRecoilValue(avatarState));
@@ -82,7 +81,7 @@ export default function EditProfileDialog(props: any) {
         if (username.length > 3) {
             const fetchUsername = async () => {
                 try {
-                    const exist = await axios.get(`${BASE_URL}/api/user/check-username?username=${username}`, {
+                    const exist = await axios.get(`${API_URL}/api/user/check-username?username=${username}`, {
                         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                     });
                     setAvailable(exist.data.available);
@@ -121,7 +120,7 @@ export default function EditProfileDialog(props: any) {
 
             setLoading(true);
             try {
-                const res = await axios.post(`${BASE_URL}/api/cloud/update`, formData, {
+                const res = await axios.post(`${API_URL}/api/cloud/update`, formData, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`,
                     }

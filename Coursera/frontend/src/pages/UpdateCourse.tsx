@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import { useRecoilValueLoadable } from "recoil";
 import { CourseState } from "../Component/atoms/atoms";
 import axios from "axios";
-
-const BASE_URL = "http://localhost:5000";
+import { API_URL } from "../config/api";
 
 export default function UpdateCourse() {
   const { id: courseIdParam } = useParams();
@@ -62,7 +61,7 @@ export default function UpdateCourse() {
 
     try {
       await axios.put(
-        `${BASE_URL}/api/course/update/${courseId}`,
+        `${API_URL}/api/course/update/${courseId}`,
         {
           name: title,
           description,
