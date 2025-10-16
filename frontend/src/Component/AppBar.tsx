@@ -5,11 +5,7 @@ import { useNavigate } from "react-router-dom";
 import {userSelector}  from "./atoms/atoms"; 
 import { AlignLeft, Icon } from "lucide-react";
 import { IconButton, Button, Avatar } from "@mui/material";
-
-import logo from "/VS/coursera/Coursera/frontend/src/assets/logo.svg";import { set } from "zod";
-;
-
-
+import logo from "../assets/logo.svg";
 
 
 export default function AppBar() {
