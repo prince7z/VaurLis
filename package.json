@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node backend/Server.ts",
+    "start": "node dist/backend/Server.js",
     "dev": "nodemon --watch backend --ext ts --exec ts-node backend/Server.ts",
     "build": "tsc",
     "postinstall": "tsc"
