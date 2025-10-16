@@ -5,8 +5,15 @@ services:
     runtime: node
     plan: free
     region: singapore
+    rootDir: ./
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start
+    buildFilter:
+      paths:
+        - backend/**
+        - package.json
+        - tsconfig.json
+        - render.yaml
     envVars:
       - key: NODE_ENV
         value: production
@@ -38,8 +45,13 @@ services:
   - type: web
     name: VaurLis-frontend
     env: static
+    rootDir: ./
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
+    buildFilter:
+      paths:
+        - frontend/**
+        - render.yaml
     envVars:
       - key: VITE_API_URL
         sync: false
