@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, use } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { API_URL } from '../config/api';
+import { API_URL, WS_URL } from '../config/api';
 
 interface PeerConnection {
   receiverId: string;
@@ -167,7 +167,7 @@ export default function LiveSender() {
       }
 
       // Connect to WebSocket server
-      const ws = new WebSocket('ws://localhost:8080');
+      const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
       
       ws.onopen = () => {

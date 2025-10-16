@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { API_URL } from '../config/api';
+import { API_URL, WS_URL } from '../config/api';
 
 interface ChatMessage {
     message: string;
@@ -88,7 +88,7 @@ export default function Reciver() {
 
         const initializeConnection = async () => {
             try {
-                const s = new WebSocket('ws://localhost:8080');
+                const s = new WebSocket(WS_URL);
                 
                 s.onopen = () => {
                     if (mounted) {
