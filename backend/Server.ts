@@ -19,8 +19,9 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000',
-  process.env.FRONTEND_URL || 'http://localhost:5173'
-];
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'https://vaurlis-frontend.onrender.com' // Production frontend
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -111,6 +112,14 @@ const authLimiter = rateLimit({
 });
 
 
+
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: "VaurLis API is running!", 
+    timestamp: new Date().toISOString(),
+    version: "1.0.0"
+  });
+});
 
 app.get('/api/test', (req, res) => {
   res.status(200).json({ 
