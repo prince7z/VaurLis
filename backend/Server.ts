@@ -10,6 +10,7 @@ import CLOUD from './Routes/Cloud'
 import SECURE from './Routes/Secure';
 import cors from 'cors';
 import { setupWebSocketServer } from './WSS';
+import { createServer } from 'http';
 
 
 const app = express();
@@ -127,13 +128,17 @@ app.use("/api/secure",SECURE);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Create HTTP server
+const server = createServer(app);
 
+// Setup WebSocket on the same server
 try {
-  setupWebSocketServer();
-  console.log('WebSocket server is running on port 8080');
+  setupWebSocketServer(server);
+  console.log('WebSocket server initialized on same port as HTTP');
 } catch (error) {
   console.error('Failed to start WebSocket server:', error);
 }
+
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

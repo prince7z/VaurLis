@@ -1,7 +1,8 @@
 import { WebSocketServer ,WebSocket} from 'ws'
+import { Server as HTTPServer } from 'http';
 
-export function setupWebSocketServer() {
-const wss = new WebSocketServer({ port: 8080 });
+export function setupWebSocketServer(server: HTTPServer) {
+const wss = new WebSocketServer({ server });
 
 interface Receiver {
   ws: WebSocket;
