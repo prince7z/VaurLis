@@ -15,6 +15,15 @@ import { createServer } from 'http';
 
 const app = express();
 
+// Health check endpoint - MUST be before any middleware for Render health checks
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: "VaurLis API is running!", 
+    timestamp: new Date().toISOString(),
+    version: "1.0.0"
+  });
+});
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
@@ -111,15 +120,6 @@ const authLimiter = rateLimit({
   },
 });
 
-
-
-app.get('/', (req, res) => {
-  res.status(200).json({ 
-    message: "VaurLis API is running!", 
-    timestamp: new Date().toISOString(),
-    version: "1.0.0"
-  });
-});
 
 app.get('/api/test', (req, res) => {
   res.status(200).json({ 
