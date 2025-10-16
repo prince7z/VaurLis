@@ -2,8 +2,8 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
-import certTemplate from "../component/cert/0002.png";
-import signature from "../component/cert/signature.png";
+import certTemplate from "../Component/cert/0002.png";
+import signature from "../Component/cert/signature.png";
 import { API_URL } from '../config/api';
 
 
