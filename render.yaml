@@ -35,11 +35,8 @@ services:
     healthCheckPath: /
 
   # Frontend Service
-  - type: web
+  - type: static
     name: coursera-frontend
-    runtime: static
-    plan: free
-    region: singapore
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
