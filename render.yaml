@@ -1,7 +1,7 @@
 services:
   # Backend Service
   - type: web
-    name: coursera-backend
+    name: VaurLis-backend
     runtime: node
     plan: free
     region: singapore
@@ -36,7 +36,7 @@ services:
 
   # Frontend Service
   - type: web
-    name: coursera-frontend
+    name: VaurLis-frontend
     env: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
