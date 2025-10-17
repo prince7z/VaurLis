@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import z from "zod";
+import z, { set } from "zod";
 import { Button, TextField } from "@mui/material";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +34,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState<string>("");
   const [confirmPass, setConfirmPass] = useState<string>("");
   const [otp, setOtp] = useState<string>("");
-  
+  const [isOtpSent, setIsOtpSent] = useState<boolean>(false);  
   const [toast, setToast] = useState<ToastProps>({ message: '', type: 'success', isVisible: false });
   const [Error, SetError] = useRecoilState(ErrorAtom);
   const [rateLimitExpiry, setRateLimitExpiry] = useRecoilState(RateLimitAtom);
@@ -53,6 +53,7 @@ export default function AuthPage() {
         params: { email: enteredEmail },
       });
       setStep(res.data.exist ? "login" : "register");
+      
     } catch (err) {
       console.error("Error checking email:", err);
       showToast("Error checking email. Try again.", "error");
@@ -95,6 +96,7 @@ export default function AuthPage() {
       
       if (res.status === 200) {
         showToast("OTP sent to your email!", "success");
+        setIsOtpSent(true);
         
       }
     } catch (err: any) {
@@ -187,6 +189,7 @@ export default function AuthPage() {
           rateLimitExpiry={rateLimitExpiry}
           error={Error}
           setError={SetError}
+
         />
       )}
       {step === "reset" && (
@@ -199,6 +202,7 @@ export default function AuthPage() {
           onResetPassword={handleVerifyOTP}
           onSendOTP={handleSendOTP}
           rateLimitExpiry={rateLimitExpiry}
+          isOtpSent={isOtpSent}
         />
       )}
 
@@ -213,6 +217,10 @@ export default function AuthPage() {
           setConfirmPass={setConfirmPass}
           onRegister={handleSendOTP}
           rateLimitExpiry={rateLimitExpiry}
+          otp={otp}
+          setOtp={setOtp}
+          onRegister2={handleVerifyOTP}
+          isOtpSent={isOtpSent}
         />
       )}
 
@@ -339,6 +347,7 @@ interface ResetFormProps {
   onResetPassword: () => void;
   onSendOTP: () => void;
   rateLimitExpiry: number | null;
+  isOtpSent: boolean;
 }
 function LoginForm({ email, password, setPassword, onLogin, onSendOTP, rateLimitExpiry, error, setError, setStep }: LoginFormProps) {
   const { remainingTime, formatTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
@@ -402,6 +411,11 @@ interface RegisterFormProps {
   setConfirmPass: (confirmPass: string) => void;
   onRegister: () => void;
   rateLimitExpiry: number | null;
+  otp: string;
+  setOtp: (otp: string) => void;
+  onRegister2: () => void;
+  isOtpSent: boolean;
+
 }
 
 function RegisterForm({
@@ -414,6 +428,10 @@ function RegisterForm({
   setConfirmPass,
   onRegister,
   rateLimitExpiry,
+  otp,
+  setOtp,
+  onRegister2,
+  isOtpSent
 }: RegisterFormProps) {
   const [available, setAvailable] = useState<boolean | null>(true);
   const { remainingTime, formatTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
@@ -494,15 +512,41 @@ function RegisterForm({
           disabled={!isValid}
           style={{ marginTop: 10 }}
         >
-          {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'next'}
+          {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'Get OTP'}
         </Button>
+
+        <TextField
+          label="Enter OTP"
+          type="text"
+          color={otp.length !== 6 ? "error" : "primary"}
+          helperText={otp.length === 6 ? "" : "OTP must be 6 digits"}
+          fullWidth
+          disabled={!isOtpSent || isRateLimited}
+          variant="outlined"
+          margin="normal"
+          placeholder="Enter OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          
+        />
+        <Button
+          onClick={() => {onRegister2();}}
+          variant="contained"
+          fullWidth
+          disabled={otp.length !== 6 || isRateLimited || !isOtpSent}
+          style={{ marginTop: 10 }}
+        >
+          {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'Register'}
+        </Button>
+
+
       </div>
     </div>
   );
 }
 
 
-function ResetForm({ email, password, setPassword, otp, setOtp, onResetPassword, onSendOTP, rateLimitExpiry }: ResetFormProps) {
+function ResetForm({ email, password, setPassword, otp, setOtp, onResetPassword, onSendOTP, rateLimitExpiry,isOtpSent }: ResetFormProps) {
   const [newPassword, setNewPassword] = useState<string>("");
   const { remainingTime, formatTime: formatRateLimitTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
 
@@ -537,6 +581,7 @@ function ResetForm({ email, password, setPassword, otp, setOtp, onResetPassword,
         margin="normal"
         value={otp}
         onChange={(e) => setOtp(e.target.value)}
+        disabled={!isOtpSent}
       />
       {isRateLimited && (
         <div>Too many attempts. Try again later in {formatRateLimitTime(remainingTime)}</div>

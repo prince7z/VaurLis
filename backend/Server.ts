@@ -125,13 +125,7 @@ const authLimiter = rateLimit({
 });
 
 
-app.get('/api/test', (req, res) => {
-  res.status(200).json({ 
-    message: "Server is running!", 
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+
 
 app.use('/api/auth', authLimiter,LOGS);
 app.use('/api/admin',ADMIN );

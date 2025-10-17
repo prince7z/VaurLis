@@ -139,7 +139,7 @@ export default function LiveSender() {
         audio: true 
       });
       
-      console.log('📹 Camera stream obtained:', {
+      console.log(' Camera stream obtained:', {
         id: stream.id,
         active: stream.active,
         tracks: stream.getTracks().map(t => ({
@@ -154,11 +154,11 @@ export default function LiveSender() {
       setMediaStream(stream);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        console.log('📺 Local video element updated');
+        console.log('Local video element updated');
         
         // Verify local video is working
         videoRef.current.onloadedmetadata = () => {
-          console.log('📹 Local video metadata loaded:', {
+          console.log(' Local video metadata loaded:', {
             videoWidth: videoRef.current?.videoWidth,
             videoHeight: videoRef.current?.videoHeight,
             duration: videoRef.current?.duration
