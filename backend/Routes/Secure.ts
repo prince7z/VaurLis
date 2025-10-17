@@ -116,6 +116,7 @@ router.post("/verify-payment", auth, async (req: Request, res: Response) => {
       }
 
     } else {
+      console.log ("Invalid signature sent!, razorpay_signature:", razorpay_signature, "expectedSign:", expectedSign," sign:", sign);
       return res.status(400).json({ error: "Invalid signature sent!" });
     }
   } catch (error) {
