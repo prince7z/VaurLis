@@ -103,8 +103,21 @@ router.post("/verify-payment", auth, async (req: Request, res: Response) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId } = req.body;
     const userId = req.user?._id;
   
+    // Trim the secret key to remove any accidental whitespace
+    const cleanSecretKey = razorpay_secret_key.trim();
+    
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSign = crypto.createHmac("sha256", razorpay_secret_key).update(sign.toString()).digest("hex");
+    const expectedSign = crypto.createHmac("sha256", cleanSecretKey).update(sign.toString()).digest("hex");
+
+    console.log("Payment Verification Debug:");
+    console.log("- Order ID:", razorpay_order_id);
+    console.log("- Payment ID:", razorpay_payment_id);
+    console.log("- Received Signature:", razorpay_signature);
+    console.log("- Expected Signature:", expectedSign);
+    console.log("- Secret Key Length:", razorpay_secret_key.length, "chars");
+    console.log("- Secret Key (trimmed length):", cleanSecretKey.length, "chars");
+    console.log("- Secret Key (full):", razorpay_secret_key);
+    console.log("- Sign String:", sign);
 
     if (razorpay_signature === expectedSign) {
       try {
@@ -116,8 +129,14 @@ router.post("/verify-payment", auth, async (req: Request, res: Response) => {
       }
 
     } else {
-      console.log ("Invalid signature sent!, razorpay_signature:", razorpay_signature, "expectedSign:", expectedSign," sign:", sign);
-      return res.status(400).json({ error: "Invalid signature sent!" });
+      console.log(" Invalid signature sent!");
+      return res.status(400).json({ 
+        error: "Invalid signature sent!",
+        debug: process.env.NODE_ENV === 'development' ? {
+          expectedSignature: expectedSign,
+          receivedSignature: razorpay_signature
+        } : undefined
+      });
     }
   } catch (error) {
     console.error("Error verifying payment:", error);

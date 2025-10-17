@@ -1,13 +1,14 @@
 import 'dotenv/config';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { logtailLogger, detailedLogger, logCorsViolation } from './config/logger';
+import { logtailLogger, detailedLogger, logCorsViolation, detailedMongoLogger } from './config/logger';
 import express from 'express';
 import LOGS from './Routes/logs';
 import USER from './Routes/User';
 import COURSE from './Routes/Course';
 import CLOUD from './Routes/Cloud'
 import SECURE from './Routes/Secure';
+import ADMIN from './Routes/admin';
 import cors from 'cors';
 import { setupWebSocketServer } from './WSS';
 import { createServer } from 'http';
@@ -85,9 +86,12 @@ app.use(express.json());
 
 app.use(helmet());
 
+// MongoDB detailed logging - captures all request details
+app.use(detailedMongoLogger);
 
-app.use(logtailLogger); 
-app.use(detailedLogger);
+// File logging disabled - using MongoDB only
+// app.use(logtailLogger); 
+// app.use(detailedLogger);
 
 
 const limiter = rateLimit({
@@ -130,6 +134,7 @@ app.get('/api/test', (req, res) => {
 });
 
 app.use('/api/auth', authLimiter,LOGS);
+app.use('/api/admin',ADMIN );
 app.use("/api/user",USER);
 app.use("/api/course",COURSE);
 app.use("/api/cloud",CLOUD)

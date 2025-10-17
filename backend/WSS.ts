@@ -77,7 +77,7 @@ ws.on('message', (message: string) => {
             receiver.ws.send(JSON.stringify({ ...data, receiverId }));
             console.log(`Offer sent to receiver ${receiverId} in room: ${roomId}`);
           } else {
-            console.error(`❌ Receiver ${receiverId} not found or not ready`);
+            console.error(`Receiver ${receiverId} not found or not ready`);
           }
         } else {
           // Send to all receivers (fallback)

@@ -32,7 +32,17 @@ export const sendOTPEmail = async (toEmail: string, otp: string) => {
     console.log('OTP email sent to:', toEmail);
     return { success: true };
   } catch (error: any) {
-    console.error('SendGrid Error:', error.response?.body || error.message);
-    return { success: false, error: error.message };
+    console.error('SendGrid Error Details:', {
+      message: error.message,
+      code: error.code,
+      statusCode: error.response?.statusCode,
+      body: error.response?.body,
+      errorDetails: JSON.stringify(error.response?.body?.errors, null, 2)
+    });
+    return { 
+      success: false, 
+      error: error.message || 'Unauthorized',
+      details: error.response?.body
+    };
   }
 };

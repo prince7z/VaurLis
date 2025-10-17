@@ -18,15 +18,15 @@ mongoose.connect(MONGO_URI, {
 } as ConnectOptions);
 
 mongoose.connection.on('connected', () => {
-  console.log('✅ MongoDB connected successfully');
+  console.log('MongoDB connected successfully');
 });
 
 mongoose.connection.on('error', (err) => {
-  console.error('❌ MongoDB connection error:', err);
+  console.error('MongoDB connection error:', err);
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('⚠️ MongoDB disconnected');
+  console.log('MongoDB disconnected');
 });
 
 const userSchema = new mongoose.Schema({
