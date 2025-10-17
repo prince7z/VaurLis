@@ -12,7 +12,13 @@ interface ChatMessage {
   message: string;
   senderName: string;
   senderId: string;
+  senderImg?: string;
   timestamp: number;
+}
+interface user {
+  id: string;
+  name: string;
+  img: string;
 }
 export default function LiveSender() {
   const [isStreaming, setIsStreaming] = useState(false);
@@ -30,6 +36,7 @@ export default function LiveSender() {
   const peerConnectionsRef = useRef<PeerConnection[]>([]); // Add ref to avoid closure issues
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { roomId } = useParams();
+  const [user, setUser] = useState<user | null>(null);
 
   useEffect(() => {
     async function checkAuth() {
@@ -43,6 +50,7 @@ export default function LiveSender() {
         
         if (res.status === 200) {
           console.log('Auth check passed:', res.data);
+          setUser(res.data.user);
           setIsAuthChecking(false);
         }
       } catch (error: any) {
@@ -284,6 +292,7 @@ export default function LiveSender() {
               message: message.message,
               senderName: message.senderName,
               senderId: message.senderId,
+              senderImg: message.senderImg,
               timestamp: message.timestamp
             }]);
             break;
@@ -398,12 +407,14 @@ export default function LiveSender() {
   };
   
   const sendChatMessage = () => {
-    if (messageInput.trim() && wsRef.current) {
+    if (messageInput.trim() && wsRef.current && user) {
       wsRef.current.send(JSON.stringify({
         type: 'chat-message',
         roomId: roomId || '68de58f1d2db363ffb370776',
         message: messageInput.trim(),
-        senderName: 'Sender',
+        senderName: user.name,
+        senderId: user.id,
+        senderImg: user.img,
         timestamp: Date.now()
       }));
       setMessageInput('');
@@ -553,26 +564,55 @@ export default function LiveSender() {
           className="flex-1 overflow-y-auto p-4 space-y-3"
         >
           {chatMessages.length === 0 ? (
-            <p className="text-gray-400 text-center text-sm mt-8">No messages yet...</p>
+            <div className="text-center mt-8">
+              <div className="text-4xl mb-2">💬</div>
+              <p className="text-gray-400 text-sm">No messages yet...</p>
+              <p className="text-gray-500 text-xs mt-1">Start the conversation!</p>
+            </div>
           ) : (
             chatMessages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`p-3 rounded-lg ${
-                  msg.senderId === 'sender'
-                    ? 'bg-blue-600 ml-auto'
-                    : 'bg-gray-700'
-                } max-w-[80%]`}
+                className={`flex gap-2 ${
+                  msg.senderId === user?.id ? 'flex-row-reverse' : 'flex-row'
+                }`}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold text-gray-200">
-                    {msg.senderName}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {new Date(msg.timestamp).toLocaleTimeString()}
-                  </span>
+                {/* Avatar */}
+                <img 
+                  src={msg?.senderImg || 'https://via.placeholder.com/40'} 
+                  alt={msg.senderName} 
+                  className="w-8 h-8 rounded-full flex-shrink-0 mt-1"
+                />
+                
+                {/* Message Bubble */}
+                <div
+                  className={`flex flex-col max-w-[70%] ${
+                    msg.senderId === user?.id ? 'items-end' : 'items-start'
+                  }`}
+                >
+                  {/* Sender Name and Time */}
+                  <div className={`flex items-center gap-2 mb-1 px-1 ${
+                    msg.senderId === user?.id ? 'flex-row-reverse' : 'flex-row'
+                  }`}>
+                                        <a href={`/${msg.senderName}`} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-gray-300">
+                                            {msg.senderName}
+                                        </a>
+                    <span className="text-xs text-gray-500">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  
+                  {/* Message Content */}
+                  <div
+                    className={`px-4 py-2 rounded-2xl ${
+                      msg.senderId === user?.id
+                        ? 'bg-blue-600 rounded-tr-sm'
+                        : 'bg-gray-700 rounded-tl-sm'
+                    }`}
+                  >
+                    <p className="text-white text-sm break-words leading-relaxed">{msg.message}</p>
+                  </div>
                 </div>
-                <p className="text-white text-sm break-words">{msg.message}</p>
               </div>
             ))
           )}

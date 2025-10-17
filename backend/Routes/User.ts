@@ -305,8 +305,9 @@ router.get('/checkLive', auth, async (req: Request, res: Response) => {
                 return res.status(402).json({ courseId: room.courseId, message: "Forbidden: You are not a participant" });
             }
         }
+        const user = { id: req.user._id, name: req.user.username, img: req.user.img };
 
-        res.status(200).json({ message: "User is authorized", room });
+        res.status(200).json({ message: "User is authorized", room,user });
     } catch (error) {
         console.error("Error checking live room:", error);
         res.status(500).json({ error: "Internal server error" });

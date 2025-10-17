@@ -133,7 +133,7 @@ ws.on('message', (message: string) => {
       
       case 'chat-message': {
         const room = rooms[roomId];
-        const { message, senderName, timestamp } = data;
+        const { message, senderName, senderId, senderImg, timestamp } = data;
         
         // Broadcast message to all users in room (including sender for confirmation)
         const chatData = {
@@ -141,7 +141,8 @@ ws.on('message', (message: string) => {
           roomId,
           message,
           senderName: senderName || ((ws as any).role === 'sender' ? 'Sender' : 'Viewer'),
-          senderId: (ws as any).receiverId || 'sender',
+          senderId: senderId || (ws as any).receiverId || 'sender',
+          senderImg: senderImg || undefined,
           timestamp: timestamp || Date.now()
         };
         
@@ -157,7 +158,7 @@ ws.on('message', (message: string) => {
           }
         });
         
-        console.log(`Chat message broadcasted in room: ${roomId}`);
+        console.log(`Chat message broadcasted in room: ${roomId} from ${senderName}`);
         break;
       }
     }
