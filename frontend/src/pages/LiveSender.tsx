@@ -95,7 +95,7 @@ export default function LiveSender() {
       });
       
       streamToUse.getTracks().forEach((track: MediaStreamTrack) => {
-        console.log(`➕ Adding ${track.kind} track during creation:`, {
+        console.log(`Adding ${track.kind} track during creation:`, {
           id: track.id,
           readyState: track.readyState,
           enabled: track.enabled,
@@ -107,13 +107,13 @@ export default function LiveSender() {
       
       // Verify tracks were added
       const senders = peerConnection.getSenders();
-      console.log('✅ Peer connection senders after adding tracks:', 
+      console.log('Peer connection senders after adding tracks:', 
         senders.map(s => ({ 
           track: s.track ? { kind: s.track.kind, readyState: s.track.readyState } : null 
         }))
       );
     } else {
-      console.warn('⚠️ No stream available during peer connection creation');
+      console.warn('No stream available during peer connection creation');
     }
 
     peerConnection.onicecandidate = (event) => {
@@ -206,27 +206,27 @@ export default function LiveSender() {
                   const trackAlreadyAdded = senders.some(sender => sender.track === track);
                   
                   if (!trackAlreadyAdded) {
-                    console.log(`➕ Adding missing ${track.kind} track:`, track.id);
+                    console.log(`Adding missing ${track.kind} track:`, track.id);
                     peerConnection.addTrack(track, mediaStream);
                   } else {
-                    console.log(`✅ ${track.kind} track already added`);
+                    console.log(`${track.kind} track already added`);
                   }
                 });
               } else if (stream && stream.getTracks().length > 0) {
-                console.log('� Using closure stream for tracks...');
+                console.log('Using closure stream for tracks...');
                 stream.getTracks().forEach((track: MediaStreamTrack) => {
                   const senders = peerConnection.getSenders();
                   const trackAlreadyAdded = senders.some(sender => sender.track === track);
                   
                   if (!trackAlreadyAdded) {
-                    console.log(`➕ Adding missing ${track.kind} track:`, track.id);
+                    console.log(`Adding missing ${track.kind} track:`, track.id);
                     peerConnection.addTrack(track, stream);
                   } else {
-                    console.log(`✅ ${track.kind} track already added`);
+                    console.log(`${track.kind} track already added`);
                   }
                 });
               } else {
-                console.error('❌ No tracks available to add!');
+                console.error('No tracks available to add!');
               }
               
               console.log('Creating offer...');
@@ -253,13 +253,13 @@ export default function LiveSender() {
               const peerConn = peerConnectionsRef.current.find(pc => pc.receiverId === message.receiverId);
               if (peerConn) {
                 await peerConn.connection.setRemoteDescription(new RTCSessionDescription(message.sdp));
-                console.log('✅ Answer set as remote description for receiver:', message.receiverId);
+                console.log('Answer set as remote description for receiver:', message.receiverId);
               } else {
-                console.error('❌ Peer connection not found for receiver:', message.receiverId);
+                console.error('Peer connection not found for receiver:', message.receiverId);
                 console.log('Available peer connections:', peerConnectionsRef.current.map(pc => pc.receiverId));
               }
             } catch (error) {
-              console.error('❌ Error setting remote description:', error);
+              console.error('Error setting remote description:', error);
             }
             break;
 
@@ -269,12 +269,12 @@ export default function LiveSender() {
               const targetPeer = peerConnectionsRef.current.find(pc => pc.receiverId === message.receiverId);
               if (targetPeer) {
                 await targetPeer.connection.addIceCandidate(new RTCIceCandidate(message.candidate));
-                console.log('✅ ICE candidate added for receiver:', message.receiverId);
+                console.log('ICE candidate added for receiver:', message.receiverId);
               } else {
-                console.error('❌ Peer connection not found for ICE candidate:', message.receiverId);
+                console.error('Peer connection not found for ICE candidate:', message.receiverId);
               }
             } catch (error) {
-              console.error('❌ Error adding ICE candidate:', error);
+              console.error('Error adding ICE candidate:', error);
             }
             break;
             
@@ -363,7 +363,7 @@ export default function LiveSender() {
           stopScreenShare();
         };
         
-        console.log('✅ Screen sharing started');
+        console.log('Screen sharing started');
       } else {
         stopScreenShare();
       }
@@ -394,7 +394,7 @@ export default function LiveSender() {
       });
     }
     
-    console.log('✅ Screen sharing stopped');
+    console.log('Screen sharing stopped');
   };
   
   const sendChatMessage = () => {
@@ -428,7 +428,11 @@ export default function LiveSender() {
     return (
       <div className="flex h-screen bg-gray-900 items-center justify-center">
         <div className="text-center text-white">
-          <div className="text-6xl mb-4">🔒</div>
+          <div className="text-6xl mb-4">
+            <svg className="inline-block w-24 h-24 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
           <h2 className="text-2xl font-bold mb-2">Checking Access...</h2>
           <p className="text-gray-300">Verifying your instructor permissions</p>
         </div>
@@ -441,7 +445,11 @@ export default function LiveSender() {
     return (
       <div className="flex h-screen bg-gray-900 items-center justify-center">
         <div className="text-center text-white max-w-md">
-          <div className="text-6xl mb-4">⚠️</div>
+          <div className="text-6xl mb-4">
+            <svg className="inline-block w-24 h-24 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
           <h2 className="text-2xl font-bold mb-2">{authError}</h2>
           {courseId && (
             <a 
