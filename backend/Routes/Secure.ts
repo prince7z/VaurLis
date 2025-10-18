@@ -22,6 +22,7 @@ async function updateUserCourseAndMakeCert(userId: string, courseId: string) {
     const instructor  = await User.findById(course.instructor).select('username').exec();
     const newCert = new Certificate({
       user: { id: user._id, name: user.username },
+      institution: course.institution,
       courseId: { id: course._id, name: course.name, instructor: instructor?.username, duration: course.duration, issuedAt: new Date() },
     });
     await newCert.save();

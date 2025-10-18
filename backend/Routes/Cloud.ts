@@ -295,6 +295,7 @@ router.post('/upload', auth, courseUpload.any(), async (req: Request, res: Respo
             img: mainThumbnailResult.secure_url,
             content: content,
             instructor: userid,
+            institution: req.body.institution || 'VaurLis Educations',
             rating: [],
             act_users: [],
             links: []

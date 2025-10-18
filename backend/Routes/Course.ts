@@ -45,6 +45,7 @@ router.get('/cert/:id', auth, async (req: Request, res: Response) => {
     if (!cert) {
         return res.status(404).json({ error: "Certificate not found" });
     }
+    if(!cert.institution){cert.institution = 'VaurLis Educations'};
     res.status(200).json(cert);
 })
 

@@ -83,6 +83,7 @@ const courseSchema = new mongoose.Schema({
     img:String,
     price:Number,
     duration:String,
+    institution: String,
     rating: [{type: mongoose.Schema.Types.ObjectId, ref: "rating" }],
     instructor: { type: mongoose.Schema.Types.ObjectId,ref: "User" },
       content: [{
@@ -107,6 +108,7 @@ const CertSchema = new mongoose.Schema({
   name: String,
   instructor: String ,
   duration: String },
+  institution: String,
   issuedAt: { type: Date, default: Date.now }
 });
 
