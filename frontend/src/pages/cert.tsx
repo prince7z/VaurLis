@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import certTemplate from "../Component/cert/0003.png";
 import signature from "../Component/cert/signature.png";
-import { API_URL } from '../config/api';
+import { FE_URL,API_URL } from '../config/api';
 
 
 const CERT_POSITIONS = {
@@ -281,7 +281,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             
                             
                            
-                            {API_URL}
+                            {FE_URL}
                         </p>
                     </div>
                     {/* Signature */}
@@ -328,7 +328,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                     >
                         <div className="bg-white p-2 ">
                             <QRCode 
-                                value={`${API_URL}/verify/cert/${props._id}`} 
+                                value={`${FE_URL}/verify/cert/${props._id}`} 
                                 size={80}
                                 style={{ background: 'white' }}
                                 fgColor="#000000" 
