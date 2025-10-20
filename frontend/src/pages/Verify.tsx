@@ -24,7 +24,8 @@ interface VerificationData {
 }
 
 export default function Verify() {
-    const { certId } = useParams();
+    const { certId: tempcertId } = useParams();
+    const [certId, setCertId] = useState<string | null>(tempcertId || null);
     const [data, setData] = useState<VerificationData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -81,6 +82,25 @@ export default function Verify() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
+
+        <div> 
+ {!certId && (<div className="text-center text-black-600 mb-4">
+        <p className="font-medium">Enter Certificate ID</p>
+        <input
+            type="text"
+            value={certId || ''}
+            
+            className="border border-gray-300 rounded-md p-2 mt-2 w-full"
+            placeholder="Certificate ID"
+        />
+        <button
+            onClick={() => setCertId(certId)}
+            className="mt-4 bg-blue-600 text-white rounded-md p-2 w-full"
+        >
+            Verify
+        </button>
+    </div>)}
+        </div>
             <div className="max-w-4xl mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-8">

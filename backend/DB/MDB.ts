@@ -109,7 +109,7 @@ const CertSchema = new mongoose.Schema({
   instructor: String ,
   duration: String },
   institution: String,
-  issuedAt: { type: Date, default: Date.now }
+  issuedAt: Date, 
 });
 
 const liveClassSchema = new mongoose.Schema({

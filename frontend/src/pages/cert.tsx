@@ -328,7 +328,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                     >
                         <div className="bg-white p-2 ">
                             <QRCode 
-                                value={`${FE_URL}/verify/cert/${props._id}`} 
+                                value={`${FE_URL}/verify/${props._id}`} 
                                 size={80}
                                 style={{ background: 'white' }}
                                 fgColor="#000000" 
