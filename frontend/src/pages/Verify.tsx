@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { API_URL } from '../config/api';
@@ -23,20 +23,24 @@ interface VerificationData {
   __v: number;
 }
 
+
 export default function Verify() {
-    const { certId: tempcertId } = useParams();
-    const [certId, setCertId] = useState<string | null>(tempcertId || null);
+    
+    const [TempcertId, setTempcertid] = useState<string | null>(null);
+    const [certId, setCertId] = useState<string | null>(useParams().certId || null);
     const [data, setData] = useState<VerificationData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        
         const detail = async () => {
             try {
                 const response = await axios.get(`${API_URL}/api/user/verify/${certId}`);
                 setData(response.data);
                 console.log(response.data);
             } catch (err) {
+                console.error('Verification error:', err);
                 setError('Certificate not found or invalid');
             } finally {
                 setLoading(false);
@@ -80,27 +84,10 @@ export default function Verify() {
         });
     };
 
+  
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">
-
-        <div> 
- {!certId && (<div className="text-center text-black-600 mb-4">
-        <p className="font-medium">Enter Certificate ID</p>
-        <input
-            type="text"
-            value={certId || ''}
-            
-            className="border border-gray-300 rounded-md p-2 mt-2 w-full"
-            placeholder="Certificate ID"
-        />
-        <button
-            onClick={() => setCertId(certId)}
-            className="mt-4 bg-blue-600 text-white rounded-md p-2 w-full"
-        >
-            Verify
-        </button>
-    </div>)}
-        </div>
             <div className="max-w-4xl mx-auto px-4">
                 {/* Header */}
                 <div className="text-center mb-8">

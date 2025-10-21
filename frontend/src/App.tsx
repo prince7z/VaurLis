@@ -47,7 +47,7 @@ function App() {
         <Route path={"/course/purchase/:id"} element={<PurchaseCourse />} />
         <Route path={"/course/update/:id"} element={<UpdateCourse />} />
         <Route path={"/:username"} element={<Instructor />} />
-        <Route path ={"/verify/:certId"} element ={<Verify/>} />
+        <Route path={"/verify/:certId"} element={<Verify />} />
         <Route path ={"/rough"} element ={<Rough/>} />
         <Route path ={"/dev/logs"} element ={<Logs/>} />
         <Route path ={"/course/live/:id"} element ={<LiveClass />} />
