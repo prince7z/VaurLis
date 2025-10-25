@@ -19,12 +19,12 @@ import Instructor from './pages/instructor';
 import Verify from './pages/Verify';
 import LiveClass from './pages/LiveClass';
 
-
 import  Landing  from './pages/landing';
 import Rough from './pages/Rough';
 import Sender from './pages/LiveSender';
 import Reciever from './pages/LiveReciever';
 import Logs from './pages/Logs';
+import Footer from './Component/Footer';
 
 function App() {
   const authPaths = ["/signin", "/signup", "/login", "/register"];
@@ -34,7 +34,7 @@ function App() {
      <RecoilRoot>
       <BrowserRouter>
        <AppBar/>
-       <div className="pt-20"> 
+  <div className="pt-20 relative z-20"> 
         <Routes>
          <Route path={"/Home"} element={<HomePage />} />
         <Route path={"/courses"} element={<Courses />} />
@@ -60,6 +60,9 @@ function App() {
         <Route path={"/"} element={<Landing />} />
         </Routes>
        </div>
+      <div className=" bottom-0 z-50 w-full">
+        <Footer />
+      </div>
        </BrowserRouter>
      </RecoilRoot>
     </>

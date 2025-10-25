@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useState } from "react";
 import { useRecoilValueLoadable } from "recoil";
 import { useNavigate } from "react-router-dom";
 import {userSelector}  from "./atoms/atoms"; 
@@ -12,14 +13,16 @@ export default function AppBar() {
     const user :any = useRecoilValueLoadable(userSelector);
 
     const navigate = useNavigate();
-    const [dropdownOpen, setDropdownOpen] = React.useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+
     
     return ( 
       
 
         <div className="w-full fixed z-50">              
 
-            <div className="w-[80%] h-[80px] mb-4 mt-[20px] min-h-[60px] md:p-6 bg-white top-0 text-xl  md:text-lg text-black flex justify-between items-center mx-auto shadow-lg rounded-full">
+            <div className="w-[100%] h-[80px] mb-4 mt-[20px] min-h-[60px] md:p-6 bg-white top-0 text-xl  md:text-lg text-black flex justify-between items-center mx-auto shadow-sm rounded-xl">
 <div className=" hidden md:block transition-opacity p-4 duration-300 " >
         <div >
 
@@ -139,7 +142,7 @@ export default function AppBar() {
             
             <div className="md:hidden flex fixed bottom-10 w-full justify-center transition-opacity duration-300 ">
 
-                <div className="bg-white shadow-lg rounded-full px-8 py-4 flex gap-8">
+                <div className="bg-white shadow-lg rounded-sm px-4 py-2 flex gap-8">
                     <li 
                     onClick={() => {
                                     navigate("/")

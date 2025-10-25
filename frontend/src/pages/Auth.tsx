@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import z, { set } from "zod";
 import { Button, TextField } from "@mui/material";
@@ -25,6 +25,10 @@ const RateLimitAtom = atom<number | null>({
 });
 
 type Step = "email" | "login" | "register" | "reset";
+
+
+
+
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -436,20 +440,44 @@ function RegisterForm({
   const [available, setAvailable] = useState<boolean | null>(true);
   const { remainingTime, formatTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
 
-  useEffect(() => {
-    if (username.length > 3) {
+
+function debounce(func: Function, delay: number): Function {
+   let timer: ReturnType<typeof setTimeout>;
+
+  return (...args: any[]) => {
+    clearTimeout(timer);         
+    timer = setTimeout(() => {   
+      func(...args); 
+    }, delay);
+  };
+}
+
+
+function checkUsername(username: string) {
+
+    console.log("Checking:", username);
+
       const fetchUsername = async () => {
         try {
           const exist = await axios.get(`${API_URL}/api/user/check-username?username=${username}`);
           setAvailable(exist.data.available);
+          console.log("Available:", exist.data.available);
         } catch (error) {
           console.error('Error checking username:', error);
           setAvailable(false);
         }
-      };
+      }
       fetchUsername();
-    }
-  }, [username]);
+    
+  }
+
+const debouncedCheck = useMemo(() => debounce(checkUsername, 500), []);
+
+useEffect(() => {
+  if (username.length >= 4)
+  debouncedCheck(username);
+}, [username]);
+ 
 
   const isValid = username.length >= 4 && available && password.length >= 6 && confirmPass === password && !isRateLimited;
 
