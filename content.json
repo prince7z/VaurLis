@@ -286,3 +286,421 @@
   "MIT 6.006 Introduction to Algorithms, Spring 2020": "35 hours, 10 minutes, 40 seconds",
   "MIT 21M.383 Computational Music Theory and Analysis, Spring 2023": "23 hours, 48 minutes, 12 seconds"
 }
+[
+{
+  "playlistname": "CS50x 2025 Lectures",
+  "instructorname": "David J. Malan",
+  "plalistthumbnaillink": "https://img.youtube.com/vi/h6lqxDwUmJQ/hqdefault.jpg",
+  "playlistduration": "Approx. 13 videos, average lecture 1h+, total ~20 hours",
+  "description": "This is CS50, Harvard University’s introduction to the intellectual enterprises of computer science and the art of programming. It covers computational thinking, abstraction, algorithms, data structures, and more. No prior coding experience required.",
+  "video": [
+    {
+      "name": "CS50x 2025 - Introduction",
+      "thumbnaillink": "https://img.youtube.com/vi/h6lqxDwUmJQ/hqdefault.jpg",
+      "description": "Introduction to CS50x 2025, Harvard's popular computer science course.",
+      "link": "https://www.youtube.com/watch?v=h6lqxDwUmJQ"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 0 - Scratch",
+      "thumbnaillink": "https://img.youtube.com/vi/2WtPyqwTLKM/hqdefault.jpg",
+      "description": "Introductory lecture covering programming fundamentals using Scratch.",
+      "link": "https://www.youtube.com/watch?v=2WtPyqwTLKM"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 1 - C",
+      "thumbnaillink": "https://img.youtube.com/vi/89cbCbWrM4U/hqdefault.jpg",
+      "description": "Introduction to C: variables, functions, loops, computer internals.",
+      "link": "https://www.youtube.com/watch?v=89cbCbWrM4U"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 2 - Arrays",
+      "thumbnaillink": "https://img.youtube.com/vi/Y8qnryVy5sQ/hqdefault.jpg",
+      "description": "Covers arrays and how to use them in C.",
+      "link": "https://www.youtube.com/watch?v=Y8qnryVy5sQ"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 3 - Algorithms",
+      "thumbnaillink": "https://img.youtube.com/vi/iCx3zwK8Ms8/hqdefault.jpg",
+      "description": "Explains basic algorithms, searching and sorting.",
+      "link": "https://www.youtube.com/watch?v=iCx3zwK8Ms8"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 4 - Memory",
+      "thumbnaillink": "https://img.youtube.com/vi/kcRdFGbzR1I/hqdefault.jpg",
+      "description": "Deep dive into memory and how computers manage it.",
+      "link": "https://www.youtube.com/watch?v=kcRdFGbzR1I"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 5 - Data Structures",
+      "thumbnaillink": "https://img.youtube.com/vi/aV8LlSmd1E8/hqdefault.jpg",
+      "description": "An introduction to core data structures.",
+      "link": "https://www.youtube.com/watch?v=aV8LlSmd1E8"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 6 - Python",
+      "thumbnaillink": "https://img.youtube.com/vi/0eNc5lJfZFM/hqdefault.jpg",
+      "description": "First Python programming lecture.",
+      "link": "https://www.youtube.com/watch?v=0eNc5lJfZFM"
+    },
+    {
+      "name": "CS50x 2025 - Artificial Intelligence",
+      "thumbnaillink": "https://img.youtube.com/vi/1HuD2ryeOLg/hqdefault.jpg",
+      "description": "Special lecture on intro to AI concepts.",
+      "link": "https://www.youtube.com/watch?v=1HuD2ryeOLg"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 7 - SQL",
+      "thumbnaillink": "https://img.youtube.com/vi/ZA25WHO62ZA/hqdefault.jpg",
+      "description": "Introduction to SQL databases and queries.",
+      "link": "https://www.youtube.com/watch?v=ZA25WHO62ZA"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 8 - HTML, CSS, JavaScript",
+      "thumbnaillink": "https://img.youtube.com/vi/xiWUL3M9D8c/hqdefault.jpg",
+      "description": "Lecture on core web programming technologies.",
+      "link": "https://www.youtube.com/watch?v=xiWUL3M9D8c"
+    },
+    {
+      "name": "CS50x 2025 - Lecture 9 - Flask",
+      "thumbnaillink": "https://img.youtube.com/vi/1r-dFbPQ7Z8/hqdefault.jpg",
+      "description": "Web application building with Flask.",
+      "link": "https://www.youtube.com/watch?v=1r-dFbPQ7Z8"
+    },
+    {
+      "name": "CS50x 2025 - The End",
+      "thumbnaillink": "https://img.youtube.com/vi/WGEy-Bu5Hos/hqdefault.jpg",
+      "description": "Final wrap-up and conclusion for CS50x 2025.",
+      "link": "https://www.youtube.com/watch?v=WGEy-Bu5Hos"
+    }
+  ]
+},{
+  "playlistname": "CS50’s Introduction to Programming with Python (CS50P)",
+  "instructorname": "David J. Malan",
+  "plalistthumbnaillink": "https://img.youtube.com/vi/OvKCESUCWII/hqdefault.jpg",
+  "playlistduration": "16 hours 34 minutes",
+  "description": "CS50P is Harvard's introduction to programming with Python for students with or without prior experience. Covers functions, variables, conditionals, loops, exceptions, unit testing, regular expressions, object-oriented programming, and more. Exercises inspired by real-world challenges.",
+  "video": [
+    {
+      "name": "CS50P - Introduction",
+      "thumbnaillink": "https://img.youtube.com/vi/OvKCESUCWII/hqdefault.jpg",
+      "description": "Course introduction and overview.",
+      "link": "https://www.youtube.com/watch?v=OvKCESUCWII"
+    },
+    {
+      "name": "CS50P - Lecture 0 - Functions, Variables",
+      "thumbnaillink": "https://img.youtube.com/vi/JP7ITIXGpHk/hqdefault.jpg",
+      "description": "Functions, variables, arguments, and return values.",
+      "link": "https://www.youtube.com/watch?v=JP7ITIXGpHk"
+    },
+    {
+      "name": "CS50P - Lecture 1 - Conditionals",
+      "thumbnaillink": "https://img.youtube.com/vi/_b6NgY_pMdw/hqdefault.jpg",
+      "description": "Conditionals, boolean expressions, if/else logic.",
+      "link": "https://www.youtube.com/watch?v=_b6NgY_pMdw"
+    },
+    {
+      "name": "CS50P - Lecture 2 - Loops",
+      "thumbnaillink": "https://img.youtube.com/vi/-7xg8pGcP6w/hqdefault.jpg",
+      "description": "For loops, while loops, iteration in Python.",
+      "link": "https://www.youtube.com/watch?v=-7xg8pGcP6w"
+    },
+    {
+      "name": "CS50P - Lecture 3 - Exceptions",
+      "thumbnaillink": "https://img.youtube.com/vi/LW7g1169v7w/hqdefault.jpg",
+      "description": "Handling errors using exceptions.",
+      "link": "https://www.youtube.com/watch?v=LW7g1169v7w"
+    },
+    {
+      "name": "CS50P - Lecture 4 - Libraries",
+      "thumbnaillink": "https://img.youtube.com/vi/MztLZWibctI/hqdefault.jpg",
+      "description": "Using third-party Python libraries.",
+      "link": "https://www.youtube.com/watch?v=MztLZWibctI"
+    },
+    {
+      "name": "CS50P - Lecture 5 - Unit Tests",
+      "thumbnaillink": "https://img.youtube.com/vi/tIrcxwLqzjQ/hqdefault.jpg",
+      "description": "Testing and debugging code with unit tests.",
+      "link": "https://www.youtube.com/watch?v=tIrcxwLqzjQ"
+    },
+    {
+      "name": "CS50P - Lecture 6 - File I/O",
+      "thumbnaillink": "https://img.youtube.com/vi/KD-Yoel6EVQ/hqdefault.jpg",
+      "description": "Reading and writing files in Python.",
+      "link": "https://www.youtube.com/watch?v=KD-Yoel6EVQ"
+    },
+    {
+      "name": "CS50P - Lecture 7 - Regular Expressions",
+      "thumbnaillink": "https://img.youtube.com/vi/hy3sd9MOAcc/hqdefault.jpg",
+      "description": "Validating and extracting data with regex.",
+      "link": "https://www.youtube.com/watch?v=hy3sd9MOAcc"
+    },
+    {
+      "name": "CS50P - Lecture 8 - Object-Oriented Programming",
+      "thumbnaillink": "https://img.youtube.com/vi/e4fwY9ZsxPw/hqdefault.jpg",
+      "description": "Classes, objects, methods, and properties.",
+      "link": "https://www.youtube.com/watch?v=e4fwY9ZsxPw"
+    },
+    {
+      "name": "CS50P - Lecture 9 - Et Cetera",
+      "thumbnaillink": "https://img.youtube.com/vi/6pgodt1mezg/hqdefault.jpg",
+      "description": "Final topics and course wrap-up.",
+      "link": "https://www.youtube.com/watch?v=6pgodt1mezg"
+    }
+  ]
+},{
+  "playlistname": "CS50’s Introduction to Artificial Intelligence with Python",
+  "instructorname": "David J. Malan, Brian Yu",
+  "plalistthumbnaillink": "https://img.youtube.com/vi/G55dGQmuV_U/hqdefault.jpg",
+  "playlistduration": "Approx. 12 hours (10 lectures + shorts)",
+  "description": "This course explores the concepts and algorithms at the foundation of modern artificial intelligence, including search, knowledge representation, neural networks, and reinforcement learning. Assignments include hands-on projects using Python.",
+  "video": [
+    {
+      "name": "Lecture 0 - Search",
+      "thumbnaillink": "https://img.youtube.com/vi/G55dGQmuV_U/hqdefault.jpg",
+      "description": "Introduction to search algorithms including depth-first, breadth-first, and heuristics.",
+      "link": "https://www.youtube.com/watch?v=G55dGQmuV_U"
+    },
+    {
+      "name": "Lecture 1 - Knowledge",
+      "thumbnaillink": "https://img.youtube.com/vi/6A5g9bRn0fU/hqdefault.jpg",
+      "description": "Knowledge representation and logic in AI.",
+      "link": "https://www.youtube.com/watch?v=6A5g9bRn0fU"
+    },
+    {
+      "name": "Lecture 2 - Uncertainty",
+      "thumbnaillink": "https://img.youtube.com/vi/Q_fktzHqT7k/hqdefault.jpg",
+      "description": "AI approaches for uncertain environments, probability, Bayes networks.",
+      "link": "https://www.youtube.com/watch?v=Q_fktzHqT7k"
+    },
+    {
+      "name": "Lecture 3 - Optimization",
+      "thumbnaillink": "https://img.youtube.com/vi/rHLEWRxRGiM/hqdefault.jpg",
+      "description": "Optimization and constraint-satisfaction problems.",
+      "link": "https://www.youtube.com/watch?v=rHLEWRxRGiM"
+    },
+    {
+      "name": "Lecture 4 - Learning",
+      "thumbnaillink": "https://img.youtube.com/vi/OZzZK7AO6Hk/hqdefault.jpg",
+      "description": "Supervised and unsupervised learning in AI.",
+      "link": "https://www.youtube.com/watch?v=OZzZK7AO6Hk"
+    },
+    {
+      "name": "Lecture 5 - Neural Networks",
+      "thumbnaillink": "https://img.youtube.com/vi/aircAruvnKk/hqdefault.jpg",
+      "description": "Covers the core theory and practice of neural networks.",
+      "link": "https://www.youtube.com/watch?v=aircAruvnKk"
+    },
+    {
+      "name": "Lecture 6 - Language",
+      "thumbnaillink": "https://img.youtube.com/vi/rRr_4tHv9OY/hqdefault.jpg",
+      "description": "Natural language processing applied to AI.",
+      "link": "https://www.youtube.com/watch?v=rRr_4tHv9OY"
+    },
+    {
+      "name": "Lecture 7 - Logic",
+      "thumbnaillink": "https://img.youtube.com/vi/6KgM3RfczsM/hqdefault.jpg",
+      "description": "More on propositional logic and inference.",
+      "link": "https://www.youtube.com/watch?v=6KgM3RfczsM"
+    },
+    {
+      "name": "Lecture 8 - Planning",
+      "thumbnaillink": "https://img.youtube.com/vi/JgvyzgLMmmo/hqdefault.jpg",
+      "description": "How AI systems reason and plan towards goals.",
+      "link": "https://www.youtube.com/watch?v=JgvyzgLMmmo"
+    },
+    {
+      "name": "Lecture 9 - Reinforcement Learning",
+      "thumbnaillink": "https://img.youtube.com/vi/KyLqUf4cdwc/hqdefault.jpg",
+      "description": "Theory and practice in reinforcement learning.",
+      "link": "https://www.youtube.com/watch?v=KyLqUf4cdwc"
+    }
+  ]
+}
+,{
+  "playlistname": "CS50's Introduction to Cybersecurity",
+  "instructorname": "David J. Malan, Doug Lloyd, Jordan Scales",
+  "plalistthumbnaillink": "https://img.youtube.com/vi/1kypaBj_qWc/hqdefault.jpg",
+  "playlistduration": "Approx. 8 hours (8 lectures + shorts)",
+  "description": "This course introduces principles, tools, and techniques for securing systems and data. Topics include cryptography, authentication, software security, web security, forensics, and societal implications. Learn essential cybersecurity fundamentals.",
+  "video": [
+    {
+      "name": "Lecture 0 - Introduction",
+      "thumbnaillink": "https://img.youtube.com/vi/1kypaBj_qWc/hqdefault.jpg",
+      "description": "Course introduction—overview of cybersecurity concepts.",
+      "link": "https://www.youtube.com/watch?v=1kypaBj_qWc"
+    },
+    {
+      "name": "Lecture 1 - Cryptography",
+      "thumbnaillink": "https://img.youtube.com/vi/-ykeT6kk4ZI/hqdefault.jpg",
+      "description": "Fundamentals of symmetric and asymmetric encryption.",
+      "link": "https://www.youtube.com/watch?v=-ykeT6kk4ZI"
+    },
+    {
+      "name": "Lecture 2 - Authentication",
+      "thumbnaillink": "https://img.youtube.com/vi/8HO0kElfgFs/hqdefault.jpg",
+      "description": "Principles and practice of authentication in cybersecurity.",
+      "link": "https://www.youtube.com/watch?v=8HO0kElfgFs"
+    },
+    {
+      "name": "Lecture 3 - Software Security",
+      "thumbnaillink": "https://img.youtube.com/vi/ke_7hJtA4DM/hqdefault.jpg",
+      "description": "Securing software against vulnerabilities.",
+      "link": "https://www.youtube.com/watch?v=ke_7hJtA4DM"
+    },
+    {
+      "name": "Lecture 4 - Web Security",
+      "thumbnaillink": "https://img.youtube.com/vi/XFGf3z--a_I/hqdefault.jpg",
+      "description": "Securing web applications and sites.",
+      "link": "https://www.youtube.com/watch?v=XFGf3z--a_I"
+    },
+    {
+      "name": "Lecture 5 - Forensics",
+      "thumbnaillink": "https://img.youtube.com/vi/MxgRHkKX8dA/hqdefault.jpg",
+      "description": "Digital forensics and investigating cyber attacks.",
+      "link": "https://www.youtube.com/watch?v=MxgRHkKX8dA"
+    },
+    {
+      "name": "Lecture 6 - Society",
+      "thumbnaillink": "https://img.youtube.com/vi/Aa4Kj3_2Pdg/hqdefault.jpg",
+      "description": "Social impact and ethical considerations in cybersecurity.",
+      "link": "https://www.youtube.com/watch?v=Aa4Kj3_2Pdg"
+    },
+    {
+      "name": "Lecture 7 - Wrap-Up",
+      "thumbnaillink": "https://img.youtube.com/vi/NYE5l8OR1QI/hqdefault.jpg",
+      "description": "Final thoughts and practical takeaways from the course.",
+      "link": "https://www.youtube.com/watch?v=NYE5l8OR1QI"
+    }
+  ]
+}
+,{
+  "playlistname": "CS50's Introduction to Databases with SQL",
+  "instructorname": "David J. Malan, Eli Upfal",
+  "plalistthumbnaillink": "https://img.youtube.com/vi/zsjvFFKOm3c/hqdefault.jpg",
+  "playlistduration": "Approx. 8 hours",
+  "description": "Learn relational databases and SQL from the ground up—from concepts to complex queries. Join Harvard’s CS50 in this comprehensive course covering design, relationships, index, transactions, and more.",
+  "video": [
+    {
+      "name": "Week 0 - Relational Databases",
+      "thumbnaillink": "https://img.youtube.com/vi/zsjvFFKOm3c/hqdefault.jpg",
+      "description": "Introduction to databases, tables, and relations.",
+      "link": "https://www.youtube.com/watch?v=zsjvFFKOm3c"
+    },
+    {
+      "name": "Week 1 - SQL, SELECT, INSERT",
+      "thumbnaillink": "https://img.youtube.com/vi/tVXe8y8APfc/hqdefault.jpg",
+      "description": "Getting started with SQL: SELECT, INSERT statements.",
+      "link": "https://www.youtube.com/watch?v=tVXe8y8APfc"
+    },
+    {
+      "name": "Week 2 - UPDATE, DELETE, JOIN",
+      "thumbnaillink": "https://img.youtube.com/vi/g_5NQJo9aGo/hqdefault.jpg",
+      "description": "Modifying and combining data using SQL.",
+      "link": "https://www.youtube.com/watch?v=g_5NQJo9aGo"
+    },
+    {
+      "name": "Week 3 - Indexes, Transactions",
+      "thumbnaillink": "https://img.youtube.com/vi/PF3gXzI7DfI/hqdefault.jpg",
+      "description": "Explains indexes and ACID transactions.",
+      "link": "https://www.youtube.com/watch?v=PF3gXzI7DfI"
+    },
+    {
+      "name": "Week 4 - Design, Relationships",
+      "thumbnaillink": "https://img.youtube.com/vi/8TFf6FbwBqQ/hqdefault.jpg",
+      "description": "Covers normalization, joins, and database design.",
+      "link": "https://www.youtube.com/watch?v=8TFf6FbwBqQ"
+    },
+    {
+      "name": "Week 5 - Final Project & Wrap-Up",
+      "thumbnaillink": "https://img.youtube.com/vi/TwLgTbGe34Q/hqdefault.jpg",
+      "description": "Instructions and advice for your database project.",
+      "link": "https://www.youtube.com/watch?v=TwLgTbGe34Q"
+    }
+  ]
+}
+,{
+  "playlistname": "CS50x 2024 Lectures",
+  "instructorname": "David J. Malan",
+  "plalistthumbnaillink": "https://i.ytimg.com/vi/3LPJfIKxwWc/maxresdefault.jpg",
+  "playlistduration": "12 lectures (~20+ hours total)",
+  "description": "Harvard’s flagship CS50 course (2024 edition): an introduction to computer science fundamentals, programming in C and Python, algorithms, web development, SQL, Flask, AI, cybersecurity, and more.",
+  "video": [
+    {
+      "name": "CS50x 2024 - Lecture 0 - Scratch",
+      "thumbnaillink": "https://i.ytimg.com/vi/3LPJfIKxwWc/maxresdefault.jpg",
+      "description": "Intro to computer science concepts: binary, ASCII, Unicode, color, algorithms, and pseudocode.",
+      "link": "https://www.youtube.com/watch?v=3LPJfIKxwWc"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 1 - C",
+      "thumbnaillink": "https://i.ytimg.com/vi/cwtpLIWylAw/maxresdefault.jpg",
+      "description": "Fundamentals of C: variables, conditionals, loops, compiling and running code.",
+      "link": "https://www.youtube.com/watch?v=cwtpLIWylAw"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 2 - Arrays",
+      "thumbnaillink": "https://i.ytimg.com/vi/4vU4aEFmTSo/maxresdefault.jpg",
+      "description": "Lecture on using arrays and their concepts in C programming.",
+      "link": "https://www.youtube.com/watch?v=4vU4aEFmTSo"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 3 - Algorithms",
+      "thumbnaillink": "https://i.ytimg.com/vi/jZzyERW7h1A/maxresdefault.jpg",
+      "description": "Explains linear search, binary search, sorting algorithms, and time complexity.",
+      "link": "https://www.youtube.com/watch?v=jZzyERW7h1A"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 4 - Memory",
+      "thumbnaillink": "https://i.ytimg.com/vi/F9-yqoS7b8w/maxresdefault.jpg",
+      "description": "Covers memory structure, pointers, hexadecimal, strings, pointer arithmetic, file I/O.",
+      "link": "https://www.youtube.com/watch?v=F9-yqoS7b8w"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 5 - Data Structures",
+      "thumbnaillink": "https://i.ytimg.com/vi/0euvEdPwQnQ/maxresdefault.jpg",
+      "description": "Stacks, queues, resizing arrays, linked lists, trees, and dictionaries in computer science.",
+      "link": "https://www.youtube.com/watch?v=0euvEdPwQnQ"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 6 - Python",
+      "thumbnaillink": "https://i.ytimg.com/vi/EHi0RDZ31VA/maxresdefault.jpg",
+      "description": "Introduction to Python vs. C, with functions, types, libraries, and ease-of-use examples.",
+      "link": "https://www.youtube.com/watch?v=EHi0RDZ31VA"
+    },
+    {
+      "name": "CS50x 2024 - Artificial Intelligence",
+      "thumbnaillink": "https://i.ytimg.com/vi/6X58aP7yXC4/maxresdefault.jpg",
+      "description": "Fundamentals of AI, large language models, generative AI, and decision trees.",
+      "link": "https://www.youtube.com/watch?v=6X58aP7yXC4"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 7 - SQL",
+      "thumbnaillink": "https://i.ytimg.com/vi/1RCMYG8RUSE/maxresdefault.jpg",
+      "description": "Relational databases and SQL basics, data analysis and security.",
+      "link": "https://www.youtube.com/watch?v=1RCMYG8RUSE"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 8 - HTML, CSS, JavaScript",
+      "thumbnaillink": "https://i.ytimg.com/vi/ciz2UaifaNM/maxresdefault.jpg",
+      "description": "Internet infrastructure, HTML, CSS, JavaScript for web development.",
+      "link": "https://www.youtube.com/watch?v=ciz2UaifaNM"
+    },
+    {
+      "name": "CS50x 2024 - Lecture 9 - Flask",
+      "thumbnaillink": "https://i.ytimg.com/vi/-aqUek49iL8/maxresdefault.jpg",
+      "description": "Dynamic web applications with Flask; user input, routes, forms.",
+      "link": "https://www.youtube.com/watch?v=-aqUek49iL8"
+    },
+    {
+      "name": "CS50x 2024 - Cybersecurity",
+      "thumbnaillink": "https://i.ytimg.com/vi/EKof-cJiTG8/maxresdefault.jpg",
+      "description": "Threats and defenses: password vulnerabilities, brute-force, managers, 2FA, hashing, cryptography.",
+      "link": "https://www.youtube.com/watch?v=EKof-cJiTG8"
+    }
+  ]
+}
+
+
+
+
+]

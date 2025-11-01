@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/backend/Server.js",
-    "dev": "nodemon --watch backend --ext ts --exec ts-node backend/Server.ts",
+    "dev": "cd backend && npm run dev ",
     "build": "tsc",
     "postinstall": "tsc"
   },
@@ -26,9 +26,13 @@
     "tailwindcss": "^4.1.11"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@faker-js/faker": "^9.9.0",
     "@logtail/node": "^0.5.6",
     "@logtail/winston": "^0.5.6",
+    "@mui/lab": "^7.0.1-beta.18",
+    "@mui/material": "^7.3.4",
     "@sendgrid/mail": "^8.1.6",
     "@types/ws": "^8.18.1",
     "bcrypt": "^6.0.0",

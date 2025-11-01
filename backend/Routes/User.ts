@@ -1,5 +1,5 @@
 import express, { Request, Response, Router } from 'express';
-import { User, Tracking, Rating, Certificate, LiveClass ,Course} from '../DB/MDB';
+import { User, Tracking, Rating, Certificate, LiveClass ,Course,Transaction} from '../DB/MDB';
 
 import { auth, authlite } from '../Midware/Mware';
 import z from 'zod';
@@ -310,6 +310,19 @@ router.get('/checkLive', auth, async (req: Request, res: Response) => {
         res.status(200).json({ message: "User is authorized", room,user });
     } catch (error) {
         console.error("Error checking live room:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+router.get('/transactions', auth, async (req: Request, res: Response) => {
+    const user = req.user
+
+    try {
+        const transactionsto = await Transaction.find({ From: user._id });
+        const transactionsfrom = await Transaction.find({ For: { $in: user.rel_courses } });
+        res.status(200).json({ transactionsto, transactionsfrom });
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

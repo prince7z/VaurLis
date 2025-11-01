@@ -18,7 +18,7 @@ import Certificate from './pages/cert';
 import Instructor from './pages/instructor';
 import Verify from './pages/Verify';
 import LiveClass from './pages/LiveClass';
-
+import Transactions from './pages/Transections';
 import  Landing  from './pages/landing';
 import Rough from './pages/Rough';
 import Sender from './pages/LiveSender';
@@ -53,6 +53,7 @@ function App() {
         <Route path ={"/course/live/:id"} element ={<LiveClass />} />
         <Route path ={"/live/sender/:roomId"} element ={<Sender />} /> 
         <Route path ={"/live/receiver/:roomId"} element ={<Reciever />} />
+        <Route path ={"/transactions"} element ={<Transactions />} />
 
        {authPaths.map((path) => (
     <Route key={path} path={path} element={<AuthPage />} />
