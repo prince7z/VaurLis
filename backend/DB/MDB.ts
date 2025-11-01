@@ -1,3 +1,4 @@
+import { time } from 'console';
 import mongoose, { ConnectOptions } from 'mongoose';
 
 
@@ -41,6 +42,7 @@ const userSchema = new mongoose.Schema({
     img : String,
     bgimg: String,
     skills : [String],
+    balance:Number,
     socialLinks:{
       github : String,
       linkedin : String,
@@ -51,6 +53,15 @@ const userSchema = new mongoose.Schema({
     rel_courses : [{type: mongoose.Schema.Types.ObjectId,  ref: "Course" }],
     rated : [{ type: mongoose.Schema.Types.ObjectId, ref: "rating" }]
 });
+const transactonSchema = new mongoose.Schema({
+  From: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  For : { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
+  status : { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
+  timestamp: { type: Date, default: Date.now },  
+  amount: { type: Number, required: true }
+});
+
+const Transaction = mongoose.model("Transaction", transactonSchema);
 const User = mongoose.model("User", userSchema);
 
 const trackingSchema = new mongoose.Schema({
@@ -126,6 +137,6 @@ const LiveClass = mongoose.model("LiveClass", liveClassSchema);
 
 const Certificate = mongoose.model("Certificate", CertSchema);
 
-export { User, Course, Rating, Tracking, LiveClass, Certificate };
+export { User, Course, Rating, Tracking, LiveClass, Certificate, Transaction };
 
 

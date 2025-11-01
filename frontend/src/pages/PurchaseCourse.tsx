@@ -173,6 +173,12 @@ export default function PurchaseCourse() {
                 {course.price === 0 ? 'FREE' : `$${course.price}`}
               </span>
             </div>
+              <div className="flex justify-between items-center border-b pb-4">
+              <span className="text-gray-500">Platform Fee</span>
+              <span className="text-xl  text-gray-700">
+                {course.price === 0 ? '0' : `$${(course.price * 0.18).toFixed(2)}`}
+              </span>
+            </div>
 
             <div className="mt-8 flex justify-end">
               <motion.button

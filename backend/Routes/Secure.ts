@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
 import Razorpay from "razorpay";
-import { User, Course, Certificate } from "../DB/MDB";
+import { User, Course, Certificate,Transaction } from "../DB/MDB";
 import { auth } from "../Midware/Mware";
 import crypto from "crypto";
 
@@ -54,7 +54,7 @@ router.get("/create-order/:courseId", auth, async (req: Request, res: Response) 
       return res.status(200).json({ alreadyEnrolled: true, message: "Course added to your account" });
     }
     const options = {
-      amount: course.price * 100,
+      amount: course.price === 0 ? 0 : course.price * 100 + course.price * 0.18, 
       currency: "INR",
       receipt: `${Date.now()}_${userId}`,
       notes: {
@@ -98,6 +98,18 @@ router.get("/create-order/:courseId", auth, async (req: Request, res: Response) 
   */ }
 
 
+async function createTransaction(userId: string, courseId: string, amount: number) {
+  try {
+    const transaction = new Transaction({
+      From: userId,
+      For: courseId,
+      amount,
+    });
+    await transaction.save();
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+  }
+}
 
 router.post("/verify-payment", auth, async (req: Request, res: Response) => {
   try {
@@ -110,19 +122,15 @@ router.post("/verify-payment", auth, async (req: Request, res: Response) => {
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto.createHmac("sha256", cleanSecretKey).update(sign.toString()).digest("hex");
 
-    console.log("Payment Verification Debug:");
-    console.log("- Order ID:", razorpay_order_id);
-    console.log("- Payment ID:", razorpay_payment_id);
-    console.log("- Received Signature:", razorpay_signature);
-    console.log("- Expected Signature:", expectedSign);
-    console.log("- Secret Key Length:", razorpay_secret_key.length, "chars");
-    console.log("- Secret Key (trimmed length):", cleanSecretKey.length, "chars");
-    console.log("- Secret Key (full):", razorpay_secret_key);
-    console.log("- Sign String:", sign);
+
 
     if (razorpay_signature === expectedSign) {
       try {
         await updateUserCourseAndMakeCert(userId, courseId);
+        const course: any= await Course.findById(courseId).select("price").exec();
+        if (course) {
+          await createTransaction(userId, courseId, course.price);
+        }
         return res.status(200).json({ message: "Payment verified successfully" });
       } catch (error) {
         console.error("Error updating user/course:", error);
