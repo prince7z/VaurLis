@@ -98,10 +98,11 @@ router.get("/create-order/:courseId", auth, async (req: Request, res: Response) 
   */ }
 
 
-async function createTransaction(userId: string, courseId: string, amount: number) {
+async function createTransaction(userId: string, courseId: string, instructorId: string, amount: number) {
   try {
     const transaction = new Transaction({
       From: userId,
+      To: instructorId,
       For: courseId,
       amount,
     });
@@ -127,9 +128,9 @@ router.post("/verify-payment", auth, async (req: Request, res: Response) => {
     if (razorpay_signature === expectedSign) {
       try {
         await updateUserCourseAndMakeCert(userId, courseId);
-        const course: any= await Course.findById(courseId).select("price").exec();
+        const course: any= await Course.findById(courseId).select("price instructor").exec();
         if (course) {
-          await createTransaction(userId, courseId, course.price);
+          await createTransaction(userId, courseId, course.instructor, course.price);
         }
         return res.status(200).json({ message: "Payment verified successfully" });
       } catch (error) {

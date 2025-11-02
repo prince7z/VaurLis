@@ -318,9 +318,9 @@ router.get('/transactions', auth, async (req: Request, res: Response) => {
     const user = req.user
 
     try {
-        const transactionsto = await Transaction.find({ From: user._id });
-        const transactionsfrom = await Transaction.find({ For: { $in: user.rel_courses } });
-        res.status(200).json({ transactionsto, transactionsfrom });
+        const trn_send = await Transaction.find({ From: user._id }).populate("To", "username img").populate("For", "name ").exec();
+        const trn_receive = await Transaction.find({ To: user._id }).populate("From", "username img").populate("For", "name ").exec();
+        res.status(200).json({ trn_send, trn_receive });
     } catch (error) {
         console.error("Error fetching transactions:", error);
         res.status(500).json({ error: "Internal server error" });

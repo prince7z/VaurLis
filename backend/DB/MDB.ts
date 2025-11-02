@@ -55,6 +55,7 @@ const userSchema = new mongoose.Schema({
 });
 const transactonSchema = new mongoose.Schema({
   From: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  To: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   For : { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
   status : { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
   timestamp: { type: Date, default: Date.now },  
