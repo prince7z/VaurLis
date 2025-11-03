@@ -50,11 +50,10 @@ router.get("/create-order/:courseId", auth, async (req: Request, res: Response) 
 
     if (course.price === 0) {
       updateUserCourseAndMakeCert(userId, courseId);
-      console.log("User has enrolled in the course");
       return res.status(200).json({ alreadyEnrolled: true, message: "Course added to your account" });
     }
     const options = {
-      amount: course.price === 0 ? 0 : course.price * 100 + course.price * 0.18, 
+      amount: course.price === 0 ? 0 : Math.round(course.price * 100 + course.price * 0.05), 
       currency: "INR",
       receipt: `${Date.now()}_${userId}`,
       notes: {
