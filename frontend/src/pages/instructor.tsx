@@ -1,7 +1,6 @@
 import React, { use, useEffect, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import CourseCard from "../Component/coursecard";
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
 import { Button } from "@mui/material";
 import { useRecoilState } from "recoil";
@@ -58,13 +57,14 @@ function TabPanel(props: TabPanelProps) {
             id={`tabpanel-${index}`}
             aria-labelledby={`tab-${index}`}
             {...other}
-            style={{ backgroundColor: '#c5c5c5ff', minHeight: '200px', padding: '24px' }}
+            style={{
+                backgroundColor: '#1A1A1A',
+                minHeight: '200px',
+                padding: '24px',
+                display: value === index ? 'block' : 'none'
+            }}
         >
-            {value === index && (
-                <Box>
-                    {children}
-                </Box>
-            )}
+            <Box>{children}</Box>
         </div>
     );
 }
@@ -89,6 +89,11 @@ export default function Instructor() {
     const [DataTrns, SetTrans] = useState<ITransaction[]>([]);
     const [value, setValue] = React.useState(0);
     const [doowns, setDoowns] = useState(false);
+
+    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+        console.log('Tab changed to:', newValue); // Debug log
+        setValue(newValue);
+    };
 
 
     
@@ -134,7 +139,11 @@ export default function Instructor() {
                     Setpur(response.data.pur_courses);
                 }
                 if (response.data.transactions){
-                    SetTrans(response.data.transactions);
+                    // Handle both array and object format
+                    const transactions = Array.isArray(response.data.transactions) 
+                        ? response.data.transactions 
+                        : response.data.transactions.restosend || [];
+                    SetTrans(transactions);
                 }
             } catch (error) {
                 setError("Error fetching instructor details");
@@ -179,12 +188,7 @@ export default function Instructor() {
 
  
 
-    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-        // Only allow changing to tabs 1 and 2 if doowns is true
-        if (newValue === 0 || doowns) {
-            setValue(newValue);
-        }
-  };
+
     return (
         <div className="min-h-screen bg-gray-100 py-8">
             <div className="max-w-5xl mx-auto">
@@ -282,23 +286,24 @@ export default function Instructor() {
             >
                 <StyledTab 
                     label="RELEASED COURSES" 
+                    value={0}
                     id="tab-0" 
                     aria-controls="tabpanel-0"
                 />
-               {doowns && (
-                    <>
-                        <StyledTab 
-                            label="PURCHASED COURSES" 
-                            id="tab-1" 
-                            aria-controls="tabpanel-1"
-                        />
-                        <StyledTab 
-                            label="TRANSACTIONS" 
-                            id="tab-2" 
-                            aria-controls="tabpanel-2"
-                        />
-                    </>
-                )}
+                <StyledTab 
+                    label="PURCHASED COURSES" 
+                    value={1}
+                    id="tab-1" 
+                    disabled={!doowns}
+                    aria-controls="tabpanel-1"
+                />
+                <StyledTab 
+                    label="TRANSACTIONS" 
+                    value={2}
+                    id="tab-2" 
+                    disabled={!doowns}
+                    aria-controls="tabpanel-2"
+                />
             </StyledTabs>
 
             <TabPanel value={value} index={0}>
