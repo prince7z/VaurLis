@@ -52,7 +52,7 @@ const handlePayment = async (courseId: string, navigate: any, showToast: any) =>
     // Check if user is already enrolled (free course)
     if (res.data.alreadyEnrolled) {
       showToast("You are enrolled in the course.", 'success');
-      setTimeout(() => window.location.href = `/course/${courseId}`, 1500);
+      setTimeout(() => window.location.href = `/course/${courseId}`, 500);
       return;
     }
     

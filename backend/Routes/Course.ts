@@ -93,7 +93,7 @@ interface resCourse{
     Role: 'pur'|'!pur'|'owns';
 }
 
-router.get('/:id', auth , async (req: Request, res: Response) => {
+router.get('/:id', authlite,async (req: Request, res: Response) => {
     
     
     const courseId = req.params.id;
@@ -104,9 +104,9 @@ router.get('/:id', auth , async (req: Request, res: Response) => {
       
 
         if(course) {
-           // console.log(course);
 
             let Role: 'pur'|'!pur'|'owns' = '!pur';
+
             if((req.user?._id).toString()===(course.instructor)?.toString()){Role = 'owns';}
             else  if(req.user.pur_courses.includes(course._id)){Role = 'pur';}
            

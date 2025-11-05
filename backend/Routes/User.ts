@@ -74,7 +74,7 @@ const uname = req.params.id;
 
 
     if (req.user.username === uname) {
-        
+        try {
     const userData= await User.findById(req.user._id).select('username bio email img bgimg socialLinks skills pur_courses rel_courses ').populate({
         path: 'rel_courses',
         select: 'img name description price instructor timestamp'
@@ -83,10 +83,34 @@ const uname = req.params.id;
         select: 'img name description price instructor timestamp'
     }).lean().exec();
     
-    const instructorWithRole = { ...userData, role: "owns" };
+    let instructorWithRole: any = { ...userData, role: "owns" };
+
+      
+        const trn_send = await Transaction.find({ From: req.user._id }).populate('To', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        const trn_receive = await Transaction.find({ To: req.user._id }).populate('From', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        
+        const sentTransactions = trn_send.map(trn => ({
+            ...trn,
+            isSentorRecived: 'sent'
+        }));
+        const receivedTransactions = trn_receive.map(trn => ({
+            ...trn,
+            isSentorRecived: 'received'
+        }));
+        
+        // Combine both arrays
+        const allTransactions = [...sentTransactions, ...receivedTransactions];
+
+        instructorWithRole.transactions = allTransactions;
+
+
     res.status(200).json(instructorWithRole);
 
+    }catch (error) {
+        console.error("Error fetching instructor data:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
+}
 
     else {
         const instructor = await User.findOne({ username: uname }).select('username bio img bgimg skills socialLinks rel_courses').populate({
@@ -318,9 +342,22 @@ router.get('/transactions', auth, async (req: Request, res: Response) => {
     const user = req.user
 
     try {
-        const trn_send = await Transaction.find({ From: user._id }).populate("To", "username img").populate("For", "name ").exec();
-        const trn_receive = await Transaction.find({ To: user._id }).populate("From", "username img").populate("For", "name ").exec();
-        res.status(200).json({ trn_send, trn_receive });
+        const trn_send = await Transaction.find({ From: user._id }).populate('To', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        const trn_receive = await Transaction.find({ To: user._id }).populate('From', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        
+        const sentTransactions = trn_send.map(trn => ({
+            ...trn,
+            isSentorRecived: 'sent'
+        }));
+        const receivedTransactions = trn_receive.map(trn => ({
+            ...trn,
+            isSentorRecived: 'received'
+        }));
+        
+        // Combine both arrays
+        const transactions = [...sentTransactions, ...receivedTransactions];
+
+        res.status(200).json({ transactions });
     } catch (error) {
         console.error("Error fetching transactions:", error);
         res.status(500).json({ error: "Internal server error" });

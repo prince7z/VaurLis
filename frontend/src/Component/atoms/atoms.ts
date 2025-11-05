@@ -12,7 +12,12 @@ export const userSelector = selector({
       }
     });
     console.log("User data fetched:", response.data);
-    localStorage.setItem("user", JSON.stringify(response.data._id));
+    if (response.data) {
+      localStorage.setItem("user", JSON.stringify(response.data));
+    }
+    else {
+      localStorage.setItem("user","guest");
+    }
 
     return response.data;
   },

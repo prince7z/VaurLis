@@ -103,6 +103,7 @@ async function createTransaction(userId: string, courseId: string, instructorId:
       From: userId,
       To: instructorId,
       For: courseId,
+      status: 'completed',
       amount,
     });
     await transaction.save();
@@ -131,6 +132,9 @@ router.post("/verify-payment", auth, async (req: Request, res: Response) => {
         if (course) {
           await createTransaction(userId, courseId, course.instructor, course.price);
         }
+
+
+
         return res.status(200).json({ message: "Payment verified successfully" });
       } catch (error) {
         console.error("Error updating user/course:", error);

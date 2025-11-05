@@ -6,7 +6,7 @@ import mongoose, { ConnectOptions } from 'mongoose';
 
 const { MONGO_URI } = process.env;
 
-
+//const MONGO_URI = "mongodb://localhost:27017/Vaurlis";
 if (!MONGO_URI) {
   throw Error("missing .env");
 }
@@ -68,7 +68,7 @@ const User = mongoose.model("User", userSchema);
 const trackingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
-  videoId: { type: mongoose.Schema.Types.ObjectId, required: true }, // 👈 reference to course.content._id
+  videoId: { type: mongoose.Schema.Types.ObjectId, required: true }, //  reference to course.content._id
 
   finished: { type: Boolean, default: false },
   lastViewedTime: { type: Date, default: Date.now },
@@ -101,8 +101,8 @@ const courseSchema = new mongoose.Schema({
       content: [{
     name: { type: String, required: true },     // Lecture title
     link: { type: String, required: true },     // Video URL
-    thumbnail: String,                          // Preview image
-    duration: Number                            // Video length in seconds/minutes
+    thumbnail: String                     // Preview image
+                             // Video length in seconds/minutes
   }],
     act_users : [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     links :[String],
