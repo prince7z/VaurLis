@@ -54,7 +54,7 @@ router.get('/instructorlist', async (req: Request, res: Response) => {
 
   const instructors =await User.find({rel_courses: { $exists: true, $not: { $size: 0 } } })
 
-  .select('_id username bio img').lean().exec();
+  .select('_id username bio img verified').lean().exec();
 
   if (!instructors || instructors.length === 0) {
       return res.status(404).json({ message: "No instructors found" });

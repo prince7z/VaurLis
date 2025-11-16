@@ -1,4 +1,6 @@
 import { time } from 'console';
+import { Verify } from 'crypto';
+import { subscribe } from 'diagnostics_channel';
 import mongoose, { ConnectOptions } from 'mongoose';
 
 
@@ -41,6 +43,9 @@ const userSchema = new mongoose.Schema({
     bio: String,
     img : String,
     bgimg: String,
+    Verified: { type: Boolean, default: false },
+    subscribers:[{type : mongoose.Schema.Types.ObjectId, ref: "User"}],
+    subscribedTo:[{type : mongoose.Schema.Types.ObjectId, ref: "User"}],
     skills : [String],
     balance:Number,
     socialLinks:{

@@ -90,9 +90,9 @@ export const DesktopSidebar = ({
 
   useEffect(() => {
     if (animate) {
-      setCurrentWidth(open ? "300px" : "60px");
+      setCurrentWidth(open ? "220px" : "60px");
     } else {
-      setCurrentWidth("300px");
+      setCurrentWidth("220px");
     }
   }, [open, animate]);
 
