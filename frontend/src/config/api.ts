@@ -11,7 +11,7 @@ export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 export const FE_URL = import.meta.env.FRONTEND_URL || 'https://vaurlis-frontend.onrender.com';
 // Log API URL in development mode for debugging
 if (import.meta.env.DEV) {
-  console.log('🔗 API URL:', API_URL);
+  console.log(' API URL:', API_URL);
 }
 
 // Optional: Export other API-related configurations
