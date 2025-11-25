@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📚 VaurLis Educations
+# VaurLis Educations
 ## Advanced Learning Management System
 
 <p align="center">
@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <strong>🎓 Transforming Education Through Technology 🚀</strong>
+  <strong>Transforming Education Through Technology</strong>
 </p>
 
 </div>
@@ -21,14 +21,14 @@
 
 ---
 
-## 🌟 Project Overview
+## Project Overview
 
 > **VaurLis Educations** is a comprehensive, modern Learning Management System (LMS) built with cutting-edge technologies. Our platform provides a seamless learning experience with features ranging from course management to real-time live streaming, payment processing, and certificate generation.
 
-### 🎯 Our Mission
+### Our Mission
 To democratize education in an era where learners often become teachers. VaurLis empowers everyone to share knowledge and encourages learning without hesitation.
 
-| For Instructors 👨‍🏫 | For Students 👨‍🎓 | For Institutions 🏛️ |
+| For Instructors | For Students | For Institutions |
 |---------------------|------------------|---------------------|
 | Powerful tools to create, manage, and monetize courses | Rich learning experiences with interactive content | Scalable platform for educational content delivery |
 | Professional analytics and insights | Live classes and certified achievements | Community-driven learning programs |
@@ -36,80 +36,80 @@ To democratize education in an era where learners often become teachers. VaurLis
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 <details open>
-<summary><strong>🎓 Course Management</strong></summary>
+<summary><strong>Course Management</strong></summary>
 <br>
 
-- ✅ **Course Creation & Upload**: Rich course creation with multimedia content support
-- ✅ **Content Management**: Video lectures, documents, and interactive materials  
-- ✅ **Course Categories**: Organized learning paths and skill-based categorization
-- ✅ **Search & Discovery**: Advanced search functionality with smart suggestions
-- ✅ **Course Reviews & Ratings**: Student feedback and instructor reputation system
+- **Course Creation & Upload**: Rich course creation with multimedia content support
+- **Content Management**: Video lectures, documents, and interactive materials  
+- **Course Categories**: Organized learning paths and skill-based categorization
+- **Search & Discovery**: Advanced search functionality with smart suggestions
+- **Course Reviews & Ratings**: Student feedback and instructor reputation system
 
 </details>
 
 <details open>
-<summary><strong>💳 Payment & Monetization</strong></summary>
+<summary><strong>Payment & Monetization</strong></summary>
 <br>
 
-- ✅ **Razorpay Integration**: Secure payment processing with multiple payment methods
-- ✅ **Dynamic Pricing**: Flexible pricing models including free and paid courses
-- ✅ **Transaction Management**: Comprehensive transaction tracking and history
-- ✅ **Revenue Analytics**: Detailed financial insights for instructors and administrators
+- **Razorpay Integration**: Secure payment processing with multiple payment methods
+- **Dynamic Pricing**: Flexible pricing models including free and paid courses
+- **Transaction Management**: Comprehensive transaction tracking and history
+- **Revenue Analytics**: Detailed financial insights for instructors and administrators
 
 </details>
 
 <details open>
-<summary><strong>🎥 Live Streaming & Real-time Features</strong></summary>
+<summary><strong>Live Streaming & Real-time Features</strong></summary>
 <br>
 
-- ✅ **Live Class Scheduling**: Schedule and manage live educational sessions
-- ✅ **WebRTC Integration**: High-quality real-time video streaming
-- ✅ **Interactive Live Sessions**: Real-time communication between instructors and students
-- ✅ **Session Recording**: Automatic recording and playback capabilities
+- **Live Class Scheduling**: Schedule and manage live educational sessions
+- **WebRTC Integration**: High-quality real-time video streaming
+- **Interactive Live Sessions**: Real-time communication between instructors and students
+- **Session Recording**: Automatic recording and playback capabilities
 
 </details>
 
 <details open>
-<summary><strong>🏆 Certification System</strong></summary>
+<summary><strong>Certification System</strong></summary>
 <br>
 
-- ✅ **Digital Certificates**: Automated certificate generation upon course completion
-- ✅ **Blockchain Validation**: QR code-based certificate verification system
-- ✅ **Custom Templates**: Professional certificate designs with institutional branding
-- ✅ **Certificate Registry**: Secure certificate storage and verification portal
+- **Digital Certificates**: Automated certificate generation upon course completion
+- **Blockchain Validation**: QR code-based certificate verification system
+- **Custom Templates**: Professional certificate designs with institutional branding
+- **Certificate Registry**: Secure certificate storage and verification portal
 
 </details>
 
 <details open>
-<summary><strong>👥 User Management & Profiles</strong></summary>
+<summary><strong>User Management & Profiles</strong></summary>
 <br>
 
-- ✅ **Role-based Access**: Student, Instructor, and Admin roles with appropriate permissions
-- ✅ **Profile Customization**: LinkedIn-style professional profiles
-- ✅ **Instructor Showcase**: Featured instructor profiles with credentials and expertise
-- ✅ **Social Features**: User interactions, reviews, and community engagement
+- **Role-based Access**: Student, Instructor, and Admin roles with appropriate permissions
+- **Profile Customization**: LinkedIn-style professional profiles
+- **Instructor Showcase**: Featured instructor profiles with credentials and expertise
+- **Social Features**: User interactions, reviews, and community engagement
 
 </details>
 
 
 <details open>
-<summary><strong>🎨 User Experience</strong></summary>
+<summary><strong>User Experience</strong></summary>
 <br>
 
-- ✅ **Responsive Design**: Mobile-first, fully responsive interface
-- ✅ **Modern UI/UX**: Clean, intuitive design with Tailwind CSS
-- ✅ **Dark/Light Theme**: Customizable interface themes
-- ✅ **Accessibility**: WCAG compliant design for inclusive learning
-- ✅ **Performance Optimized**: Fast loading times and smooth interactions
+- **Responsive Design**: Mobile-first, fully responsive interface
+- **Modern UI/UX**: Clean, intuitive design with Tailwind CSS
+- **Dark/Light Theme**: Customizable interface themes
+- **Accessibility**: WCAG compliant design for inclusive learning
+- **Performance Optimized**: Fast loading times and smooth interactions
 
 </details>
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 <details>
 <summary><strong>Click to expand project structure</strong></summary>
@@ -183,7 +183,7 @@ VaurLis-Educations/
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 <div align="center">
 
@@ -212,11 +212,11 @@ VaurLis-Educations/
 
 ---
 
-## 📸 Features Showcase
+## Features Showcase
 
 <div align="center">
 
-| 🎓 Course Management | 💳 Payments | 🎥 Live Streaming | 🏆 Certificates |
+| Course Management | Payments | Live Streaming | Certificates |
 |:---:|:---:|:---:|:---:|
 | Rich multimedia content | Secure Razorpay integration | Real-time WebRTC streaming | Automated generation |
 | Advanced search & filters | Multiple payment methods | Interactive live sessions | QR code verification |
@@ -232,7 +232,7 @@ VaurLis-Educations/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 <div align="center">
 
@@ -317,11 +317,11 @@ VaurLis-Educations/
 
 ---
 
-## 🎯 Core Features Deep Dive
+## Core Features Deep Dive
 
 <div align="center">
 
-### 📊 Platform Capabilities
+### Platform Capabilities
 
 </div>
 
@@ -353,7 +353,7 @@ VaurLis-Educations/
 
 ---
 
-## 📊 Platform Statistics & Analytics
+## Platform Statistics & Analytics
 
 <div align="center">
 
@@ -383,11 +383,11 @@ VaurLis-Educations/
 
 ---
 
-## 🔒 Security Features
+## Security Features
 
 <div align="center">
 
-### 🋡️ Enterprise-Grade Security
+### Enterprise-Grade Security
 
 </div>
 
@@ -407,7 +407,7 @@ VaurLis-Educations/
 
 ---
 
-## 🌐 API Documentation
+## API Documentation
 
 <div align="center">
 
@@ -416,7 +416,7 @@ VaurLis-Educations/
 </div>
 
 <details>
-<summary><strong>🔑 Authentication Endpoints</strong></summary>
+<summary><strong>Authentication Endpoints</strong></summary>
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -428,7 +428,7 @@ VaurLis-Educations/
 </details>
 
 <details>
-<summary><strong>🎓 Course Management</strong></summary>
+<summary><strong>Course Management</strong></summary>
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -440,7 +440,7 @@ VaurLis-Educations/
 </details>
 
 <details>
-<summary><strong>💳 Payment Processing</strong></summary>
+<summary><strong>Payment Processing</strong></summary>
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -451,7 +451,7 @@ VaurLis-Educations/
 </details>
 
 <details>
-<summary><strong>🎥 Live Streaming</strong></summary>
+<summary><strong>Live Streaming</strong></summary>
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -467,11 +467,11 @@ VaurLis-Educations/
 
 ---
 
-## 🏆 Premium Content & Licensing
+## Premium Content & Licensing
 
 <div align="center">
 
-### 🎓 Educational Excellence Partnership
+### Educational Excellence Partnership
 
 </div>
 
@@ -489,7 +489,7 @@ VaurLis-Educations/
 
 ---
 
-## [DEVOPS] **Deployment & DevOps**
+## Deployment & DevOps
 
 ### **Production Deployment**
 - **Render.com Integration**: Automated deployment pipeline
@@ -505,7 +505,7 @@ VaurLis-Educations/
 
 ---
 
-## [MOBILE] **Mobile Responsiveness**
+## Mobile Responsiveness
 
 ### **Cross-Platform Compatibility**
 - **Mobile-First Design**: Optimized for mobile learning experiences
@@ -515,7 +515,7 @@ VaurLis-Educations/
 
 ---
 
-## [CONTRIBUTE] **Contributing**
+## Contributing
 
 We welcome contributions from the community! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
@@ -534,7 +534,7 @@ We welcome contributions from the community! Please see our [Contributing Guidel
 
 ---
 
-## [LEGAL] **Copyright & Legal**
+## Copyright & Legal
 
 ### **Copyright Notice**
 ```
@@ -562,24 +562,24 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 
 ---
 
-## 🛣️ Roadmap & Future Enhancements
+## Roadmap & Future Enhancements
 
 <div align="center">
 
-### 🚀 Coming Soon
+### Coming Soon
 
 </div>
 
 | Feature | Status | Timeline |
 |---------|--------|----------|
-| 🤖 AI-Powered Recommendations | 🟡 In Development | Q1 2025 |
-| 🌍 Multi-language Support | 🟠 Planning | Q2 2025 |
-| 📊 Advanced Analytics | 🟡 In Development | Q1 2025 |
-| 🎮 Gamification Elements | 🟠 Planning | Q2 2025 |
-| 📱 Mobile Applications | 🟡 In Development | Q3 2025 |
-| 🔗 Blockchain Integration | 🟠 Planning | Q3 2025 |
-| 🎯 Adaptive Learning | 🟠 Planning | Q4 2025 |
-| 💬 Enhanced Communication | 🟡 In Development | Q2 2025 |
+| AI-Powered Recommendations | In Development | Q1 2025 |
+| Multi-language Support | Planning | Q2 2025 |
+| Advanced Analytics | In Development | Q1 2025 |
+| Gamification Elements | Planning | Q2 2025 |
+| Mobile Applications | In Development | Q3 2025 |
+| Blockchain Integration | Planning | Q3 2025 |
+| Adaptive Learning | Planning | Q4 2025 |
+| Enhanced Communication | In Development | Q2 2025 |
 
 ### **Platform Improvements**
 - **Performance Optimization**: Enhanced loading times and responsiveness
@@ -590,18 +590,16 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 
 ---
 
-## [SUPPORT] **Support & Contact**
+## Support & Contact
 
-### **Technical Support**
-- [EMAIL] Email: princesahu17125@gmail.com
-- [BUG] Bug Reports: GitHub Issues
-
-
-- [WEB] Website: https://vaurlis-frontend.onrender.com/
+### Technical Support
+- **Email**: princesahu17125@gmail.com
+- **Bug Reports**: GitHub Issues
+- **Website**: https://vaurlis-frontend.onrender.com/
 
 ---
 
-## [THANKS] **Acknowledgments**
+## Acknowledgments
 
 - **Educational Partners**: MIT, Harvard, and other leading institutions
 - **Technology Partners**: MongoDB, Cloudinary, Razorpay, SendGrid
@@ -611,7 +609,7 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 
 ---
 
-## [VERSION] **Version History**
+## Version History
 
 - **v1.0.0** (Current) - Initial release with core LMS features
 - **v0.9.0** - Beta release with payment integration
@@ -624,9 +622,9 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 
 ---
 
-### 🎆 Built with passion by [@prince7z](https://github.com/prince7z)
+### Built with passion by [@prince7z](https://github.com/prince7z)
 
-**🎓 Transforming Education Through Technology 🚀**
+**Transforming Education Through Technology**
 
 [![Made with TypeScript](https://img.shields.io/badge/Made%20with-TypeScript-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Powered by React](https://img.shields.io/badge/Powered%20by-React-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
@@ -635,6 +633,6 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 
 ---
 
-**⭐ Star this repository if you found it helpful!**
+**Star this repository if you found it helpful!**
 
 </div>
