@@ -317,7 +317,13 @@ VaurLis-Educations/
 
 ---
 
-## [FEATURES] **Core Features Deep Dive**
+## 🎯 Core Features Deep Dive
+
+<div align="center">
+
+### 📊 Platform Capabilities
+
+</div>
 
 ### **Course Management System**
 - **Multi-media Support**: Upload videos, documents, images, and interactive content
@@ -345,7 +351,15 @@ VaurLis-Educations/
 
 ---
 
-## [ANALYTICS] **Platform Statistics & Analytics**
+---
+
+## 📊 Platform Statistics & Analytics
+
+<div align="center">
+
+### Real-time Insights Dashboard
+
+</div>
 
 ### **User Engagement Metrics**
 - Real-time user activity tracking
@@ -367,7 +381,15 @@ VaurLis-Educations/
 
 ---
 
-## [SECURITY] **Security Features**
+---
+
+## 🔒 Security Features
+
+<div align="center">
+
+### 🋡️ Enterprise-Grade Security
+
+</div>
 
 ### **Data Protection**
 - **Encryption**: End-to-end data encryption in transit and at rest
@@ -383,32 +405,75 @@ VaurLis-Educations/
 
 ---
 
-## [API] **API Documentation**
+---
 
-### **Authentication Endpoints**
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User authentication
+## 🌐 API Documentation
+
+<div align="center">
+
+### RESTful API Endpoints
+
+</div>
+
+<details>
+<summary><strong>🔑 Authentication Endpoints</strong></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | User registration |
+| POST | `/api/auth/login` | User authentication |
+| POST | `/api/auth/refresh` | Token refresh |
+| POST | `/api/auth/logout` | User logout |
+
+</details>
+
+<details>
+<summary><strong>🎓 Course Management</strong></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/courses` | Retrieve all courses |
+| POST | `/api/courses` | Create new course |
+| PUT | `/api/courses/:id` | Update course |
+| DELETE | `/api/courses/:id` | Delete course |
+
+</details>
+
+<details>
+<summary><strong>💳 Payment Processing</strong></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/secure/create-order/:courseId` | Create payment order |
+| POST | `/api/secure/verify-payment` | Verify payment signature |
+| GET | `/api/user/transactions` | Get transaction history |
+
+</details>
+
+<details>
+<summary><strong>🎥 Live Streaming</strong></summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/user/schedule/liveclass/:id` | Schedule live session |
+| GET | `/api/user/liveclass/:id` | Get live class details |
+| WS | `/ws` | WebSocket for real-time communication |
+
+</details>
 
 
-### **Course Management**
-- `GET /api/courses` - Retrieve all courses
-- `POST /api/courses` - Create new course
-- `PUT /api/courses/:id` - Update course
-- `DELETE /api/courses/:id` - Delete course
-
-### **Payment Processing**
-- `POST /api/secure/create-order/:courseId` - Create payment order
-- `POST /api/secure/verify-payment` - Verify payment signature
-- `GET /api/user/transactions` - Get transaction history
-
-### **Live Streaming**
-- `POST /api/user/schedule/liveclass/:id` - Schedule live session
-- `GET /api/user/liveclass/:id` - Get live class details
-- WebSocket endpoints for real-time communication
 
 ---
 
-## [PREMIUM] **Premium Content & Licensing**
+---
+
+## 🏆 Premium Content & Licensing
+
+<div align="center">
+
+### 🎓 Educational Excellence Partnership
+
+</div>
 
 ### **Educational Partnerships**
 - **MIT Harvard Creative Content License**: Access to top-tier educational content
@@ -495,17 +560,26 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 
 ---
 
-## [ROADMAP] **Roadmap & Future Enhancements**
+---
 
-### **Upcoming Features**
-- [AI] **AI-Powered Recommendations**: Personalized course suggestions
-- [GLOBAL] **Multi-language Support**: Internationalization and localization
-- [CHARTS] **Advanced Analytics Dashboard**: Enhanced reporting and insights
-- [GAME] **Gamification Elements**: Badges, achievements, and leaderboards
-- [MOBILE] **Mobile Applications**: Native iOS and Android apps
-- [CHAIN] **Blockchain Integration**: Immutable certificate verification
-- [TARGET] **Adaptive Learning**: AI-driven personalized learning paths
-- [CHAT] **Enhanced Communication**: Forums, messaging, and collaboration tools
+## 🛣️ Roadmap & Future Enhancements
+
+<div align="center">
+
+### 🚀 Coming Soon
+
+</div>
+
+| Feature | Status | Timeline |
+|---------|--------|----------|
+| 🤖 AI-Powered Recommendations | 🟡 In Development | Q1 2025 |
+| 🌍 Multi-language Support | 🟠 Planning | Q2 2025 |
+| 📊 Advanced Analytics | 🟡 In Development | Q1 2025 |
+| 🎮 Gamification Elements | 🟠 Planning | Q2 2025 |
+| 📱 Mobile Applications | 🟡 In Development | Q3 2025 |
+| 🔗 Blockchain Integration | 🟠 Planning | Q3 2025 |
+| 🎯 Adaptive Learning | 🟠 Planning | Q4 2025 |
+| 💬 Enhanced Communication | 🟡 In Development | Q2 2025 |
 
 ### **Platform Improvements**
 - **Performance Optimization**: Enhanced loading times and responsiveness
@@ -546,13 +620,21 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 
 ---
 
-*Built with [LOVE] by the @prince7z*
-
-**Transforming Education Through Technology**
+<div align="center">
 
 ---
 
-![Footer](https://img.shields.io/badge/Made%20with-TypeScript-blue)
-![Footer](https://img.shields.io/badge/Powered%20by-React-blue)
-![Footer](https://img.shields.io/badge/Database-MongoDB-green)
-![Footer](https://img.shields.io/badge/Deployment-Render-purple)
+### 🎆 Built with passion by [@prince7z](https://github.com/prince7z)
+
+**🎓 Transforming Education Through Technology 🚀**
+
+[![Made with TypeScript](https://img.shields.io/badge/Made%20with-TypeScript-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Powered by React](https://img.shields.io/badge/Powered%20by-React-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
+[![Database MongoDB](https://img.shields.io/badge/Database-MongoDB-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![Deployment Render](https://img.shields.io/badge/Deployment-Render-purple?style=for-the-badge&logo=render)](https://render.com/)
+
+---
+
+**⭐ Star this repository if you found it helpful!**
+
+</div>
