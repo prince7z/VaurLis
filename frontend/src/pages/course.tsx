@@ -1,5 +1,5 @@
-import { useRecoilValueLoadable, useRecoilState } from 'recoil';
-import { CourseState, CourseReview, userState } from '../Component/atoms/atoms';
+import { useRecoilValueLoadable, useRecoilState, useRecoilValue } from 'recoil';
+import { CourseState, CourseReview, userState, userSelector } from '../Component/atoms/atoms';
 import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import ReviewItem from '../Component/review';
@@ -38,6 +38,8 @@ interface Review {
 
 export default function Course() {
     const { id: courseIdParam } = useParams();
+    const user = useRecoilValue(userSelector);
+    
 
     const courseId = courseIdParam || '';
     const courseLoadable = useRecoilValueLoadable(CourseState(courseId));
@@ -45,12 +47,17 @@ export default function Course() {
     const reviewLoadable = useRecoilValueLoadable(CourseReview(courseId));
     const reviews = reviewLoadable.state === "hasValue" ? reviewLoadable.contents : [];
 
+
+
     if (!courseId) return <div className="flex justify-center items-center min-h-screen">Course ID is missing</div>;
     if (courseLoadable.state === "loading") return <div className="flex justify-center items-center min-h-screen">Loading details...</div>;
     if (courseLoadable.state === "hasError") return <div className="flex justify-center items-center min-h-screen">Error loading course. Please try logging in again.</div>;
     if (reviewLoadable.state === "hasError") return <div className="flex justify-center items-center min-h-screen">Error loading reviews</div>;
     if (reviewLoadable.state === "loading") return <div className="flex justify-center items-center min-h-screen">Loading reviews...</div>;
     if (!course) return <div className="flex justify-center items-center min-h-screen">Course not found</div>;
+
+
+
     return (
         <div className="max-w-4xl mx-auto p-6">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -83,7 +90,7 @@ export default function Course() {
                     <div className="flex gap-4 mb-8">
                         {(course.Role === 'pur' || course.Role === 'owns') && <a href={`/course/content/${courseId}`} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">View Recorded Content</a>}
                          {course.Role ==='pur'&& <a href={`/course/live/${courseId}`} className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Go Live</a>}
-                        {course.Role === '!pur' && <a href={`/course/purchase/${courseId}`}  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Enroll Now</a>}
+                        {course.Role === '!pur' && <a href={user.username=="guest" ? '/login' : `/course/purchase/${courseId}`}  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Enroll Now</a>}
                         {course.Role === 'owns' && <a href={`/course/update/${courseId}`} className="px-6 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">Update Course</a>}
                         {course.Role === 'owns' && <a href={`/course/live/${courseId}`} className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">Shedule LiveClass</a>}
                         {course.Role ==='pur'&& <a href={`/course/certificate/${courseId}`} className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Claim Certificate</a>}

@@ -1,6 +1,6 @@
 import  { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import z, { set } from "zod";
+import z  from "zod";
 import { Button, TextField } from "@mui/material";
 import { useRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
@@ -474,12 +474,12 @@ function checkUsername(username: string) {
 const debouncedCheck = useMemo(() => debounce(checkUsername, 500), []);
 
 useEffect(() => {
-  if (username.length >= 4)
+  if (username.length >= 4 && !username.includes(" ") )
   debouncedCheck(username);
 }, [username]);
  
 
-  const isValid = username.length >= 4 && available && password.length >= 6 && confirmPass === password && !isRateLimited;
+  const isValid = username.length >= 4 && !username.includes(" ") && available && password.length >= 6 && confirmPass === password && !isRateLimited;
 
   return (
     <div>
@@ -487,9 +487,11 @@ useEffect(() => {
       <div style={{ padding: '20px', marginTop: '30px' }}>
         <TextField
           label="Username"
-          color={username.length < 4 || isRateLimited ? "error" : available ? "primary" : "error"}
+          color={username.length < 4 || isRateLimited || username.includes(" ")  ? "error" : available ? "primary" : "error"}
           helperText={
-            isRateLimited 
+            username.includes(" ")
+            ? "Username cannot contain spaces"
+            : isRateLimited 
               ? `Too many attempts. Retry in ${formatTime(remainingTime)}`
               : username.length < 4 
                 ? "Username must be at least 4 characters" 
