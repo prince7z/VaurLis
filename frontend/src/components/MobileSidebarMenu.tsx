@@ -36,7 +36,7 @@ const ProfileIcon = ({ className, user }: { className?: string; user: any }) => 
   }
   return (
     <img
-      src={user.img || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+      src={user.img ? user.img : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
       className={`${className} rounded-full object-cover`}
       alt="User Avatar"
       style={{ width: '20px', height: '20px' }}

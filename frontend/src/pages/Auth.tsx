@@ -2,11 +2,12 @@ import  { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import z  from "zod";
 import { Button, TextField } from "@mui/material";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilRefresher_UNSTABLE } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { atom } from "recoil";
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_URL } from "../config/api";
+import { userSelector } from "../Component/atoms/atoms";
 
 interface ToastProps {
   message: string;
@@ -43,6 +44,9 @@ export default function AuthPage() {
   const [Error, SetError] = useRecoilState(ErrorAtom);
   const [rateLimitExpiry, setRateLimitExpiry] = useRecoilState(RateLimitAtom);
   
+  // Add refresher to update user data after login
+  const refreshUser = useRecoilRefresher_UNSTABLE(userSelector);
+  
   // Shared toast function
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type, isVisible: true });
@@ -75,7 +79,10 @@ export default function AuthPage() {
       if (res.status === 200) {
         localStorage.setItem("token", res.data.token);
         showToast("Logged in successfully!", "success");
-        setTimeout(() => window.location.href = '/', 1000);
+        
+        refreshUser();
+        
+        setTimeout(() => window.location.href = '/courses', 1000);
       }
     } catch (err: any) {
       console.error("Login failed:", err);
@@ -139,15 +146,19 @@ export default function AuthPage() {
         const token = res.data.token;
         localStorage.setItem("token", token);
         showToast("OTP verified successfully!", "success");
-
+        
+        // Refresh user selector to update sidebar immediately
+        refreshUser();
+        
         setTimeout(() => {
-          navigate('/');
+          navigate('/courses');
         }, 1500);
       }
       if (step === "reset" && res.status === 200) {
         showToast("Password reset successfully!", "success");
+                
         setTimeout(() => {
-          window.location.reload();
+          setStep("login");
         }, 1500);
       }
     } catch (err: any) {
@@ -381,6 +392,22 @@ function LoginForm({ email, password, setPassword, onLogin, onSendOTP, rateLimit
         disabled={isRateLimited}
       />
       <br />
+      <a 
+        onClick={isRateLimited ? undefined : ()=>{onSendOTP()
+          setStep("reset")
+        }}
+        style={{ 
+          marginTop: 10, 
+          cursor: isRateLimited ? 'not-allowed' : 'pointer', 
+          display: 'block', 
+          textAlign: 'right',
+          opacity: isRateLimited ? 0.5 : 1,
+          pointerEvents: isRateLimited ? 'none' : 'auto'
+        }}
+      >
+        Forget Password..
+      </a>
+
       <Button 
         onClick={onLogin}
         disabled={isRateLimited || password.length < 6}
@@ -390,17 +417,7 @@ function LoginForm({ email, password, setPassword, onLogin, onSendOTP, rateLimit
       >
         {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'Login'}
       </Button>
-      <Button 
-        onClick={()=>{onSendOTP()
-          setStep("reset")
-        }}
-        disabled={isRateLimited}
-        variant="outlined"
-        fullWidth
-        style={{ marginTop: 10 }}
-      >
-        Forget Password..
-      </Button>
+
     </div>
   );
 }
