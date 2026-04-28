@@ -1,13 +1,13 @@
 import  { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import z  from "zod";
-import { Button, TextField } from "@mui/material";
 import { useRecoilState, useRecoilRefresher_UNSTABLE } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { atom } from "recoil";
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_URL } from "../config/api";
 import { userSelector } from "../Component/atoms/atoms";
+import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 interface ToastProps {
   message: string;
@@ -125,27 +125,20 @@ export default function AuthPage() {
     }
   };
 
-  // Verify OTP
-  const handleVerifyOTP = async () => {
+  // Handle Registration without OTP
+  const handleRegister = async () => {
     try {
-      if (step === "register" && (username.length >= 4 && password.length >= 6 && confirmPass === password)) {
-        
-      }
-      const res = await axios.post(`${API_URL}/api/auth/verify-otp`, {
+      const res = await axios.post(`${API_URL}/api/auth/signup`, {
         email,
         username,
         password,
-        otp,
-        work: step
-
       });
 
-      
-      if (res.status === 200 && step !== "reset") {
-        // Get token from response body (not headers)
+      if (res.status === 200 || res.status === 201) {
+        // Get token from response body
         const token = res.data.token;
         localStorage.setItem("token", token);
-        showToast("OTP verified successfully!", "success");
+        showToast("Account created successfully!", "success");
         
         // Refresh user selector to update sidebar immediately
         refreshUser();
@@ -154,15 +147,37 @@ export default function AuthPage() {
           navigate('/courses');
         }, 1500);
       }
+    } catch (err: any) {
+      if (err.response?.status === 429) {
+        const expiryTime = Date.now() + 2 * 60 * 1000;
+        setRateLimitExpiry(expiryTime);
+        showToast("Too many attempts. Please wait 2 minutes.", "error");
+      } else if (err.response?.status === 400) {
+        showToast(err.response?.data?.error || "Registration failed.", "error");
+      } else if (err.response?.status === 409) {
+        showToast("Email or username already exists.", "error");
+      } else {
+        showToast("Registration failed. Please try again.", "error");
+      }
+    }
+  };
+
+  // Verify OTP (only for password reset)
+  const handleVerifyOTP = async () => {
+    try {
+      const res = await axios.post(`${API_URL}/api/auth/verify-otp`, {
+        email,
+        otp,
+        work: step
+      });
+
       if (step === "reset" && res.status === 200) {
         showToast("Password reset successfully!", "success");
-                
         setTimeout(() => {
           setStep("login");
         }, 1500);
       }
     } catch (err: any) {
-      
       if (err.response?.status === 401) {
         showToast("Invalid OTP. Please try again.", "error");
       } else if (err.response?.status === 404) {
@@ -173,7 +188,6 @@ export default function AuthPage() {
         showToast("Too many attempts. Request a new OTP.", "error");
         const expiryTime = Date.now() + 2 * 60 * 1000;
         setRateLimitExpiry(expiryTime);
-
       } else if (err.response?.status === 400) {
         showToast(err.response?.data?.error || "Verification failed.", "error");
       } else {
@@ -184,62 +198,61 @@ export default function AuthPage() {
     
         
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ padding: 20 }}>
-      {step === "email" && (
-        <EmailForm 
-          email={email}
-          setEmail={setEmail}
-          onNext={handleEmailSubmit} 
-        />
-      )}
-      
-      {step === "login" && (
-        <LoginForm 
-          email={email}
-          password={password}
-          setStep={setStep}
-          setPassword={setPassword}
-          onLogin={handleLogin}
-          onSendOTP={handleSendOTP}
-          rateLimitExpiry={rateLimitExpiry}
-          error={Error}
-          setError={SetError}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center px-4 py-12">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        {step === "email" && (
+          <EmailForm 
+            email={email}
+            setEmail={setEmail}
+            onNext={handleEmailSubmit} 
+          />
+        )}
+        
+        {step === "login" && (
+          <LoginForm 
+            email={email}
+            password={password}
+            setStep={setStep}
+            setPassword={setPassword}
+            onLogin={handleLogin}
+            rateLimitExpiry={rateLimitExpiry}
+            error={Error}
+            setError={SetError}
+          />
+        )}
+        {step === "reset" && (
+          <ResetForm
+            email={email}
+            password={password}
+            setPassword={setPassword}
+            otp={otp}
+            setOtp={setOtp}
+            onResetPassword={handleVerifyOTP}
+            onSendOTP={handleSendOTP}
+            rateLimitExpiry={rateLimitExpiry}
+            isOtpSent={isOtpSent}
+          />
+        )}
 
-        />
-      )}
-      {step === "reset" && (
-        <ResetForm
-          email={email}
-          password={password}
-          setPassword={setPassword}
-          otp={otp}
-          setOtp={setOtp}
-          onResetPassword={handleVerifyOTP}
-          onSendOTP={handleSendOTP}
-          rateLimitExpiry={rateLimitExpiry}
-          isOtpSent={isOtpSent}
-        />
-      )}
-
-      {step === "register" && (
-        <RegisterForm 
-          email={email}
-          username={username}
-          setUsername={setUsername}
-          password={password}
-          setPassword={setPassword}
-          confirmPass={confirmPass}
-          setConfirmPass={setConfirmPass}
-          onRegister={handleSendOTP}
-          rateLimitExpiry={rateLimitExpiry}
-          otp={otp}
-          setOtp={setOtp}
-          onRegister2={handleVerifyOTP}
-          isOtpSent={isOtpSent}
-        />
-      )}
-
-
+        {step === "register" && (
+          <RegisterForm 
+            email={email}
+            username={username}
+            setUsername={setUsername}
+            password={password}
+            setPassword={setPassword}
+            confirmPass={confirmPass}
+            setConfirmPass={setConfirmPass}
+            onRegister={handleRegister}
+            rateLimitExpiry={rateLimitExpiry}
+          />
+        )}
+      </motion.div>
 
       <AnimatePresence>
         {toast.isVisible && (
@@ -247,9 +260,9 @@ export default function AuthPage() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
-              toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            } text-white z-50`}
+            className={`fixed bottom-4 right-4 px-6 py-4 rounded-lg shadow-xl backdrop-blur-sm ${
+              toast.type === 'success' ? 'bg-green-500/90' : 'bg-red-500/90'
+            } text-white z-50 font-medium`}
           >
             {toast.message}
           </motion.div>
@@ -313,32 +326,51 @@ function EmailForm({ email, setEmail, onNext }: EmailFormProps) {
   };
 
   return (
-    <div>
-      <h3>Enter your Email</h3>
-      <TextField
-        label="Email"
-        type="email"
-        fullWidth
-        variant="outlined"
-        margin="normal"
-        placeholder="Email"
-        helperText={error}
-        color={emailSchema.safeParse(email).success ? "primary" : "error"}
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
-          setError(emailSchema.safeParse(e.target.value).success ? "" : "Enter a valid email");
-        }}
-      />
-      <br />
-      <Button
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-2xl shadow-2xl p-8 space-y-6"
+    >
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+        <p className="text-gray-600 text-sm">Enter your email to continue</p>
+      </div>
+
+      {/* Email Input */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">Email Address</label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-3.5 text-gray-400" size={20} />
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setError(emailSchema.safeParse(e.target.value).success ? "" : "");
+            }}
+            className={`w-full pl-10 pr-4 py-3 rounded-lg border-2 transition-colors focus:outline-none ${
+              error || (!emailSchema.safeParse(email).success && email)
+                ? "border-red-500 focus:border-red-500 bg-red-50"
+                : "border-gray-300 focus:border-slate-600 bg-gray-50"
+            }`}
+          />
+        </div>
+        {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
+      </div>
+
+      {/* Submit Button */}
+      <button
         disabled={!email || !emailSchema.safeParse(email).success}
-        variant="contained"
         onClick={handleNext}
+        className="w-full bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-800 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg"
       >
-        Next
-      </Button>
-    </div>
+        Continue
+      </button>
+    </motion.div>
   );
 }
 
@@ -347,78 +379,116 @@ interface LoginFormProps {
   password: string;
   setPassword: (password: string) => void;
   onLogin: () => void;
-  onSendOTP: () => void;
   rateLimitExpiry: number | null;
   error: number | null;
   setError: (error: number | null) => void;
   setStep: (step: Step) => void;
 }
-interface ResetFormProps {
-  email: string;
-  password: string;
-  setPassword: (password: string) => void;
-  otp: string;
-  setOtp: (otp: string) => void;
-  onResetPassword: () => void;
-  onSendOTP: () => void;
-  rateLimitExpiry: number | null;
-  isOtpSent: boolean;
-}
-function LoginForm({ email, password, setPassword, onLogin, onSendOTP, rateLimitExpiry, error, setError, setStep }: LoginFormProps) {
+
+function LoginForm({ email, password, setPassword, onLogin, rateLimitExpiry, error, setError, setStep }: LoginFormProps) {
   const { remainingTime, formatTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleReset = () => {
+    setStep("email");
+    setPassword("");
+    setError(null);
+  };
 
   return (
-    <div>
-      <h3>Welcome back, {email}</h3>
-      <TextField
-        label="Password"
-        type="password"
-        color={password.length < 6 || error !== null || isRateLimited ? "error" : "primary"}
-        helperText={
-          isRateLimited 
-            ? `Too many attempts. Retry in ${formatTime(remainingTime)}` 
-            : password.length < 6 
-              ? "Password must be at least 6 characters" 
-              : error === 401
-                ? "Incorrect Password" 
-                : ""
-        }
-        fullWidth
-        value={password}
-        onChange={(e) => {
-          setPassword(e.target.value);
-          setError(null);
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-2xl shadow-2xl p-8 space-y-6"
+    >
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
+        <p className="text-gray-600 text-sm">{email}</p>
+      </div>
+
+      {/* Password Input */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">Password</label>
+        <div className="relative">
+          <Lock className="absolute left-3 top-3.5 text-gray-400" size={20} />
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setError(null);
+            }}
+            disabled={isRateLimited}
+            className={`w-full pl-10 pr-12 py-3 rounded-lg border-2 transition-colors focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
+              (password.length < 6 && password) || error === 401
+                ? "border-red-500 focus:border-red-500 bg-red-50"
+                : "border-gray-300 focus:border-slate-600 bg-gray-50"
+            }`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+        {error === 401 && <p className="text-sm text-red-600 font-medium">Incorrect password. Please try again.</p>}
+        {password.length < 6 && password && <p className="text-sm text-red-600 font-medium">Password must be at least 6 characters</p>}
+      </div>
+
+      {/* Forgot Password Link */}
+      <button
+        onClick={() => {
+          handleReset();
         }}
         disabled={isRateLimited}
-      />
-      <br />
-      <a 
-        onClick={isRateLimited ? undefined : ()=>{onSendOTP()
-          setStep("reset")
-        }}
-        style={{ 
-          marginTop: 10, 
-          cursor: isRateLimited ? 'not-allowed' : 'pointer', 
-          display: 'block', 
-          textAlign: 'right',
-          opacity: isRateLimited ? 0.5 : 1,
-          pointerEvents: isRateLimited ? 'none' : 'auto'
-        }}
+        className="text-slate-600 hover:text-slate-700 text-sm font-semibold transition-colors disabled:text-gray-400 disabled:cursor-not-allowed"
       >
-        Forget Password..
-      </a>
+        Forgot password?
+      </button>
 
-      <Button 
+      {/* Rate Limit Warning */}
+      {isRateLimited && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-red-50 border border-red-200 rounded-lg p-4"
+        >
+          <p className="text-sm text-red-700 font-medium">
+            Too many attempts. Please wait {formatTime(remainingTime)}
+          </p>
+        </motion.div>
+      )}
+
+      {/* Login Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onLogin}
         disabled={isRateLimited || password.length < 6}
-        variant="contained"
-        fullWidth
-        style={{ marginTop: 10 }}
+        className="w-full bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-800 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all shadow-lg"
       >
         {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'Login'}
-      </Button>
+      </motion.button>
 
-    </div>
+      {/* Sign Up Link */}
+      <div className="text-center">
+        <p className="text-gray-600 text-sm">
+          Don't have an account?{' '}
+          <button
+            onClick={() => setStep("email")}
+            className="text-slate-600 hover:text-slate-700 font-semibold transition-colors"
+          >
+            Sign up
+          </button>
+        </p>
+      </div>
+    </motion.div>
   );
 }
 
@@ -432,11 +502,6 @@ interface RegisterFormProps {
   setConfirmPass: (confirmPass: string) => void;
   onRegister: () => void;
   rateLimitExpiry: number | null;
-  otp: string;
-  setOtp: (otp: string) => void;
-  onRegister2: () => void;
-  isOtpSent: boolean;
-
 }
 
 function RegisterForm({
@@ -448,211 +513,350 @@ function RegisterForm({
   confirmPass,
   setConfirmPass,
   onRegister,
-  rateLimitExpiry,
-  otp,
-  setOtp,
-  onRegister2,
-  isOtpSent
+  rateLimitExpiry
 }: RegisterFormProps) {
   const [available, setAvailable] = useState<boolean | null>(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { remainingTime, formatTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
 
-
-function debounce(func: Function, delay: number): Function {
-   let timer: ReturnType<typeof setTimeout>;
-
-  return (...args: any[]) => {
-    clearTimeout(timer);         
-    timer = setTimeout(() => {   
-      func(...args); 
-    }, delay);
-  };
-}
-
-
-function checkUsername(username: string) {
-
-    console.log("Checking:", username);
-
-      const fetchUsername = async () => {
-        try {
-          const exist = await axios.get(`${API_URL}/api/user/check-username?username=${username}`);
-          setAvailable(exist.data.available);
-          console.log("Available:", exist.data.available);
-        } catch (error) {
-          console.error('Error checking username:', error);
-          setAvailable(false);
-        }
-      }
-      fetchUsername();
-    
+  function debounce(func: Function, delay: number): Function {
+    let timer: ReturnType<typeof setTimeout>;
+    return (...args: any[]) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
   }
 
-const debouncedCheck = useMemo(() => debounce(checkUsername, 500), []);
+  function checkUsername(username: string) {
+    const fetchUsername = async () => {
+      try {
+        const exist = await axios.get(`${API_URL}/api/user/check-username?username=${username}`);
+        setAvailable(exist.data.available);
+      } catch (error) {
+        console.error('Error checking username:', error);
+        setAvailable(false);
+      }
+    };
+    fetchUsername();
+  }
 
-useEffect(() => {
-  if (username.length >= 4 && !username.includes(" ") )
-  debouncedCheck(username);
-}, [username]);
- 
+  const debouncedCheck = useMemo(() => debounce(checkUsername, 500), []);
+
+  useEffect(() => {
+    if (username.length >= 4 && !username.includes(" ")) {
+      debouncedCheck(username);
+    }
+  }, [username]);
 
   const isValid = username.length >= 4 && !username.includes(" ") && available && password.length >= 6 && confirmPass === password && !isRateLimited;
 
   return (
-    <div>
-      <h3>Create account with {email}</h3>
-      <div style={{ padding: '20px', marginTop: '30px' }}>
-        <TextField
-          label="Username"
-          color={username.length < 4 || isRateLimited || username.includes(" ")  ? "error" : available ? "primary" : "error"}
-          helperText={
-            username.includes(" ")
-            ? "Username cannot contain spaces"
-            : isRateLimited 
-              ? `Too many attempts. Retry in ${formatTime(remainingTime)}`
-              : username.length < 4 
-                ? "Username must be at least 4 characters" 
-                : available 
-                  ? "Username is available" 
-                  : "Username is taken"
-          }
-          fullWidth
-          variant="outlined"
-          margin="normal"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          disabled={isRateLimited}
-        />
-        
-        <TextField
-          label="Password"
-          type="password"
-          color={password.length < 6 || isRateLimited ? "error" : "primary"}
-          helperText={password.length < 6 ? "Password must be at least 6 characters" : ""}
-          fullWidth
-          variant="outlined"
-          margin="normal"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={isRateLimited}
-        />
-        
-        <TextField
-          label="Confirm Password"
-          type="password"
-          color={confirmPass !== password || isRateLimited ? "error" : "primary"}
-          helperText={confirmPass === password ? "" : "Passwords do not match"}
-          fullWidth
-          variant="outlined"
-          margin="normal"
-          placeholder="Confirm Password"
-          value={confirmPass}
-          onChange={(e) => setConfirmPass(e.target.value)}
-          disabled={isRateLimited}
-        />
-        
-        <Button
-          onClick={() => {onRegister();}}
-          variant="contained"
-          fullWidth
-          disabled={!isValid}
-          style={{ marginTop: 10 }}
-        >
-          {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'Get OTP'}
-        </Button>
-
-        <TextField
-          label="Enter OTP"
-          type="text"
-          color={otp.length !== 6 ? "error" : "primary"}
-          helperText={otp.length === 6 ? "" : "OTP must be 6 digits"}
-          fullWidth
-          disabled={!isOtpSent || isRateLimited}
-          variant="outlined"
-          margin="normal"
-          placeholder="Enter OTP"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          
-        />
-        <Button
-          onClick={() => {onRegister2();}}
-          variant="contained"
-          fullWidth
-          disabled={otp.length !== 6 || isRateLimited || !isOtpSent}
-          style={{ marginTop: 10 }}
-        >
-          {isRateLimited ? `Wait ${formatTime(remainingTime)}` : 'Register'}
-        </Button>
-
-
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-2xl shadow-2xl p-8 space-y-5"
+    >
+      {/* Header */}
+      <div className="text-center space-y-1">
+        <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
+        <p className="text-gray-600 text-sm">{email}</p>
       </div>
-    </div>
+
+      {/* Username Input */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">Username</label>
+        <div className="relative">
+          <User className="absolute left-3 top-3.5 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Choose a username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            disabled={isRateLimited}
+            className={`w-full pl-10 pr-4 py-3 rounded-lg border-2 transition-colors focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
+              username.includes(" ") || (username.length >= 4 && !available)
+                ? "border-red-500 focus:border-red-500 bg-red-50"
+                : username.length >= 4 && available
+                ? "border-green-500 focus:border-green-500 bg-green-50"
+                : "border-gray-300 focus:border-slate-600 bg-gray-50"
+            }`}
+          />
+        </div>
+        <div className="text-xs">
+          {username.includes(" ") && <p className="text-red-600 font-medium">Username cannot contain spaces</p>}
+          {username.length < 4 && username && <p className="text-gray-600">At least 4 characters needed</p>}
+          {username.length >= 4 && available && <p className="text-green-600 font-medium">✓ Username available</p>}
+          {username.length >= 4 && !available && <p className="text-red-600 font-medium">Username already taken</p>}
+        </div>
+      </div>
+
+      {/* Password Input */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">Password</label>
+        <div className="relative">
+          <Lock className="absolute left-3 top-3.5 text-gray-400" size={20} />
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Create a strong password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isRateLimited}
+            className={`w-full pl-10 pr-12 py-3 rounded-lg border-2 transition-colors focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
+              password.length < 6 && password
+                ? "border-red-500 focus:border-red-500 bg-red-50"
+                : "border-gray-300 focus:border-slate-600 bg-gray-50"
+            }`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+        {password.length < 6 && password && <p className="text-xs text-red-600 font-medium">At least 6 characters</p>}
+      </div>
+
+      {/* Confirm Password Input */}
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700">Confirm Password</label>
+        <div className="relative">
+          <Lock className="absolute left-3 top-3.5 text-gray-400" size={20} />
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm your password"
+            value={confirmPass}
+            onChange={(e) => setConfirmPass(e.target.value)}
+            disabled={isRateLimited}
+            className={`w-full pl-10 pr-12 py-3 rounded-lg border-2 transition-colors focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed ${
+              confirmPass !== password && confirmPass
+                ? "border-red-500 focus:border-red-500 bg-red-50"
+                : "border-gray-300 focus:border-slate-600 bg-gray-50"
+            }`}
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+          >
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+        {confirmPass !== password && confirmPass && <p className="text-xs text-red-600 font-medium">Passwords don't match</p>}
+      </div>
+
+      {/* Rate Limit Warning */}
+      {isRateLimited && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-red-50 border border-red-200 rounded-lg p-3"
+        >
+          <p className="text-sm text-red-700 font-medium">
+            Too many attempts. Please wait {formatTime(remainingTime)}
+          </p>
+        </motion.div>
+      )}
+
+      {/* Register Button - Direct registration without OTP */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => onRegister()}
+        disabled={!isValid}
+        className="w-full bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-800 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all shadow-lg"
+      >
+        Create Account
+      </motion.button>
+
+      {/* Sign In Link */}
+      <div className="text-center">
+        <p className="text-gray-600 text-sm">
+          Already have an account?{' '}
+          <button
+            onClick={() => {
+              setUsername('');
+              setPassword('');
+              setConfirmPass('');
+            }}
+            className="text-slate-600 hover:text-slate-700 font-semibold transition-colors"
+          >
+            Sign in
+          </button>
+        </p>
+      </div>
+    </motion.div>
   );
 }
 
 
-function ResetForm({ email, password, setPassword, otp, setOtp, onResetPassword, onSendOTP, rateLimitExpiry,isOtpSent }: ResetFormProps) {
+interface ResetFormProps {
+  email: string;
+  password: string;
+  setPassword: (password: string) => void;
+  otp: string;
+  setOtp: (otp: string) => void;
+  onResetPassword: () => void;
+  onSendOTP: () => void;
+  rateLimitExpiry: number | null;
+  isOtpSent: boolean;
+}
+
+function ResetForm({ email, password, setPassword, otp, setOtp, onResetPassword, onSendOTP, rateLimitExpiry, isOtpSent }: ResetFormProps) {
   const [newPassword, setNewPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const { remainingTime, formatTime: formatRateLimitTime, isRateLimited } = useRateLimitTimer(rateLimitExpiry);
 
   return (
-    <div className="flex flex-col">
-      <div>Reset Form</div>
-      <h3>Reset Password for {email}</h3>
-      <h4>OTP has been sent</h4>
-      <TextField
-        label="New Password"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <TextField
-        label="Confirm Password"
-        variant="outlined"
-        fullWidth
-        color={password === newPassword ? "primary" : "error"}
-        margin="normal"
-        type="password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-      />
-      <TextField
-        label="OTP"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={otp}
-        onChange={(e) => setOtp(e.target.value)}
-        disabled={!isOtpSent}
-      />
-      {isRateLimited && (
-        <div>Too many attempts. Try again later in {formatRateLimitTime(remainingTime)}</div>
-      )}
-      <Button
-        onClick={onResetPassword}
-        variant="contained"
-        fullWidth
-        disabled={isRateLimited || password.length < 6 || password !== newPassword || otp.length < 6}
-        style={{ marginTop: 10 }}
-      >
-        Reset Password
-      </Button>
-      <Button
-        onClick={onSendOTP}
-        variant="outlined"
-        color="primary"
-        fullWidth
-        style={{ marginTop: 10 }}
-      >
-        Resend OTP
-      </Button>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-2xl shadow-2xl p-8 space-y-5"
+    >
+      {/* Header */}
+      <div className="text-center space-y-1">
+        <h1 className="text-3xl font-bold text-gray-900">Reset Password</h1>
+        <p className="text-gray-600 text-sm">{email}</p>
       </div>
-    
+
+      {!isOtpSent ? (
+        <>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-blue-50 border border-blue-200 rounded-lg p-4"
+          >
+            <p className="text-sm text-blue-700 font-medium">Sending OTP to your email...</p>
+          </motion.div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onSendOTP}
+            disabled={isRateLimited}
+            className="w-full bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-800 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all shadow-lg"
+          >
+            {isRateLimited ? `Wait ${formatRateLimitTime(remainingTime)}` : 'Send OTP'}
+          </motion.button>
+        </>
+      ) : (
+        <>
+          {/* New Password Input */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">New Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3.5 text-gray-400" size={20} />
+              <input
+                type={showNewPassword ? "text" : "password"}
+                placeholder="Enter new password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full pl-10 pr-12 py-3 rounded-lg border-2 transition-colors focus:outline-none ${
+                  password.length < 6 && password
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
+                    : "border-gray-300 focus:border-slate-600 bg-gray-50"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+              >
+                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            {password.length < 6 && password && <p className="text-xs text-red-600 font-medium">At least 6 characters</p>}
+          </div>
+
+          {/* Confirm Password Input */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Confirm Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3.5 text-gray-400" size={20} />
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Confirm new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className={`w-full pl-10 pr-12 py-3 rounded-lg border-2 transition-colors focus:outline-none ${
+                  password !== newPassword && newPassword
+                    ? "border-red-500 focus:border-red-500 bg-red-50"
+                    : "border-gray-300 focus:border-slate-600 bg-gray-50"
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+            {password !== newPassword && newPassword && <p className="text-xs text-red-600 font-medium">Passwords don't match</p>}
+          </div>
+
+          {/* OTP Input */}
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700">Verification Code</label>
+            <input
+              type="text"
+              placeholder="Enter 6-digit OTP"
+              maxLength={6}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+              className={`w-full px-4 py-3 rounded-lg border-2 text-center text-2xl tracking-widest font-semibold transition-colors focus:outline-none ${
+                otp.length !== 6 && otp
+                  ? "border-red-500 focus:border-red-500 bg-red-50"
+                  : "border-gray-300 focus:border-slate-600 bg-gray-50"
+              }`}
+            />
+            {otp.length !== 6 && otp && <p className="text-xs text-red-600 font-medium">OTP must be 6 digits</p>}
+          </div>
+
+          {/* Rate Limit Warning */}
+          {isRateLimited && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-red-50 border border-red-200 rounded-lg p-3"
+            >
+              <p className="text-sm text-red-700 font-medium">
+                Too many attempts. Please wait {formatRateLimitTime(remainingTime)}
+              </p>
+            </motion.div>
+          )}
+
+          {/* Reset Button */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onResetPassword}
+            disabled={isRateLimited || password.length < 6 || password !== newPassword || otp.length < 6}
+            className="w-full bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-800 hover:to-slate-700 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all shadow-lg"
+          >
+            Reset Password
+          </motion.button>
+
+          {/* Resend OTP Button */}
+          <button
+            onClick={onSendOTP}
+            disabled={isRateLimited}
+            className="w-full border-2 border-slate-600 text-slate-600 hover:bg-slate-50 disabled:border-gray-400 disabled:text-gray-400 disabled:cursor-not-allowed font-semibold py-3 rounded-lg transition-colors"
+          >
+            Resend OTP
+          </button>
+        </>
+      )}
+    </motion.div>
   );
 }
 

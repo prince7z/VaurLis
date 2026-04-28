@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState, type JSX } from "react";
+import React, { useEffect, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
