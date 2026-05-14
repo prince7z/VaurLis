@@ -27,11 +27,10 @@ app.get('/', (req, res) => {
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://localhost:5174',
+  'http://vaurlis.vercel.app',
   'http://localhost:3000',
   process.env.FRONTEND_URL || 'http://localhost:5173',
-  'https://vaurlis-frontend.onrender.com' // Production frontend
-].filter(Boolean);
+  ].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
