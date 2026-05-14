@@ -15,6 +15,12 @@
   <strong>Transforming Education Through Technology</strong>
 </p>
 
+<p align="center">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Demo Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</p>
+
+> 
+
 </div>
 
 **VaurLis Educations** is a comprehensive, modern Learning Management System (LMS) built with cutting-edge technologies. Our platform provides a seamless learning experience with features ranging from course management to real-time live streaming, payment processing, and certificate generation.
@@ -595,7 +601,7 @@ is strictly prohibited without prior written consent from VaurLis Educations.
 ### Technical Support
 - **Email**: princesahu17125@gmail.com
 - **Bug Reports**: GitHub Issues
-- **Website**: https://vaurlis-frontend.onrender.com/
+- **Website**: https://vaurlis.vercel.app
 
 ---
 

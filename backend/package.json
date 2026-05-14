@@ -1,11 +1,11 @@
 {
-  "name": "coursera",
+  "name": "Vaurlist-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/backend/Server.js",
-    "dev": "nodemon --watch backend --ext ts --exec ts-node backend/Server.ts",
+    "start": "node dist/Server.js",
+    "dev": "nodemon",
     "build": "tsc",
     "postinstall": "tsc"
   },
