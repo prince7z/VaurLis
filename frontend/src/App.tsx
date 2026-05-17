@@ -30,7 +30,7 @@ interface pathElement {
 function App() {
 
 const paths: pathElement[] = [
-  { path: "/home", element: <HomePage /> },
+  { path: "/", element: <HomePage /> },
   { path: "/courses", element: <Courses /> },
   { path: "/purchasedcourses", element: <PurchasedCourses /> },
   { path: "/releasedcourses", element: <ReleasedCourses /> },

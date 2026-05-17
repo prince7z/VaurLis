@@ -13,7 +13,7 @@ router.get ('/allcourses', authlite,  async (req: Request, res: Response) => {
     
 
     const courses = await Course.find({})
-        .select('img name description  price rating tag instructor timestamp').populate({path : 'instructor', select: 'username img' } ).populate({path : 'rating', select: 'rating' })
+        .select('img name description price rating tag instructor timestamp institution').populate({path : 'instructor', select: 'username img' } ).populate({path : 'rating', select: 'rating' })
         .lean()
         .exec();
         
