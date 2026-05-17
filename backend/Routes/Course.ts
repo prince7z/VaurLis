@@ -13,7 +13,7 @@ router.get ('/allcourses', authlite,  async (req: Request, res: Response) => {
     
 
     const courses = await Course.find({})
-        .select('img name description  price rating tag instructor timestamp').populate({path : 'instructor', select: 'username img' } ).populate({path : 'rating', select: 'rating' })
+        .select('img name description price rating tag instructor timestamp institution').populate({path : 'instructor', select: 'username img' } ).populate({path : 'rating', select: 'rating' })
         .lean()
         .exec();
         
@@ -45,8 +45,28 @@ router.get('/cert/:id', auth, async (req: Request, res: Response) => {
     if (!cert) {
         return res.status(404).json({ error: "Certificate not found" });
     }
+    if(!cert.institution){cert.institution = 'VaurLis Educations'};
     res.status(200).json(cert);
 })
+
+
+router.get('/instructorlist', async (req: Request, res: Response) => {
+
+  const instructors =await User.find({rel_courses: { $exists: true, $not: { $size: 0 } } })
+
+  .select('_id username bio img verified').lean().exec();
+
+  if (!instructors || instructors.length === 0) {
+      return res.status(404).json({ message: "No instructors found" });
+  }
+
+  res.status(200).json({
+    message: "Instructors fetched successfully",
+    instructors: instructors
+  });
+
+})
+
 
 router.get('/purchased', auth, async (req: Request, res: Response)=>{
     const user = req.user;
@@ -92,7 +112,7 @@ interface resCourse{
     Role: 'pur'|'!pur'|'owns';
 }
 
-router.get('/:id', auth , async (req: Request, res: Response) => {
+router.get('/:id', authlite,async (req: Request, res: Response) => {
     
     
     const courseId = req.params.id;
@@ -103,15 +123,15 @@ router.get('/:id', auth , async (req: Request, res: Response) => {
       
 
         if(course) {
-           // console.log(course);
 
             let Role: 'pur'|'!pur'|'owns' = '!pur';
+            if (req.user.username!="guest"){
             if((req.user?._id).toString()===(course.instructor)?.toString()){Role = 'owns';}
             else  if(req.user.pur_courses.includes(course._id)){Role = 'pur';}
            
             else {Role = '!pur';}
 
-
+            }
             const instboj = await User.findById(course.instructor).select('username img skills').lean().exec();
                   
            
@@ -313,8 +333,6 @@ router.get('/getcontent/:id', auth, async (req: Request, res: Response) => {
     });
   }
 });
-
-
 
 
         // const reviewid = req.params.id;

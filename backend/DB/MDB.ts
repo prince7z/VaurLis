@@ -1,3 +1,6 @@
+import { time } from 'console';
+import { Verify } from 'crypto';
+import { subscribe } from 'diagnostics_channel';
 import mongoose, { ConnectOptions } from 'mongoose';
 
 
@@ -5,7 +8,7 @@ import mongoose, { ConnectOptions } from 'mongoose';
 
 const { MONGO_URI } = process.env;
 
-
+//const MONGO_URI = "mongodb://localhost:27017/Vaurlis";
 if (!MONGO_URI) {
   throw Error("missing .env");
 }
@@ -18,15 +21,15 @@ mongoose.connect(MONGO_URI, {
 } as ConnectOptions);
 
 mongoose.connection.on('connected', () => {
-  console.log('✅ MongoDB connected successfully');
+  console.log('MongoDB connected successfully');
 });
 
 mongoose.connection.on('error', (err) => {
-  console.error('❌ MongoDB connection error:', err);
+  console.error('MongoDB connection error:', err);
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('⚠️ MongoDB disconnected');
+  console.log('MongoDB disconnected');
 });
 
 const userSchema = new mongoose.Schema({
@@ -40,7 +43,11 @@ const userSchema = new mongoose.Schema({
     bio: String,
     img : String,
     bgimg: String,
+    Verified: { type: Boolean, default: false },
+    subscribers:[{type : mongoose.Schema.Types.ObjectId, ref: "User"}],
+    subscribedTo:[{type : mongoose.Schema.Types.ObjectId, ref: "User"}],
     skills : [String],
+    balance:Number,
     socialLinks:{
       github : String,
       linkedin : String,
@@ -51,12 +58,22 @@ const userSchema = new mongoose.Schema({
     rel_courses : [{type: mongoose.Schema.Types.ObjectId,  ref: "Course" }],
     rated : [{ type: mongoose.Schema.Types.ObjectId, ref: "rating" }]
 });
+const transactonSchema = new mongoose.Schema({
+  From: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  To: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  For : { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
+  status : { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
+  timestamp: { type: Date, default: Date.now },  
+  amount: { type: Number, required: true }
+});
+
+const Transaction = mongoose.model("Transaction", transactonSchema);
 const User = mongoose.model("User", userSchema);
 
 const trackingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
-  videoId: { type: mongoose.Schema.Types.ObjectId, required: true }, // 👈 reference to course.content._id
+  videoId: { type: mongoose.Schema.Types.ObjectId, required: true }, //  reference to course.content._id
 
   finished: { type: Boolean, default: false },
   lastViewedTime: { type: Date, default: Date.now },
@@ -83,13 +100,14 @@ const courseSchema = new mongoose.Schema({
     img:String,
     price:Number,
     duration:String,
+    institution: String,
     rating: [{type: mongoose.Schema.Types.ObjectId, ref: "rating" }],
     instructor: { type: mongoose.Schema.Types.ObjectId,ref: "User" },
       content: [{
     name: { type: String, required: true },     // Lecture title
     link: { type: String, required: true },     // Video URL
-    thumbnail: String,                          // Preview image
-    duration: Number                            // Video length in seconds/minutes
+    thumbnail: String                     // Preview image
+                             // Video length in seconds/minutes
   }],
     act_users : [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     links :[String],
@@ -107,7 +125,8 @@ const CertSchema = new mongoose.Schema({
   name: String,
   instructor: String ,
   duration: String },
-  issuedAt: { type: Date, default: Date.now }
+  institution: String,
+  issuedAt: Date, 
 });
 
 const liveClassSchema = new mongoose.Schema({
@@ -124,6 +143,6 @@ const LiveClass = mongoose.model("LiveClass", liveClassSchema);
 
 const Certificate = mongoose.model("Certificate", CertSchema);
 
-export { User, Course, Rating, Tracking, LiveClass, Certificate };
+export { User, Course, Rating, Tracking, LiveClass, Certificate, Transaction };
 
 

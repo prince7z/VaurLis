@@ -9,7 +9,6 @@ if (!JWT_SECRET) {
   throw new Error("missing .env");
 }
 
-// Extend Express Request interface to include 'user'
 declare global {
   namespace Express {
     interface Request {

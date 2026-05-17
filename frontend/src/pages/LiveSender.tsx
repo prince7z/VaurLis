@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, use } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { API_URL } from '../config/api';
+import { API_URL, WS_URL } from '../config/api';
 
 interface PeerConnection {
   receiverId: string;
@@ -12,7 +12,13 @@ interface ChatMessage {
   message: string;
   senderName: string;
   senderId: string;
+  senderImg?: string;
   timestamp: number;
+}
+interface user {
+  id: string;
+  name: string;
+  img: string;
 }
 export default function LiveSender() {
   const [isStreaming, setIsStreaming] = useState(false);
@@ -30,6 +36,7 @@ export default function LiveSender() {
   const peerConnectionsRef = useRef<PeerConnection[]>([]); // Add ref to avoid closure issues
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { roomId } = useParams();
+  const [user, setUser] = useState<user | null>(null);
 
   useEffect(() => {
     async function checkAuth() {
@@ -43,6 +50,7 @@ export default function LiveSender() {
         
         if (res.status === 200) {
           console.log('Auth check passed:', res.data);
+          setUser(res.data.user);
           setIsAuthChecking(false);
         }
       } catch (error: any) {
@@ -95,7 +103,7 @@ export default function LiveSender() {
       });
       
       streamToUse.getTracks().forEach((track: MediaStreamTrack) => {
-        console.log(`➕ Adding ${track.kind} track during creation:`, {
+        console.log(`Adding ${track.kind} track during creation:`, {
           id: track.id,
           readyState: track.readyState,
           enabled: track.enabled,
@@ -107,13 +115,13 @@ export default function LiveSender() {
       
       // Verify tracks were added
       const senders = peerConnection.getSenders();
-      console.log('✅ Peer connection senders after adding tracks:', 
+      console.log('Peer connection senders after adding tracks:', 
         senders.map(s => ({ 
           track: s.track ? { kind: s.track.kind, readyState: s.track.readyState } : null 
         }))
       );
     } else {
-      console.warn('⚠️ No stream available during peer connection creation');
+      console.warn('No stream available during peer connection creation');
     }
 
     peerConnection.onicecandidate = (event) => {
@@ -139,7 +147,7 @@ export default function LiveSender() {
         audio: true 
       });
       
-      console.log('📹 Camera stream obtained:', {
+      console.log(' Camera stream obtained:', {
         id: stream.id,
         active: stream.active,
         tracks: stream.getTracks().map(t => ({
@@ -154,11 +162,11 @@ export default function LiveSender() {
       setMediaStream(stream);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        console.log('📺 Local video element updated');
+        console.log('Local video element updated');
         
         // Verify local video is working
         videoRef.current.onloadedmetadata = () => {
-          console.log('📹 Local video metadata loaded:', {
+          console.log(' Local video metadata loaded:', {
             videoWidth: videoRef.current?.videoWidth,
             videoHeight: videoRef.current?.videoHeight,
             duration: videoRef.current?.duration
@@ -167,7 +175,7 @@ export default function LiveSender() {
       }
 
       // Connect to WebSocket server
-      const ws = new WebSocket('ws://localhost:8080');
+      const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
       
       ws.onopen = () => {
@@ -206,27 +214,27 @@ export default function LiveSender() {
                   const trackAlreadyAdded = senders.some(sender => sender.track === track);
                   
                   if (!trackAlreadyAdded) {
-                    console.log(`➕ Adding missing ${track.kind} track:`, track.id);
+                    console.log(`Adding missing ${track.kind} track:`, track.id);
                     peerConnection.addTrack(track, mediaStream);
                   } else {
-                    console.log(`✅ ${track.kind} track already added`);
+                    console.log(`${track.kind} track already added`);
                   }
                 });
               } else if (stream && stream.getTracks().length > 0) {
-                console.log('� Using closure stream for tracks...');
+                console.log('Using closure stream for tracks...');
                 stream.getTracks().forEach((track: MediaStreamTrack) => {
                   const senders = peerConnection.getSenders();
                   const trackAlreadyAdded = senders.some(sender => sender.track === track);
                   
                   if (!trackAlreadyAdded) {
-                    console.log(`➕ Adding missing ${track.kind} track:`, track.id);
+                    console.log(`Adding missing ${track.kind} track:`, track.id);
                     peerConnection.addTrack(track, stream);
                   } else {
-                    console.log(`✅ ${track.kind} track already added`);
+                    console.log(`${track.kind} track already added`);
                   }
                 });
               } else {
-                console.error('❌ No tracks available to add!');
+                console.error('No tracks available to add!');
               }
               
               console.log('Creating offer...');
@@ -253,13 +261,13 @@ export default function LiveSender() {
               const peerConn = peerConnectionsRef.current.find(pc => pc.receiverId === message.receiverId);
               if (peerConn) {
                 await peerConn.connection.setRemoteDescription(new RTCSessionDescription(message.sdp));
-                console.log('✅ Answer set as remote description for receiver:', message.receiverId);
+                console.log('Answer set as remote description for receiver:', message.receiverId);
               } else {
-                console.error('❌ Peer connection not found for receiver:', message.receiverId);
+                console.error('Peer connection not found for receiver:', message.receiverId);
                 console.log('Available peer connections:', peerConnectionsRef.current.map(pc => pc.receiverId));
               }
             } catch (error) {
-              console.error('❌ Error setting remote description:', error);
+              console.error('Error setting remote description:', error);
             }
             break;
 
@@ -269,12 +277,12 @@ export default function LiveSender() {
               const targetPeer = peerConnectionsRef.current.find(pc => pc.receiverId === message.receiverId);
               if (targetPeer) {
                 await targetPeer.connection.addIceCandidate(new RTCIceCandidate(message.candidate));
-                console.log('✅ ICE candidate added for receiver:', message.receiverId);
+                console.log('ICE candidate added for receiver:', message.receiverId);
               } else {
-                console.error('❌ Peer connection not found for ICE candidate:', message.receiverId);
+                console.error('Peer connection not found for ICE candidate:', message.receiverId);
               }
             } catch (error) {
-              console.error('❌ Error adding ICE candidate:', error);
+              console.error('Error adding ICE candidate:', error);
             }
             break;
             
@@ -284,6 +292,7 @@ export default function LiveSender() {
               message: message.message,
               senderName: message.senderName,
               senderId: message.senderId,
+              senderImg: message.senderImg,
               timestamp: message.timestamp
             }]);
             break;
@@ -363,7 +372,7 @@ export default function LiveSender() {
           stopScreenShare();
         };
         
-        console.log('✅ Screen sharing started');
+        console.log('Screen sharing started');
       } else {
         stopScreenShare();
       }
@@ -394,16 +403,18 @@ export default function LiveSender() {
       });
     }
     
-    console.log('✅ Screen sharing stopped');
+    console.log('Screen sharing stopped');
   };
   
   const sendChatMessage = () => {
-    if (messageInput.trim() && wsRef.current) {
+    if (messageInput.trim() && wsRef.current && user) {
       wsRef.current.send(JSON.stringify({
         type: 'chat-message',
         roomId: roomId || '68de58f1d2db363ffb370776',
         message: messageInput.trim(),
-        senderName: 'Sender',
+        senderName: user.name,
+        senderId: user.id,
+        senderImg: user.img,
         timestamp: Date.now()
       }));
       setMessageInput('');
@@ -428,7 +439,11 @@ export default function LiveSender() {
     return (
       <div className="flex h-screen bg-gray-900 items-center justify-center">
         <div className="text-center text-white">
-          <div className="text-6xl mb-4">🔒</div>
+          <div className="text-6xl mb-4">
+            <svg className="inline-block w-24 h-24 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
           <h2 className="text-2xl font-bold mb-2">Checking Access...</h2>
           <p className="text-gray-300">Verifying your instructor permissions</p>
         </div>
@@ -441,7 +456,11 @@ export default function LiveSender() {
     return (
       <div className="flex h-screen bg-gray-900 items-center justify-center">
         <div className="text-center text-white max-w-md">
-          <div className="text-6xl mb-4">⚠️</div>
+          <div className="text-6xl mb-4">
+            <svg className="inline-block w-24 h-24 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
           <h2 className="text-2xl font-bold mb-2">{authError}</h2>
           {courseId && (
             <a 
@@ -545,26 +564,55 @@ export default function LiveSender() {
           className="flex-1 overflow-y-auto p-4 space-y-3"
         >
           {chatMessages.length === 0 ? (
-            <p className="text-gray-400 text-center text-sm mt-8">No messages yet...</p>
+            <div className="text-center mt-8">
+              <div className="text-4xl mb-2">💬</div>
+              <p className="text-gray-400 text-sm">No messages yet...</p>
+              <p className="text-gray-500 text-xs mt-1">Start the conversation!</p>
+            </div>
           ) : (
             chatMessages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`p-3 rounded-lg ${
-                  msg.senderId === 'sender'
-                    ? 'bg-blue-600 ml-auto'
-                    : 'bg-gray-700'
-                } max-w-[80%]`}
+                className={`flex gap-2 ${
+                  msg.senderId === user?.id ? 'flex-row-reverse' : 'flex-row'
+                }`}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold text-gray-200">
-                    {msg.senderName}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {new Date(msg.timestamp).toLocaleTimeString()}
-                  </span>
+                {/* Avatar */}
+                <img 
+                  src={msg?.senderImg || 'https://via.placeholder.com/40'} 
+                  alt={msg.senderName} 
+                  className="w-8 h-8 rounded-full flex-shrink-0 mt-1"
+                />
+                
+                {/* Message Bubble */}
+                <div
+                  className={`flex flex-col max-w-[70%] ${
+                    msg.senderId === user?.id ? 'items-end' : 'items-start'
+                  }`}
+                >
+                  {/* Sender Name and Time */}
+                  <div className={`flex items-center gap-2 mb-1 px-1 ${
+                    msg.senderId === user?.id ? 'flex-row-reverse' : 'flex-row'
+                  }`}>
+                                        <a href={`/${msg.senderName}`} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-gray-300">
+                                            {msg.senderName}
+                                        </a>
+                    <span className="text-xs text-gray-500">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  
+                  {/* Message Content */}
+                  <div
+                    className={`px-4 py-2 rounded-2xl ${
+                      msg.senderId === user?.id
+                        ? 'bg-blue-600 rounded-tr-sm'
+                        : 'bg-gray-700 rounded-tl-sm'
+                    }`}
+                  >
+                    <p className="text-white text-sm break-words leading-relaxed">{msg.message}</p>
+                  </div>
                 </div>
-                <p className="text-white text-sm break-words">{msg.message}</p>
               </div>
             ))
           )}

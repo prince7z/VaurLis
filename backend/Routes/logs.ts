@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../DB/MDB';
 import { genotp, storeOtp, verifyOtp ,res} from '../utlis/otpstore';
 import { sendOTPEmail } from '../config/emailService';
-import { ca } from 'zod/v4/locales/index.cjs';
+
 
 
 const router: Router = express.Router();
@@ -44,7 +44,7 @@ router.post('/send-otp',async(req: Request, res: Response) => {
   if(emailResult.success){
     return res.status(200).json({ message: "OTP sent successfully" });
   }
-  return res.status(500).json({ error: "Failed to send OTP" });
+  return res.status(500).json({ error: "Failed to send OTP",res: emailResult});
 });
 
 router.post('/verify-otp', async (req: Request, res: Response) => {
@@ -169,6 +169,8 @@ router.post('/signup', async (req: Request, res: Response) => {
     res.status(201).json({ message: "User created successfully",token : token  });
 
     })
+
+
 export default router;
 
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { API_URL } from '../config/api';
@@ -23,19 +23,24 @@ interface VerificationData {
   __v: number;
 }
 
+
 export default function Verify() {
-    const { certId } = useParams();
+    
+    const [TempcertId, setTempcertid] = useState<string | null>(null);
+    const [certId, setCertId] = useState<string | null>(useParams().certId || null);
     const [data, setData] = useState<VerificationData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        
         const detail = async () => {
             try {
                 const response = await axios.get(`${API_URL}/api/user/verify/${certId}`);
                 setData(response.data);
                 console.log(response.data);
             } catch (err) {
+                console.error('Verification error:', err);
                 setError('Certificate not found or invalid');
             } finally {
                 setLoading(false);
@@ -78,6 +83,8 @@ export default function Verify() {
             day: 'numeric'
         });
     };
+
+  
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12">

@@ -20,6 +20,7 @@ export default function EditProfileDialog(props: any) {
     const [profileFile, setProfileFile] = useState<File | null>(null);
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
+    const [currentSkillInput, setCurrentSkillInput] = useState('');
 
     // Cropping states
     const [cropDialogOpen, setCropDialogOpen] = useState(false);
@@ -72,9 +73,41 @@ export default function EditProfileDialog(props: any) {
     };
 
     const handleSkillsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const skillsString = event.target.value;
-        const skillsArray = skillsString.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
-        setSkills(skillsArray);
+        const value = event.target.value;
+        
+        // Check if space or comma was just typed
+        if (value.endsWith(' ') || value.endsWith(',')) {
+            const trimmedSkill = value.slice(0, -1).trim();
+            if (trimmedSkill && !skills.includes(trimmedSkill)) {
+                setSkills([...skills, trimmedSkill]);
+                setCurrentSkillInput(''); // Clear input after adding skill
+            } else {
+                setCurrentSkillInput(''); // Clear even if duplicate
+            }
+        } else {
+            setCurrentSkillInput(value);
+        }
+    };
+    
+    const handleSkillsKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Backspace' && currentSkillInput === '') {
+            // Remove last skill if backspace is pressed on empty input
+            event.preventDefault();
+            if (skills.length > 0) {
+                setSkills(skills.slice(0, -1));
+            }
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            const trimmedSkill = currentSkillInput.trim();
+            if (trimmedSkill && !skills.includes(trimmedSkill)) {
+                setSkills([...skills, trimmedSkill]);
+                setCurrentSkillInput('');
+            }
+        }
+    };
+    
+    const removeSkill = (skillToRemove: string) => {
+        setSkills(skills.filter(skill => skill !== skillToRemove));
     };
 
     useEffect(() => {
@@ -231,16 +264,71 @@ export default function EditProfileDialog(props: any) {
                         placeholder="Tell us about yourself..."
                     />
 
-                    <TextField
-                        label="Skills"
-                        fullWidth
-                        variant="outlined"
-                        margin="normal"
-                        value={skills.join(', ')}
-                        onChange={handleSkillsChange}
-                        placeholder="Separate skills with commas"
-                        helperText="Add your top skills and expertise"
-                    />
+                    <div style={{ marginTop: '16px', marginBottom: '8px' }}>
+                        <label style={{ fontSize: '12px', color: '#666', marginBottom: '8px', display: 'block' }}>
+                            Skills
+                        </label>
+                        <div style={{ 
+                            border: '1px solid #ccc', 
+                            borderRadius: '4px', 
+                            padding: '8px', 
+                            minHeight: '56px',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '8px',
+                            alignItems: 'center'
+                        }}>
+                            {skills.map((skill, index) => (
+                                <span 
+                                    key={index}
+                                    style={{
+                                        backgroundColor: '#1976d2',
+                                        color: 'white',
+                                        padding: '4px 8px',
+                                        borderRadius: '16px',
+                                        fontSize: '14px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                    }}
+                                >
+                                    {skill}
+                                    <button
+                                        onClick={() => removeSkill(skill)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: 'white',
+                                            cursor: 'pointer',
+                                            padding: '0 2px',
+                                            fontSize: '16px',
+                                            lineHeight: '1'
+                                        }}
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                            <input
+                                type="text"
+                                value={currentSkillInput}
+                                onChange={handleSkillsChange}
+                                onKeyDown={handleSkillsKeyDown}
+                                placeholder={skills.length === 0 ? "Type a skill and press Space or Comma" : "Add more..."}
+                                style={{
+                                    border: 'none',
+                                    outline: 'none',
+                                    flex: 1,
+                                    minWidth: '120px',
+                                    fontSize: '14px',
+                                    padding: '4px'
+                                }}
+                            />
+                        </div>
+                        <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                            Press Space, Comma, or Enter to add a skill. Backspace to remove last skill.
+                        </p>
+                    </div>
                     <h3 style={{ margin: 0 }}>Social Links</h3>
                     {Object.entries(socialLinks).map(([platform, link]) => (
                         <TextField

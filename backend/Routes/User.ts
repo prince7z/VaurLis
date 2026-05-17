@@ -1,5 +1,5 @@
 import express, { Request, Response, Router } from 'express';
-import { User, Tracking, Rating, Certificate, LiveClass ,Course} from '../DB/MDB';
+import { User, Tracking, Rating, Certificate, LiveClass ,Course,Transaction} from '../DB/MDB';
 
 import { auth, authlite } from '../Midware/Mware';
 import z from 'zod';
@@ -74,25 +74,83 @@ const uname = req.params.id;
 
 
     if (req.user.username === uname) {
-        
-    const userData= await User.findById(req.user._id).select('username bio email img bgimg socialLinks skills pur_courses rel_courses ').populate({
+        try {
+    const userData= await User.findById(req.user._id).select('username bio verified email img bgimg socialLinks skills  subscribers subscribedTo pur_courses rel_courses ').populate({
         path: 'rel_courses',
         select: 'img name description price instructor timestamp'
     }).populate({
         path: 'pur_courses',
         select: 'img name description price instructor timestamp'
+    }).populate({
+        path: 'subscribers',
+        select: 'username img'
+    }).populate({
+        path: 'subscribedTo',
+        select: 'username img'
     }).lean().exec();
     
-    const instructorWithRole = { ...userData, role: "owns" };
+    let instructorWithRole: any = { ...userData, role: "owns" };
+
+      
+        const trn_send = await Transaction.find({ From: req.user._id }).populate('To', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        const trn_receive = await Transaction.find({ To: req.user._id }).populate('From', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        
+        const sentTransactions = trn_send.map(trn => ({
+            ...trn,
+            isSentorRecived: 'sent'
+        }));
+        const receivedTransactions = trn_receive.map(trn => ({
+            ...trn,
+            isSentorRecived: 'received'
+        }));
+        
+        // Combine both arrays
+        const allTransactions = [...sentTransactions, ...receivedTransactions];
+
+        instructorWithRole.transactions = allTransactions;
+
+
     res.status(200).json(instructorWithRole);
 
+    }catch (error) {
+        console.error("Error fetching instructor data:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
+}
 
     else {
-        const instructor = await User.findOne({ username: uname }).select('username bio img bgimg skills socialLinks rel_courses').populate({
-        path: 'rel_courses',
-        select: 'img name description price instructor timestamp'
-    }).lean().exec();
+        // use an aggregation to return rel_courses populated and subscribers count (no subscribers array)
+        const instructorAgg = await User.aggregate([
+            { $match: { username: uname } },
+            {
+            $lookup: {
+                from: 'courses', // adjust if your Course collection name differs
+                localField: 'rel_courses',
+                foreignField: '_id',
+                as: 'rel_courses'
+            }
+            },
+            {
+            $project: {
+                username: 1,
+                verified: 1,
+                bio: 1,
+                img: 1,
+                bgimg: 1,
+                skills: 1,
+                socialLinks: 1,
+                'rel_courses.img': 1,
+                'rel_courses.name': 1,
+                'rel_courses.description': 1,
+                'rel_courses.price': 1,
+                'rel_courses.instructor': 1,
+                'rel_courses.timestamp': 1,
+                subscribersCount: { $size: { $ifNull: ['$subscribers', []] } }
+            }
+            }
+        ]).exec();
+
+        const instructor = instructorAgg[0] || null;
     if (!instructor) {
         return res.status(404).json({ error: "Instructor not found" });
     }
@@ -305,10 +363,37 @@ router.get('/checkLive', auth, async (req: Request, res: Response) => {
                 return res.status(402).json({ courseId: room.courseId, message: "Forbidden: You are not a participant" });
             }
         }
+        const user = { id: req.user._id, name: req.user.username, img: req.user.img };
 
-        res.status(200).json({ message: "User is authorized", room });
+        res.status(200).json({ message: "User is authorized", room,user });
     } catch (error) {
         console.error("Error checking live room:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+router.get('/transactions', auth, async (req: Request, res: Response) => {
+    const user = req.user
+
+    try {
+        const trn_send = await Transaction.find({ From: user._id }).populate('To', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        const trn_receive = await Transaction.find({ To: user._id }).populate('From', 'username img').populate('For', 'name').sort({ timestamp: -1 }).lean().exec();
+        
+        const sentTransactions = trn_send.map(trn => ({
+            ...trn,
+            isSentorRecived: 'sent'
+        }));
+        const receivedTransactions = trn_receive.map(trn => ({
+            ...trn,
+            isSentorRecived: 'received'
+        }));
+        
+        // Combine both arrays
+        const transactions = [...sentTransactions, ...receivedTransactions];
+
+        res.status(200).json({ transactions });
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });

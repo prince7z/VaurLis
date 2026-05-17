@@ -1,13 +1,19 @@
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { API_URL } from '../config/api';
+import { API_URL, WS_URL } from '../config/api';
 
 interface ChatMessage {
     message: string;
     senderName: string;
     senderId: string;
+    senderImg?: string;
     timestamp: number;
+}
+interface user {
+  id: string;
+  name: string;
+  img: string;
 }
 
 export default function Reciver() {
@@ -25,6 +31,7 @@ export default function Reciver() {
     const pcRef = useRef<RTCPeerConnection | null>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const {roomId} = useParams();
+    const [user, setUser] = useState<user | null>(null);
     const LID = roomId;
 
       useEffect(() => {
@@ -42,6 +49,7 @@ export default function Reciver() {
         
         if (res.status === 200) {
           console.log('Auth check passed:', res.data);
+          setUser(res.data.user);
           setIsAuthChecking(false);
         }
       } catch (error: any) {
@@ -88,7 +96,7 @@ export default function Reciver() {
 
         const initializeConnection = async () => {
             try {
-                const s = new WebSocket('ws://localhost:8080');
+                const s = new WebSocket(WS_URL);
                 
                 s.onopen = () => {
                     if (mounted) {
@@ -144,6 +152,7 @@ export default function Reciver() {
                                 message: data.message,
                                 senderName: data.senderName,
                                 senderId: data.senderId,
+                                senderImg: data.senderImg,
                                 timestamp: data.timestamp
                             }]);
                         }
@@ -435,12 +444,14 @@ export default function Reciver() {
     };
     
     const sendChatMessage = () => {
-        if (messageInput.trim() && socket) {
+        if (messageInput.trim() && socket && user) {
             socket.send(JSON.stringify({
                 type: 'chat-message',
                 roomId: LID,
                 message: messageInput.trim(),
-                senderName: 'Viewer',
+                senderName: user.name,
+                senderId: user.id,
+                senderImg: user.img,
                 timestamp: Date.now()
             }));
             setMessageInput('');
@@ -553,29 +564,55 @@ export default function Reciver() {
                     className="flex-1 overflow-y-auto p-4 space-y-3"
                 >
                     {chatMessages.length === 0 ? (
-                        <div className="text-center text-gray-400 text-sm mt-8">
-                            <p>No messages yet</p>
-                            <p className="text-xs mt-2">Send a message to start chatting!</p>
+                        <div className="text-center mt-8">
+                            <div className="text-4xl mb-2">💬</div>
+                            <p className="text-gray-400 text-sm">No messages yet...</p>
+                            <p className="text-gray-500 text-xs mt-1">Start the conversation!</p>
                         </div>
                     ) : (
                         chatMessages.map((msg, idx) => (
                             <div
                                 key={idx}
-                                className={`p-3 rounded-lg ${
-                                    msg.senderId === receiverId
-                                        ? 'bg-blue-600 ml-auto'
-                                        : 'bg-gray-700'
-                                } max-w-[85%]`}
+                                className={`flex gap-2 ${
+                                    msg.senderId === user?.id ? 'flex-row-reverse' : 'flex-row'
+                                }`}
                             >
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-xs font-semibold text-gray-200">
-                                        {msg.senderName}
-                                    </span>
-                                    <span className="text-xs text-gray-400">
-                                        {new Date(msg.timestamp).toLocaleTimeString()}
-                                    </span>
+                                {/* Avatar */}
+                                <img 
+                                    src={msg?.senderImg || 'https://via.placeholder.com/40'} 
+                                    alt={msg.senderName} 
+                                    className="w-8 h-8 rounded-full flex-shrink-0 mt-1"
+                                />
+                                
+                                {/* Message Bubble */}
+                                <div
+                                    className={`flex flex-col max-w-[70%] ${
+                                        msg.senderId === user?.id ? 'items-end' : 'items-start'
+                                    }`}
+                                >
+                                   
+                                    <div className={`flex items-center gap-2 mb-1 px-1 ${
+                                        msg.senderId === user?.id ? 'flex-row-reverse' : 'flex-row'
+                                    }`}>
+                                        <a href={`/${msg.senderName}`} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-gray-300">
+                                            {msg.senderName}
+                                        </a>
+                                        <span className="text-xs text-gray-500">
+                                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Message Content */}
+                                    <div
+                                        className={`px-4 py-2 rounded-2xl ${
+                                            msg.senderId === user?.id
+                                                ? 'bg-blue-600 rounded-tr-sm'
+                                                : 'bg-gray-700 rounded-tl-sm'
+                                        }`}
+                                    >
+                                        <p className="text-white text-sm break-words leading-relaxed">{msg.message}</p>
+                                    </div>
                                 </div>
-                                <p className="text-white text-sm break-words">{msg.message}</p>
                             </div>
                         ))
                     )}

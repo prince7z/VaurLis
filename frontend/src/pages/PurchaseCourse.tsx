@@ -52,7 +52,7 @@ const handlePayment = async (courseId: string, navigate: any, showToast: any) =>
     // Check if user is already enrolled (free course)
     if (res.data.alreadyEnrolled) {
       showToast("You are enrolled in the course.", 'success');
-      setTimeout(() => window.location.href = `/course/${courseId}`, 1500);
+      setTimeout(() => window.location.href = `/course/${courseId}`, 500);
       return;
     }
     
@@ -171,6 +171,18 @@ export default function PurchaseCourse() {
               <span className="text-gray-600">Course Price</span>
               <span className="text-2xl font-bold text-gray-800">
                 {course.price === 0 ? 'FREE' : `$${course.price}`}
+              </span>
+            </div>
+              <div className="flex justify-between items-center border-b pb-4">
+              <span className="text-gray-500">Platform Fee</span>
+              <span className="text-xl  text-gray-700">
+                {course.price === 0 ? '0' : `$${(course.price * 0.05).toFixed(2)}`}
+              </span>
+            </div>
+             <div className="flex justify-between items-center border-b pb-4">
+              <span className="text-gray-600">Total</span>
+              <span className="text-2xl font-bold text-gray-800">
+                {course.price === 0 ? 'FREE' : `$${(course.price + course.price * 0.05).toFixed(2)}`}
               </span>
             </div>
 

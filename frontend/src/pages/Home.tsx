@@ -1,475 +1,591 @@
-import React, {  useEffect, useState } from 'react';
-import { Home, Search, ShoppingCart, User, ChevronLeft, ChevronRight, Book, Beaker, Infinity, FileText, Camera, Gamepad2, Play, Clock, Star, Calendar } from 'lucide-react';
+import {
+  Container,
+  Box,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Avatar,
+  Rating,
+  Button,
+  Paper,
+  CircularProgress,
+  Grid,
+} from '@mui/material';
+import Carousel from 'react-material-ui-carousel';
+import { useEffect, useState } from 'react';
+import { useRecoilValueLoadable } from 'recoil';
+import { CoursesState } from '../Component/atoms/atoms';
 import axios from 'axios';
 import { API_URL } from '../config/api';
+import { useNavigate } from 'react-router-dom';
+import InstructorCircleCard from '../Component/InstructorCircleCard';
 
-const heroSlides1 = [
-  {
-    title: "Urban Legends Explained",
-    description: "Why do urban legends continue to thrive in our modern world? Explore the ways storytelling helps us face our fears, understand our own culture, and connect with each other.",
-    bgImage: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)"
-  },
-  {
-    title: "Ancient Civilizations",
-    description: "Discover the mysteries of ancient worlds and how they shaped our modern society through archaeological evidence and historical analysis.",
-    bgImage: "linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #f59e0b 100%)"
-  },
-  {
-    title: "Modern Physics",
-    description: "Explore the fundamental forces that govern our universe, from quantum mechanics to relativity theory.",
-    bgImage: "linear-gradient(135deg, #dbeafe 0%, #93c5fd 50%, #3b82f6 100%)"
-  }
-];
+interface Course {
+  _id: string;
+  name: string;
+  img: string;
+  description: string;
+  price: number;
+  rating: number;
+  institution: string;
+  instructor: {
+    _id: string;
+    username: string;
+    img: string;
+  };
+}
 
-const categories1 = [
-  {
-    icon: <Book className="w-8 h-8" />,
-    title: "History",
-    bgImage: "linear-gradient(135deg, #fef3c7 0%, #f59e0b 100%)"
-  },
-  {
-    icon: <Beaker className="w-8 h-8" />,
-    title: "Science",
-    bgImage: "linear-gradient(135deg, #dbeafe 0%, #3b82f6 100%)"
-  },
-  {
-    icon: <Infinity className="w-8 h-8" />,
-    title: "Philosophy & Religion",
-    bgImage: "linear-gradient(135deg, #f3e8ff 0%, #8b5cf6 100%)"
-  },
-  {
-    icon: <FileText className="w-8 h-8" />,
-    title: "Literature",
-    bgImage: "linear-gradient(135deg, #fecaca 0%, #ef4444 100%)"
-  },
-  {
-    icon: <Camera className="w-8 h-8" />,
-    title: "Travel & Culture",
-    bgImage: "linear-gradient(135deg, #d1fae5 0%, #10b981 100%)"
-  },
-  {
-    icon: <Gamepad2 className="w-8 h-8" />,
-    title: "Hobby & Personal",
-    bgImage: "linear-gradient(135deg, #fed7d7 0%, #f56565 100%)"
-  }
-];
-
-const continueWatchingData = [
-  {
-    title: "The History of Ancient Rome",
-    instructor: "Dr. Gregory Aldrete",
-    progress: 65,
-    duration: "24 lectures",
-    thumbnail: "linear-gradient(135deg, #fef3c7 0%, #f59e0b 100%)"
-  },
-  {
-    title: "Understanding Genetics",
-    instructor: "Prof. David Sadava",
-    progress: 30,
-    duration: "36 lectures",
-    thumbnail: "linear-gradient(135deg, #dbeafe 0%, #3b82f6 100%)"
-  },
-  {
-    title: "Great World Religions",
-    instructor: "Prof. Mark W. Muesse",
-    progress: 80,
-    duration: "12 lectures",
-    thumbnail: "linear-gradient(135deg, #f3e8ff 0%, #8b5cf6 100%)"
-  }
-];
-
-const newArrivedData = [
-  {
-    title: "Climate Change Science",
-    instructor: "Dr. Richard Wolfson",
-    rating: 4.8,
-    lectures: "24 lectures",
-    thumbnail: "linear-gradient(135deg, #d1fae5 0%, #10b981 100%)"
-  },
-  {
-    title: "Modern Art Movements",
-    instructor: "Prof. Sarah Burns",
-    rating: 4.9,
-    lectures: "18 lectures",
-    thumbnail: "linear-gradient(135deg, #fecaca 0%, #ef4444 100%)"
-  },
-  {
-    title: "Quantum Mechanics",
-    instructor: "Dr. Benjamin Schumacher",
-    rating: 4.7,
-    lectures: "30 lectures",
-    thumbnail: "linear-gradient(135deg, #dbeafe 0%, #3b82f6 100%)"
-  }
-];
-
-const comingSoonData = [
-  {
-    title: "Future of AI Technology",
-    instructor: "Prof. Stuart Russell",
-    releaseDate: "Coming Sept 2025",
-    thumbnail: "linear-gradient(135deg, #f1f5f9 0%, #64748b 100%)"
-  },
-  {
-    title: "Medieval European History",
-    instructor: "Dr. Philip Daileader",
-    releaseDate: "Coming Oct 2025",
-    thumbnail: "linear-gradient(135deg, #fef3c7 0%, #f59e0b 100%)"
-  },
-  {
-    title: "Advanced Psychology",
-    instructor: "Prof. Catherine Sanderson",
-    releaseDate: "Coming Nov 2025",
-    thumbnail: "linear-gradient(135deg, #f3e8ff 0%, #8b5cf6 100%)"
-  }
-];
+interface Instructor {
+  _id: string;
+  username: string;
+  img: string;
+  bio?: string;
+  verified?: boolean;
+}
 
 export default function HomePage() {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [heroSlides,setHeroSlides] = useState(heroSlides1);
-  const [categories,setCategories] = useState(categories1);
+  const navigate = useNavigate();
+  const coursesLoadable = useRecoilValueLoadable(CoursesState('all'));
+  
+  const [mitCourses, setMitCourses] = useState<Course[]>([]);
+  const [harvardCourses, setHarvardCourses] = useState<Course[]>([]);
+  const [featuredCourses, setFeaturedCourses] = useState<Course[]>([]);
+  const [topInstructors, setTopInstructors] = useState<Instructor[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const processData = async () => {
+      try {
+        if (coursesLoadable.state === 'hasValue') {
+          const courses: Course[] = coursesLoadable.contents || [];
+          
+          console.log('All courses:', courses);
 
-    useEffect(()=>{
-      const interval = setInterval(() => {
-        nextSlide();
-      }, 3000);
-      return () => clearInterval(interval);
-    },[currentSlide])
+          // Filter by institution - "Harvard University" and "MIT"
+          const mit = courses.filter((c) => c.institution?.toLowerCase().includes('mit'));
+          const harvard = courses.filter((c) => c.institution?.toLowerCase().includes('harvard'));
+          
+          console.log('MIT courses:', mit.length);
+          console.log('Harvard courses:', harvard.length);
 
-    const fetchData = async ()=>{
-      try{
-        const res = await axios.get(`${API_URL}/api/home`);
-        if(res.status===200){
-          setHeroSlides(res.data.heroSlides);
-          setCategories(res.data.categories);
+          setMitCourses(mit);
+          setHarvardCourses(harvard);
+
+          // Featured: mix of courses
+          const featured = courses.slice(0, 5);
+          setFeaturedCourses(featured);
+
+          // Fetch instructors
+          try {
+            const instructorsRes = await axios.get(`${API_URL}/api/course/instructorlist`);
+            setTopInstructors(instructorsRes.data.instructors || []);
+          } catch (err) {
+            console.error('Error fetching instructors:', err);
+          }
+
+          // Fetch reviews
+          try {
+            const topCourses = courses.slice(0, 3);
+            const allReviews: any[] = [];
+            
+            for (const course of topCourses) {
+              try {
+                const reviewRes = await axios.get(`${API_URL}/api/course/getreview/${course._id}`, {
+                  headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                  }
+                });
+                if (reviewRes.data.reviews && reviewRes.data.reviews.length > 0) {
+                  allReviews.push(...reviewRes.data.reviews.slice(0, 2));
+                }
+              } catch (err) {
+                // Continue
+              }
+            }
+            setReviews(allReviews.slice(0, 3));
+          } catch (err) {
+            console.error('Error fetching reviews:', err);
+          }
+
+          setLoading(false);
         }
+      } catch (error) {
+        console.error('Error processing courses:', error);
+        setLoading(false);
       }
-      catch(err){
-        console.log(err);
-      }
-    }
-    useEffect(()=>{
-      fetchData();},[])
+    };
 
+    processData();
+  }, [coursesLoadable]);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-  };
+  const CourseCard = ({ course }: { course: Course }) => (
+    <Card
+      onClick={() => navigate(`/course/${course._id}`)}
+      sx={{
+        minWidth: 280,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.3s ease',
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)',
+        borderRadius: 2,
+        overflow: 'hidden',
+        cursor: 'pointer',
+        border: '1px solid #f0f0f0',
+        flexShrink: 0,
+        '&:hover': {
+          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+          transform: 'translateY(-4px)',
+        },
+      }}
+    >
+      {/* Fixed 16:9 aspect ratio for images */}
+      <Box
+        sx={{
+          position: 'relative',
+          width: '100%',
+          paddingBottom: '56.25%', // 16:9 aspect ratio
+          overflow: 'hidden',
+          bgcolor: '#e8e8e8',
+        }}
+      >
+        <CardMedia
+          component="img"
+          image={course.img || 'https://via.placeholder.com/400x225?text=Course'}
+          alt={course.name}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+          }}
+        />
+      </Box>
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  };
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          p: 2,
+          gap: 1,
+        }}
+      >
+        {/* Course Title */}
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            lineHeight: 1.3,
+            color: '#222',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            minHeight: '2.6em',
+          }}
+        >
+          {course.name}
+        </Typography>
+
+        {/* Instructor */}
+        <Typography
+          variant="caption"
+          sx={{
+            color: '#888',
+            fontSize: '0.8rem',
+            fontWeight: 500,
+          }}
+        >
+          {course.instructor?.username || 'Instructor'}
+        </Typography>
+
+        {/* Rating and Price */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mt: 'auto',
+            pt: 0.5,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Rating
+              value={course.rating || 0}
+              readOnly
+              size="small"
+              sx={{ fontSize: '0.9rem' }}
+            />
+            <Typography variant="caption" sx={{ color: '#999', fontSize: '0.75rem' }}>
+              {(course.rating || 0).toFixed(1)}
+            </Typography>
+          </Box>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              color: course.price === 0 ? '#4caf50' : '#ff6b35',
+              fontSize: '0.9rem',
+            }}
+          >
+            {course.price === 0 ? 'Free' : `$${course.price}`}
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+
+  // Using `InstructorCircleCard` component for a compact circular instructor card
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <div className="top-[80px] " style={{ backgroundColor: '#ffff' }}>
-
-
-      {/* Main Container - 60% width, centered */}
-      <div style={{width: '100%', margin: '0 auto', padding: '20px 0' }}>
-
-        
-        {/* Hero Section */}
-        <section className="relative overflow-hidden rounded-lg mb-12" style={{ height: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
-          <div 
-            className="absolute inset-0"
-            style={{ background: heroSlides[currentSlide].bgImage }}
-          >
-            <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}></div>
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.3), transparent, transparent)' }}></div>
-          </div>
-          
-          {/* Navigation Arrows */}
-          <button 
-            onClick={prevSlide}
-            className="absolute rounded-full cursor-pointer p-3 transition-all z-10"
-
-            style={{ 
-              left: '16px', 
-              top: '50%', 
-              transform: 'translateY(-50%)', 
-              backgroundColor: 'rgba(255,255,255,0.8)',
-              color: '#374151',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+    <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', pb: 4 }}>
+      {/* Hero Carousel */}
+      {featuredCourses.length > 0 && (
+        <Box sx={{ bgcolor: '#ffffff', py: 0, mb: 6 }}>
+          <Carousel
+            sx={{
+              borderRadius: 0,
+              overflow: 'hidden',
+              boxShadow: 'none',
+              height: 400,
             }}
-            onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,1)'}
-            onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,0.8)'}
-
           >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          
-          <button 
-            onClick={nextSlide}
-            className="absolute rounded-full p-3 cursor-pointer transition-all z-10"
-
-            style={{ 
-              right: '16px', 
-              top: '50%', 
-              transform: 'translateY(-50%)', 
-              backgroundColor: 'rgba(255,255,255,0.8)',
-              color: '#374151',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-            }}
-            onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,1)'}
-            onMouseLeave={(e) =>(e.target as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,0.8)'}
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          {/* New Release Badge */}
-          <div className="absolute z-10" style={{ top: '32px', right: '32px' }}>
-            <div className="px-4 py-2 rounded-full text-sm font-semibold" style={{ backgroundColor: '#f97316', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-              New Release
-            </div>
-          </div>
-
-          {/* Hero Content */}
-          <div className="relative z-10 h-full flex items-center">
-            <div style={{ padding: '0 32px' }}>
-              <div style={{ maxWidth: '512px' }}>
-                <h2 className="text-5xl font-bold mb-6" style={{ color: '#1f2937' }}>
-                  {heroSlides[currentSlide].title}
-                </h2>
-                <p className="text-xl mb-8 leading-relaxed" style={{ color: '#374151' }}>
-                  {heroSlides[currentSlide].description}
-                </p>
-                <button 
-                  className="px-8 py-3 rounded-full font-semibold transition-all"
-                  style={{ backgroundColor: '#1f2937', color: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                  onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#111827'}
-                  onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#1f2937'}
-                >
-                  Purchase Course
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Slide Indicators */}
-          <div className="absolute flex space-x-2" style={{ bottom: '24px', left: '50%', transform: 'translateX(-50%)' }}>
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className="w-3 h-3 rounded-full transition-all"
-                style={{ 
-                  backgroundColor: index === currentSlide ? '#1f2937' : '#9ca3af',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-              />
-            ))}
-          </div>
-        </section>
-
-        {/* Categories Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold" style={{ color: '#1f2937' }}>Shop By Category</h3>
-            <button 
-              className="font-semibold text-sm uppercase tracking-wide transition-colors"
-              style={{ color: '#f97316' }}
-              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#ea580c'}
-
-              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#f97316'}
-            >
-              VIEW ALL
-            </button>
-          </div>
-          
-          <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                className="group relative rounded-lg overflow-hidden cursor-pointer transition-all duration-300"
-                style={{ 
-                  height: '192px',
-                  background: category.bgImage,
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                  transform: 'scale(1)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            {featuredCourses.map((course) => (
+              <Box
+                key={course._id}
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  height: 400,
+                  backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2)), url(${course.img})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  p: 4,
                 }}
               >
-                <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}></div>
-                <div className="relative h-full flex flex-col items-center justify-center text-center p-4">
-                  <div className="text-white mb-3 transition-transform duration-300" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
-                    {category.icon}
-                  </div>
-                  <h4 className="text-white font-semibold text-sm" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>{category.title}</h4>
-                </div>
-              </div>
+                <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+                  <Box sx={{ color: '#fff', maxWidth: 500 }}>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        fontSize: '1.4rem',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {course.name}
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        mb: 2,
+                        fontSize: '0.95rem',
+                        lineHeight: 1.6,
+                        opacity: 0.95,
+                      }}
+                    >
+                      {course.description?.substring(0, 100)}...
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: '0.9rem',
+                        opacity: 0.9,
+                      }}
+                    >
+                      Instructor: {course.instructor?.username}
+                    </Typography>
+                  </Box>
+                </Container>
+              </Box>
             ))}
-          </div>
-        </section>
+          </Carousel>
+        </Box>
+      )}
 
-        {/* Continue Watching Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold" style={{ color: '#1f2937' }}>Continue Watching</h3>
-            <button 
-              className="font-semibold text-sm uppercase tracking-wide transition-colors"
-              style={{ color: '#f97316' }}
-              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#ea580c'}
-              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#f97316'}
-            >
-              VIEW ALL
-            </button>
-          </div>
-          
-          <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-            {continueWatchingData.map((course, index) => (
-              <div
-                key={index}
-                className="rounded-lg overflow-hidden cursor-pointer transition-all duration-300"
-                style={{ 
-                  backgroundColor: 'white', 
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                  border: '1px solid #e5e7eb'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)'}
-                onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'}
-              >
-                <div 
-                  className="relative"
-                  style={{ height: '128px', background: course.thumbnail }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
-                    <Play className="w-12 h-12 text-white" style={{ opacity: 0.8 }} />
-                  </div>
-                </div>
-                <div style={{ padding: '16px' }}>
-                  <h4 className="font-semibold mb-2" style={{ color: '#1f2937' }}>{course.title}</h4>
-                  <p className="text-sm mb-3" style={{ color: '#6b7280' }}>{course.instructor}</p>
-                  <div className="flex items-center justify-between text-sm mb-3" style={{ color: '#9ca3af' }}>
-                    <span>{course.duration}</span>
-                    <span>{course.progress}% complete</span>
-                  </div>
-                  <div className="w-full rounded-full h-2" style={{ backgroundColor: '#e5e7eb' }}>
-                    <div 
-                      className="h-2 rounded-full transition-all duration-300" 
-                      style={{ width: `${course.progress}%`, backgroundColor: '#f97316' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* New Arrivals Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold" style={{ color: '#1f2937' }}>New Arrivals</h3>
-            <button 
-              className="font-semibold text-sm uppercase tracking-wide transition-colors"
-              style={{ color: '#f97316' }}
-              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#ea580c'}
-              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#f97316'}
-            >
-              VIEW ALL
-            </button>
-          </div>
-          
-          <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-            {newArrivedData.map((course, index) => (
-              <div
-                key={index}
-                className="rounded-lg overflow-hidden cursor-pointer transition-all duration-300"
-                style={{ 
-                  backgroundColor: 'white', 
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                  border: '1px solid #e5e7eb'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)'}
-                onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'}
-              >
-                <div 
-                  className="relative"
-                  style={{ height: '128px', background: course.thumbnail }}
-                >
-                  <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}></div>
-                  <div className="absolute px-2 py-1 rounded text-xs font-semibold" style={{ top: '8px', right: '8px', backgroundColor: '#10b981', color: 'white' }}>
-                    NEW
-                  </div>
-                </div>
-                <div style={{ padding: '16px' }}>
-                  <h4 className="font-semibold mb-2" style={{ color: '#1f2937' }}>{course.title}</h4>
-                  <p className="text-sm mb-3" style={{ color: '#6b7280' }}>{course.instructor}</p>
-                  <div className="flex items-center justify-between text-sm" style={{ color: '#9ca3af' }}>
-                    <span>{course.lectures}</span>
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 mr-1" style={{ color: '#f59e0b' }} fill="currentColor" />
-                      <span>{course.rating}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Coming Soon Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-3xl font-bold" style={{ color: '#1f2937' }}>Coming Soon</h3>
-            <button 
-              className="font-semibold text-sm uppercase tracking-wide transition-colors"
-              style={{ color: '#f97316' }}
-              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.color = '#ea580c'}
-              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.color = '#f97316'}
-            >
-              VIEW ALL
-            </button>
-          </div>
-          
-          <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
-            {comingSoonData.map((course, index) => (
-              <div
-                key={index}
-                className="rounded-lg overflow-hidden cursor-pointer transition-all duration-300"
-                style={{ 
-                  backgroundColor: 'white', 
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                  border: '1px solid #e5e7eb',
-                  opacity: 0.9
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
-                  e.currentTarget.style.opacity = '1';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-                  e.currentTarget.style.opacity = '0.9';
+      {/* MIT Courses Section */}
+      {mitCourses.length > 0 && (
+        <Box sx={{ py: 6, bgcolor: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+          <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '1.3rem',
+                  color: '#222',
                 }}
               >
-                <div 
-                  className="relative flex items-center justify-center"
-                  style={{ height: '128px', background: course.thumbnail }}
-                >
-                  <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}></div>
-                  <Calendar className="w-12 h-12 text-white" style={{ opacity: 0.8 }} />
-                </div>
-                <div style={{ padding: '16px' }}>
-                  <h4 className="font-semibold mb-2" style={{ color: '#1f2937' }}>{course.title}</h4>
-                  <p className="text-sm mb-3" style={{ color: '#6b7280' }}>{course.instructor}</p>
-                  <div className="flex items-center text-sm">
-                    <Clock className="w-4 h-4 mr-2" style={{ color: '#f97316' }} />
-                    <span style={{ color: '#ea580c', fontWeight: 500 }}>{course.releaseDate}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+                MIT Courses
+              </Typography>
+              <Button
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  color: '#2196f3',
+                  '&:hover': { bgcolor: 'transparent', color: '#1976d2' },
+                }}
+              >
+                View All →
+              </Button>
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2.5,
+                overflowX: 'auto',
+                pb: 1,
+                '&::-webkit-scrollbar': {
+                  height: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: '#f5f5f5',
+                  borderRadius: '10px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#ddd',
+                  borderRadius: '10px',
+                  '&:hover': {
+                    background: '#bbb',
+                  },
+                },
+              }}
+            >
+              {mitCourses.map((course) => (
+                <CourseCard key={course._id} course={course} />
+              ))}
+            </Box>
+          </Container>
+        </Box>
+      )}
 
-      </div>
-    </div>
+      {/* Harvard Courses Section */}
+      {harvardCourses.length > 0 && (
+        <Box sx={{ py: 6, bgcolor: '#f9f9f9', borderBottom: '1px solid #f0f0f0' }}>
+          <Container maxWidth="lg">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '1.3rem',
+                  color: '#222',
+                }}
+              >
+                Harvard University Courses
+              </Typography>
+              <Button
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  color: '#2196f3',
+                  '&:hover': { bgcolor: 'transparent', color: '#1976d2' },
+                }}
+              >
+                View All →
+              </Button>
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2.5,
+                overflowX: 'auto',
+                pb: 1,
+                '&::-webkit-scrollbar': {
+                  height: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: '#f5f5f5',
+                  borderRadius: '10px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#ddd',
+                  borderRadius: '10px',
+                  '&:hover': {
+                    background: '#bbb',
+                  },
+                },
+              }}
+            >
+              {harvardCourses.map((course) => (
+                <CourseCard key={course._id} course={course} />
+              ))}
+            </Box>
+          </Container>
+        </Box>
+      )}
+
+      {/* Top Instructors Section */}
+      {topInstructors.length > 0 && (
+        <Box sx={{ py: 6, bgcolor: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+          <Container maxWidth="lg">
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                fontSize: '1.3rem',
+                color: '#222',
+                mb: 3,
+              }}
+            >
+              Top Instructors
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2,
+                overflowX: 'auto',
+                pb: 1,
+                alignItems: 'flex-start',
+                WebkitOverflowScrolling: 'touch',
+                '&::-webkit-scrollbar': {
+                  height: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: '#f5f5f5',
+                  borderRadius: '10px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#ddd',
+                  borderRadius: '10px',
+                  '&:hover': {
+                    background: '#bbb',
+                  },
+                },
+              }}
+            >
+              {topInstructors.map((instructor) => (
+                <InstructorCircleCard key={instructor._id} instructor={instructor} />
+              ))}
+            </Box>
+          </Container>
+        </Box>
+      )}
+
+      {/* Reviews Section */}
+      {reviews.length > 0 && (
+        <Box sx={{ py: 6, bgcolor: '#f9f9f9' }}>
+          <Container maxWidth="lg">
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 600,
+                fontSize: '1.3rem',
+                color: '#222',
+                mb: 3,
+              }}
+            >
+              What Students Say
+            </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2.5,
+                overflowX: 'auto',
+                pb: 1,
+                '&::-webkit-scrollbar': {
+                  height: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: '#f5f5f5',
+                  borderRadius: '10px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#ddd',
+                  borderRadius: '10px',
+                  '&:hover': {
+                    background: '#bbb',
+                  },
+                },
+              }}
+            >
+              {reviews.map((review, idx) => (
+                <Paper
+                  key={idx}
+                  sx={{
+                    p: 2.5,
+                    height: '100%',
+                    minWidth: 300,
+                    flexShrink: 0,
+                    borderRadius: 2,
+                    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid #f0f0f0',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    },
+                  }}
+                >
+                  {/* User info */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                    <Avatar
+                      src={review.user?.img}
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        bgcolor: '#e8e8e8',
+                        border: '1px solid #f0f0f0',
+                        fontSize: '1.2rem',
+                      }}
+                    />
+                    <Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 600,
+                          color: '#222',
+                          fontSize: '0.85rem',
+                          display: 'block',
+                        }}
+                      >
+                        {review.user?.username || 'Student'}
+                      </Typography>
+                      <Rating value={review.rating} readOnly size="small" sx={{ mt: 0.25 }} />
+                    </Box>
+                  </Box>
+
+                  {/* Review text */}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#666',
+                      fontSize: '0.85rem',
+                      lineHeight: 1.5,
+                      fontStyle: 'italic',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                    
+                  >
+                    "{review.review}"
+                  </Typography>
+                </Paper>
+              ))}
+            </Box>
+          </Container>
+        </Box>
+      )}
+    </Box>
   );
 }

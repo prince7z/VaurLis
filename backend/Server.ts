@@ -1,25 +1,36 @@
 import 'dotenv/config';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { logtailLogger, detailedLogger, logCorsViolation } from './config/logger';
+import { logtailLogger, detailedLogger, logCorsViolation, detailedMongoLogger } from './config/logger';
 import express from 'express';
 import LOGS from './Routes/logs';
 import USER from './Routes/User';
 import COURSE from './Routes/Course';
 import CLOUD from './Routes/Cloud'
 import SECURE from './Routes/Secure';
+import ADMIN from './Routes/admin';
 import cors from 'cors';
 import { setupWebSocketServer } from './WSS';
+import { createServer } from 'http';
 
 
 const app = express();
 
+// Health check endpoint - MUST be before any middleware for Render health checks
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: "VaurLis API is running!", 
+    timestamp: new Date().toISOString(),
+    version: "1.0.0"
+  });
+});
+
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://localhost:5174',
+  'https://vaurlis.vercel.app',
   'http://localhost:3000',
   process.env.FRONTEND_URL || 'http://localhost:5173'
-];
+  ].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -74,9 +85,12 @@ app.use(express.json());
 
 app.use(helmet());
 
+// MongoDB detailed logging - captures all request details
+app.use(detailedMongoLogger);
 
-app.use(logtailLogger); 
-app.use(detailedLogger);
+// File logging disabled - using MongoDB only
+// app.use(logtailLogger); 
+// app.use(detailedLogger);
 
 
 const limiter = rateLimit({
@@ -111,15 +125,9 @@ const authLimiter = rateLimit({
 
 
 
-app.get('/api/test', (req, res) => {
-  res.status(200).json({ 
-    message: "Server is running!", 
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
 
 app.use('/api/auth', authLimiter,LOGS);
+app.use('/api/admin',ADMIN );
 app.use("/api/user",USER);
 app.use("/api/course",COURSE);
 app.use("/api/cloud",CLOUD)
@@ -127,13 +135,17 @@ app.use("/api/secure",SECURE);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Create HTTP server
+const server = createServer(app);
 
+// Setup WebSocket on the same server
 try {
-  setupWebSocketServer();
-  console.log('WebSocket server is running on port 8080');
+  setupWebSocketServer(server);
+  console.log('WebSocket server initialized on same port as HTTP');
 } catch (error) {
   console.error('Failed to start WebSocket server:', error);
 }
+
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

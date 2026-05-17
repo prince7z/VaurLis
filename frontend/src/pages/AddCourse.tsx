@@ -16,6 +16,7 @@ export default function CreateCourse() {
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [price, setPrice] = useState("");
+  const [Institution, setInstitution] = useState("VaurLis Educations");
   const [contentLink, setContentLink] = useState<ContentLink[]>([
     { name: "", link: "", thumbnail: null as any, duration: 0 }
   ]);
@@ -25,8 +26,9 @@ export default function CreateCourse() {
     description: false,
     duration: false,
     price: false,
-    
+    Institution: false
   });
+  
 
   const handleCreate = async () => {
     const newErrors = {
@@ -34,7 +36,7 @@ export default function CreateCourse() {
       description: !description.trim(),
       duration: !duration.trim(),
       price: !price.trim(),
-      
+      Institution: !Institution.trim()
     };
 
     setErrors(newErrors);
@@ -46,6 +48,7 @@ export default function CreateCourse() {
     formdata.append("description", description);
     formdata.append("duration", duration);
     formdata.append("price", price);
+    formdata.append("institution", Institution);
     contentLink.forEach((linkObj, index) => {
       formdata.append(`contentLink[${index}][name]`, linkObj.name);
       formdata.append(`contentLink[${index}][link]`, linkObj.link);
@@ -131,6 +134,15 @@ export default function CreateCourse() {
         type="text"
         placeholder="Course Price in INR"
         className={`p-2 border ${errors.price ? "border-red-500" : "border-gray-300"}`}
+      />
+
+     <input
+        value={Institution}
+        onChange={(e) => setInstitution(e.target.value)}
+        type="text"
+        placeholder="Course Institution"
+        
+        className={`p-2 border ${errors.Institution ? "border-red-500" : "border-gray-300"}`}
       />
 
       <h1 className="text-xl font-semibold mt-4 mb-2">Course Content Links</h1>

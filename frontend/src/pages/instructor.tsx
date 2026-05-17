@@ -1,16 +1,75 @@
 import React, { useEffect, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import CourseCard from "../Component/coursecard";
 import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
 import { Button } from "@mui/material";
-import { Edit } from "lucide-react";
 import { useRecoilState } from "recoil";
 import { avatarState,bannerState,usernameState,socialLinksState,bioState, skillsState } from "../Component/atoms/atoms";
 import EditProfileDialog from "../Component/EditProfileDialog";
 import { API_URL } from '../config/api';
+import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import {Tabb, TTabb} from '../Component/CustomTab';
+import { styled } from '@mui/material/styles';
+import type {ITransaction} from '../Component/CustomTab';
 
-const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp&f=y";
+const StyledTabs = styled(Tabs)(() => ({
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+    '& .MuiTabs-indicator': {
+        backgroundColor: '#7F1D1D',
+        height: '3px'
+    }
+}));
+
+const StyledTab = styled(Tab)(() => ({
+    color: '#A0A0A0',
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
+    fontSize: '14px',
+    letterSpacing: '0.5px',
+    padding: '6px 16px',
+    '&.Mui-selected': {
+        color: '#FFFFFF'
+    },
+    '&.Mui-disabled': {
+        color: 'rgba(160, 160, 160, 0.4)'
+    },
+    '&:hover:not(.Mui-disabled)': {
+        color: '#FFFFFF',
+        opacity: 1
+    }
+}));
+
+interface TabPanelProps {
+    children?: React.ReactNode;
+    index: number;
+    value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`tabpanel-${index}`}
+            aria-labelledby={`tab-${index}`}
+            {...other}
+            style={{
+                backgroundColor: '#1A1A1A',
+                minHeight: '200px',
+                padding: '24px',
+                display: value === index ? 'block' : 'none'
+            }}
+        >
+            <Box>{children}</Box>
+        </div>
+    );
+}
+
+const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
 export default function Instructor() {
     const { username } = useParams();
@@ -27,6 +86,14 @@ export default function Instructor() {
     const [pur,Setpur] = useState([]);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const id = username || '';
+    const [DataTrns, SetTrans] = useState<ITransaction[]>([]);
+    const [value, setValue] = React.useState(0);
+    const [doowns, setDoowns] = useState(false);
+
+    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
+        console.log('Tab changed to:', newValue); // Debug log
+        setValue(newValue);
+    };
 
 
     
@@ -54,6 +121,10 @@ export default function Instructor() {
                 }
                 if (response.data.username){
                     setUname(response.data.username);
+                    const local_user=localStorage.getItem("user");
+                    if (local_user && JSON.parse(local_user).username===response.data.username){
+                        setDoowns(true);
+                    }
                 }
                 if (response.data.socialLinks){
                     setSocialLinks(response.data.socialLinks);
@@ -67,6 +138,13 @@ export default function Instructor() {
                 if (response.data.role==="owns"){
                     Setpur(response.data.pur_courses);
                 }
+                if (response.data.transactions){
+                    // Handle both array and object format
+                    const transactions = Array.isArray(response.data.transactions) 
+                        ? response.data.transactions 
+                        : response.data.transactions.restosend || [];
+                    SetTrans(transactions);
+                }
             } catch (error) {
                 setError("Error fetching instructor details");
             } finally {
@@ -78,6 +156,7 @@ export default function Instructor() {
             fetchInstructorDetails(id);
         }
     }, [id]);
+
 
     if (loading) {
         return (
@@ -97,6 +176,8 @@ export default function Instructor() {
         return null;
     }
 
+
+
     // Social icon mapping
     const socialIcons: Record<string, JSX.Element> = {
         github: <FaGithub className="inline mr-2" />,
@@ -104,6 +185,9 @@ export default function Instructor() {
         x: <FaTwitter className="inline mr-2" />,
         mail: <FaEnvelope className="inline mr-2" />,
     };
+
+ 
+
 
     return (
         <div className="min-h-screen bg-gray-100 py-8">
@@ -176,44 +260,92 @@ export default function Instructor() {
                         </div>
                     </div>
                 </div>
-                
-                {/* Courses Sections */}
-                {rel.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                        <div className="p-6">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                                <span className="w-1 h-6 bg-blue-500 rounded mr-3"></span>
-                                Released Courses
-                            </h3>
-                            <div className="flex gap-4 overflow-x-auto pb-2" style={{scrollbarWidth: 'thin'}}>
-                                {rel.map((course: any) => (
-                                    <div key={course._id} className="min-w-[280px] flex-shrink-0">
-                                        <CourseCard course={course} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                <div>
+
+
+        <Box sx={{ 
+                width: '100%', 
+                bgcolor: '#1A1A1A',
+                '& .MuiTabs-flexContainer': {
+                    gap: '1rem'
+                }
+            }}>
+            <StyledTabs 
+                value={value} 
+                onChange={handleChange} 
+                centered
+                variant="standard"
+                aria-label="profile tabs"
+                sx={{
+                    minHeight: '48px',
+                    '& .MuiTab-root': {
+                        minHeight: '48px',
+                        padding: '12px 16px'
+                    }
+                }}
+            >
+                <StyledTab 
+                    label="RELEASED COURSES" 
+                    value={0}
+                    id="tab-0" 
+                    aria-controls="tabpanel-0"
+                />
+                <StyledTab 
+                    label="PURCHASED COURSES" 
+                    value={1}
+                    id="tab-1" 
+                    disabled={!doowns}
+                    aria-controls="tabpanel-1"
+                />
+                <StyledTab 
+                    label="TRANSACTIONS" 
+                    value={2}
+                    id="tab-2" 
+                    disabled={!doowns}
+                    aria-controls="tabpanel-2"
+                />
+            </StyledTabs>
+
+            <TabPanel value={value} index={0}>
+                {rel && rel.length > 0 ? (
+                    <Tabb label="" Data={rel} />
+                ) : (
+                    <p style={{ color: '#A0A0A0', textAlign: 'center', padding: '2rem' }}>No released courses yet</p>
                 )}
-                
-                {pur.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div className="p-6">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                                <span className="w-1 h-6 bg-green-500 rounded mr-3"></span>
-                                Purchased Courses
-                            </h3>
-                            <div className="flex gap-4 overflow-x-auto pb-2" style={{scrollbarWidth: 'thin'}}>
-                                {pur.map((course: any) => (
-                                    <div key={course._id} className="min-w-[280px] flex-shrink-0">
-                                        <CourseCard course={course} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+            </TabPanel>
+
+            <TabPanel value={value} index={1}>
+                {doowns ? (
+                    pur && pur.length > 0 ? (
+                        <Tabb label="" Data={pur} />
+                    ) : (
+                        <p style={{ color: '#A0A0A0', textAlign: 'center', padding: '2rem' }}>No purchased courses yet</p>
+                    )
+                ) : (
+                    <p style={{ color: '#A0A0A0', textAlign: 'center', padding: '2rem' }}>
+                        You need to be logged in to view purchased courses
+                    </p>
                 )}
-            </div>
+            </TabPanel>
+
+            <TabPanel value={value} index={2}>
+                {doowns ? (
+                    DataTrns && DataTrns.length > 0 ? (
+                        <TTabb label="" Data={DataTrns} />
+                    ) : (
+                        <p style={{ color: '#A0A0A0', textAlign: 'center', padding: '2rem' }}>No transactions yet</p>
+                    )
+                ) : (
+                    <p style={{ color: '#A0A0A0', textAlign: 'center', padding: '2rem' }}>
+                        You need to be logged in to view transactions
+                    </p>
+                )}
+            </TabPanel>
+        </Box>
+                </div>
         </div>
+    </div>
     );
 }
+
+

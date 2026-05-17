@@ -2,9 +2,9 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
-import certTemplate from "../component/cert/0002.png";
-import signature from "../component/cert/signature.png";
-import { API_URL } from '../config/api';
+import certTemplate from "../Component/cert/0003.png";
+import signature from "../Component/cert/signature.png";
+import { FE_URL,API_URL } from '../config/api';
 
 
 const CERT_POSITIONS = {
@@ -12,11 +12,13 @@ const CERT_POSITIONS = {
     courseName: { x: 50, y: 42 },      // Course name position
     instructor: { x: 70.5, y: 57.5 },      // Instructor position
     duration : {x: 51, y:57.5},
-    date: { x: 11, y: 90 },            // Date position
-    id: { x: 15.8, y: 93 },            // ID position
-    url: { x: 8.2, y: 96 },           // URL position
+    date: { x: 14, y: 90 },            // Date position
+    id: { x: 83, y: 90 },            // ID position
+    url: { x: 48, y: 90},           // URL position
     qrCode: { x: 50, y: 70 }       ,    // QR code position
-    signature: { x: 21, y: 67 }        // Signature position
+    signature: { x: 21, y: 67 } ,
+    note:{x:50,y:96} ,      // Note position
+    level: { x: 30.5, y: 57.5 }       // Level position
 };
 
 
@@ -100,12 +102,49 @@ const printStyles = `
       margin: 0;
     }
   }
+
+  /* Mobile Responsive Scaling */
+  @media (max-width: 768px) {
+    .certificate-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      width: 100%;
+      padding: 1rem 0;
+    }
+
+    .certificate-container {
+      transform: scale(0.6);
+      transform-origin: top center;
+      width: 167%; /* 100% / 0.6 to compensate for scale */
+      margin: 0 auto;
+      position: relative;
+      left: 50%;
+      margin-left: -83.5%; /* -width/2 to center */
+    }
+  }
+
+  @media (max-width: 480px) {
+    .certificate-container {
+      transform: scale(0.5);
+      width: 200%; /* 100% / 0.5 */
+      margin-left: -100%; /* -width/2 */
+    }
+  }
+
+  @media (max-width: 375px) {
+    .certificate-container {
+      transform: scale(0.42);
+      width: 238%; /* 100% / 0.42 */
+      margin-left: -119%; /* -width/2 */
+    }
+  }
 `;
 
-function Cert(props: { _id: string; name: string; course: string; duration: String; instructor: string; date: string }) {
+function Cert(props: { _id: string; name: string; course: string; duration: String; instructor: string; institution: string; date: string }) {
 
 const name = props.name.replace(/[^a-zA-Z\s]/g, '');
 const instructor = props.instructor.replace(/[^a-zA-Z\s]/g, '');
+const institution =props.institution.replace(/[^a-zA-Z\s]/g, '');
 
 const duration = props.duration.replace(/[^0-9]/g, '');
 const date = new Date(props.date).toLocaleDateString('en-US', {
@@ -116,14 +155,15 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
     return (
         <>
             <style>{printStyles}</style>
-            <div className="certificate-container relative w-full max-w-4xl mx-auto shadow-2xl">
-                {/* Certificate Template Image */}
-                <img 
-                    src={certTemplate} 
-                    alt="Certificate Template" 
-                    className="w-full h-auto"
-                    crossOrigin="anonymous"
-                />
+            <div className="certificate-wrapper">
+                <div className="certificate-container relative w-full max-w-4xl mx-auto shadow-2xl">
+                    {/* Certificate Template Image */}
+                    <img 
+                        src={certTemplate} 
+                        alt="Certificate Template" 
+                        className="w-full h-auto"
+                        crossOrigin="anonymous"
+                    />
                 
                 {/* Overlay Certificate Data */}
                 <div className="absolute inset-0">
@@ -151,7 +191,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                         }}
                     >
                         <p className="text-base md:text-l text-gray-700 italic font-glacial">
-                            has successfully completed the <span className="font-semibold">{props.course}</span> course, demonstrating proficiency in essential skills and knowledge. This achievement reflects dedication to professional development and continuous learning.
+                         {`\n`}   has successfully completed the <span className="font-semibold">{props.course}</span> course, under the guidance of <span className="font-semibold">{instructor} from {institution}</span>, demonstrating proficiency in essential skills and knowledge. This achievement reflects dedication to professional development and continuous learning.
                         </p>
                     </div>
 
@@ -164,11 +204,11 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <p className="text-sm md:text-m text-gray-800 font-glacial">
-                            {instructor.length > 8 ? (
-                                <span className="font-semibold">{instructor} from MIT</span>
+                        <p className="text-sm md:text-m font-semibold text-gray-800 font-glacial">
+                            {instructor.length > 12 ? (
+                                <span className="font-semibold">{instructor} </span>
                             ) : (
-                                <>Instructor: <span className="font-semibold">{instructor} from MIT</span></>
+                                <>Instructor: {instructor} </>
                             )}
                         </p>
                     </div>
@@ -181,10 +221,24 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <p className="text-sm md:text-m text-gray-800 font-glacial">
+                        <p className="text-sm md:text-m font-semibold text-gray-800 font-glacial">
                             <span className="">{duration} Training hours</span>
                         </p>
+                        
                     </div>
+                    {/* Level */}
+                    <div 
+                        className="absolute text-center  w-full"
+                        style={{ 
+                            left: `${CERT_POSITIONS.level.x}%`, 
+                            top: `${CERT_POSITIONS.level.y}%`,
+                            transform: 'translate(-50%, -50%)'
+                        }}
+                    >
+                        <p className="text-sm md:text-m font-semibold text-gray-800 font-glacial">
+                            Level: {"Intermediate"}
+                        </p>
+                    </div>  
 
                     {/* Date */}
                     <div 
@@ -195,7 +249,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <p className="text-sm md:text-m text-gray-200 font-glacial">
+                        <p className="text-xs md:text-sm text-gray-200 font-glacial">
                             Issued Date: {" "}
                             {date}
                         </p>
@@ -209,7 +263,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <p className="text-sm md:text-m text-gray-200 font-glacial">
+                        <p className="text-xs md:text-sm text-gray-200 font-glacial">
                             Certificate ID: {" "}
                             {props._id}
                         </p>
@@ -223,11 +277,11 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             transform: 'translate(-50%, -50%)'
                         }}
                     >
-                        <p className="text-sm md:text-m text-gray-200 font-glacial">
+                        <p className="text-xs md:text-sm text-gray-200 font-glacial">
                             
                             
                            
-                            {API_URL}
+                            {FE_URL}
                         </p>
                     </div>
                     {/* Signature */}
@@ -246,6 +300,22 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                             crossOrigin="anonymous"
                         />
                     </div>
+                    {/* Note */}
+                    <div 
+                        className="absolute text-center w-full"
+                        style={{ 
+                            left: `${CERT_POSITIONS.note.x}%`, 
+                            top: `${CERT_POSITIONS.note.y}%`,
+                            transform: 'translate(-50%, -50%)'
+                        }}
+                    >
+                        <p className="text-[0.5rem] md:text-[0.6rem] text-gray-200 font-glacial p-2 rounded">
+                        NOTE: THIS CERTIFICATE CONTAINS MATERIALS ADAPTED FROM
+                        {" "}{institution} LICENSED UNDER CC BY-NC-SAR
+                        WITH GRATITUDE TO {" "}{institution} AND THE ORIGINAL AUTHORS FOR THEIR
+                        DISTINGUISHED CONTRIBUTION TO GLOBAL EDUCATION.
+                                                </p>
+                    </div>
 
                     {/* QR Code */}
                     <div 
@@ -258,7 +328,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                     >
                         <div className="bg-white p-2 ">
                             <QRCode 
-                                value={`${API_URL}/verify/cert/${props._id}`} 
+                                value={`${FE_URL}/verify/${props._id}`} 
                                 size={80}
                                 style={{ background: 'white' }}
                                 fgColor="#000000" 
@@ -267,6 +337,7 @@ const date = new Date(props.date).toLocaleDateString('en-US', {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </>
     );
@@ -341,6 +412,7 @@ export default function Certificate() {
                             course={res.courseId.name} 
                             duration={res.courseId.duration}
                             instructor={res.courseId.instructor} 
+                            institution={res.institution}
                             date={res.createdAt || new Date().toISOString()} 
                         />
                     </div>

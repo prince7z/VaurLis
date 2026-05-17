@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from "express";
 import Razorpay from "razorpay";
-import { User, Course, Certificate } from "../DB/MDB";
+import { User, Course, Certificate,Transaction } from "../DB/MDB";
 import { auth } from "../Midware/Mware";
 import crypto from "crypto";
 
@@ -22,6 +22,7 @@ async function updateUserCourseAndMakeCert(userId: string, courseId: string) {
     const instructor  = await User.findById(course.instructor).select('username').exec();
     const newCert = new Certificate({
       user: { id: user._id, name: user.username },
+      institution: course.institution,
       courseId: { id: course._id, name: course.name, instructor: instructor?.username, duration: course.duration, issuedAt: new Date() },
     });
     await newCert.save();
@@ -49,11 +50,10 @@ router.get("/create-order/:courseId", auth, async (req: Request, res: Response) 
 
     if (course.price === 0) {
       updateUserCourseAndMakeCert(userId, courseId);
-      console.log("User has enrolled in the course");
       return res.status(200).json({ alreadyEnrolled: true, message: "Course added to your account" });
     }
     const options = {
-      amount: course.price * 100,
+      amount: course.price === 0 ? 0 : Math.round(course.price * 100 + course.price * 0.05), 
       currency: "INR",
       receipt: `${Date.now()}_${userId}`,
       notes: {
@@ -97,18 +97,44 @@ router.get("/create-order/:courseId", auth, async (req: Request, res: Response) 
   */ }
 
 
+async function createTransaction(userId: string, courseId: string, instructorId: string, amount: number) {
+  try {
+    const transaction = new Transaction({
+      From: userId,
+      To: instructorId,
+      For: courseId,
+      status: 'completed',
+      amount,
+    });
+    await transaction.save();
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+  }
+}
 
 router.post("/verify-payment", auth, async (req: Request, res: Response) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, courseId } = req.body;
     const userId = req.user?._id;
   
+    // Trim the secret key to remove any accidental whitespace
+    const cleanSecretKey = razorpay_secret_key.trim();
+    
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSign = crypto.createHmac("sha256", razorpay_secret_key).update(sign.toString()).digest("hex");
+    const expectedSign = crypto.createHmac("sha256", cleanSecretKey).update(sign.toString()).digest("hex");
+
+
 
     if (razorpay_signature === expectedSign) {
       try {
         await updateUserCourseAndMakeCert(userId, courseId);
+        const course: any= await Course.findById(courseId).select("price instructor").exec();
+        if (course) {
+          await createTransaction(userId, courseId, course.instructor, course.price);
+        }
+
+
+
         return res.status(200).json({ message: "Payment verified successfully" });
       } catch (error) {
         console.error("Error updating user/course:", error);
@@ -116,7 +142,14 @@ router.post("/verify-payment", auth, async (req: Request, res: Response) => {
       }
 
     } else {
-      return res.status(400).json({ error: "Invalid signature sent!" });
+      console.log(" Invalid signature sent!");
+      return res.status(400).json({ 
+        error: "Invalid signature sent!",
+        debug: process.env.NODE_ENV === 'development' ? {
+          expectedSignature: expectedSign,
+          receivedSignature: razorpay_signature
+        } : undefined
+      });
     }
   } catch (error) {
     console.error("Error verifying payment:", error);

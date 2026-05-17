@@ -1,8 +1,6 @@
-import { useState } from 'react'
-import React from 'react'
-import { RecoilRoot } from 'recoil'
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import  AppBar  from './Component/AppBar';
+import { BrowserRouter } from 'react-router-dom';
+import { RecoilRoot } from 'recoil';
+import SidebarDemo from './Component/st';
 import  AddCourse  from './pages/AddCourse';
 import  Course  from './pages/course';
 import  Courses  from './pages/Courses';
@@ -18,49 +16,56 @@ import Certificate from './pages/cert';
 import Instructor from './pages/instructor';
 import Verify from './pages/Verify';
 import LiveClass from './pages/LiveClass';
-
-
+import Transactions from './pages/Transections';
 import  Landing  from './pages/landing';
 import Rough from './pages/Rough';
 import Sender from './pages/LiveSender';
 import Reciever from './pages/LiveReciever';
-
+import Logs from './pages/Logs';
+import Instructorlist from './pages/Instructorlist';
+interface pathElement {
+  path: string;
+  element: React.JSX.Element;
+}
 function App() {
-  const authPaths = ["/signin", "/signup", "/login", "/register"];
+
+const paths: pathElement[] = [
+  { path: "/", element: <HomePage /> },
+  { path: "/courses", element: <Courses /> },
+  { path: "/purchasedcourses", element: <PurchasedCourses /> },
+  { path: "/releasedcourses", element: <ReleasedCourses /> },
+  { path: "/addcourse", element: <AddCourse /> },
+  { path: "/course/:id", element: <Course /> },
+  { path: "/course/certificate/:id", element: <Certificate /> },
+  { path: "/course/content/:id", element: <CourseContent /> },
+  { path: "/course/purchase/:id", element: <PurchaseCourse /> },
+  { path: "/course/update/:id", element: <UpdateCourse /> },
+  { path: "/:username", element: <Instructor /> },
+  { path: "/verify/:certId", element: <Verify /> },
+  { path: "/rough", element: <Rough /> },
+  { path: "/dev/logs", element: <Logs /> },
+  { path: "/course/live/:id", element: <LiveClass /> },
+  { path: "/live/sender/:roomId", element: <Sender /> },
+  { path: "/live/receiver/:roomId", element: <Reciever /> },
+  { path: "/transactions", element: <Transactions /> },
+  { path: "/instructors", element: <Instructorlist /> },
+  { path: "/signin", element: <AuthPage /> },
+  { path: "/signup", element: <AuthPage /> },
+  { path: "/login", element: <AuthPage /> },
+  { path: "/register", element: <AuthPage /> },
+
+  // default route
+  { path: "/", element: <Landing /> },
+];
 
   return (
-    <>
-     <RecoilRoot>
-      <BrowserRouter>
-       <AppBar/>
-       <div className="pt-20"> 
-        <Routes>
-         <Route path={"/Home"} element={<HomePage />} />
-        <Route path={"/courses"} element={<Courses />} />
-        <Route path={"/purchasedcourses"} element={<PurchasedCourses />} />
-        <Route path={"/releasedcourses"} element={<ReleasedCourses />} />        
-        <Route path={"/addcourse"} element={<AddCourse />} />
-        <Route path={"/course/:id"} element={<Course />} />
-        <Route path={"/course/certificate/:id"} element={<Certificate />} />
-        <Route path={"/course/content/:id"} element={<CourseContent />} />
-        <Route path={"/course/purchase/:id"} element={<PurchaseCourse />} />
-        <Route path={"/course/update/:id"} element={<UpdateCourse />} />
-        <Route path={"/:username"} element={<Instructor />} />
-        <Route path ={"/verify/:certId"} element ={<Verify/>} />
-        <Route path ={"/rough"} element ={<Rough/>} />
-        <Route path ={"/course/live/:id"} element ={<LiveClass />} />
-        <Route path ={"/live/sender/:roomId"} element ={<Sender />} /> 
-        <Route path ={"/live/receiver/:roomId"} element ={<Reciever />} />
-
-       {authPaths.map((path) => (
-    <Route key={path} path={path} element={<AuthPage />} />
-  ))}
-        <Route path={"/"} element={<Landing />} />
-        </Routes>
-       </div>
-       </BrowserRouter>
-     </RecoilRoot>
-    </>
+    <div className="w-full min-h-screen">
+      <RecoilRoot>
+        <BrowserRouter>
+          <SidebarDemo paths={paths} />
+        </BrowserRouter>
+      </RecoilRoot>
+    </div>
   )
 }
 
