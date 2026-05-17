@@ -576,6 +576,7 @@ export default function HomePage() {
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     }}
+                    
                   >
                     "{review.review}"
                   </Typography>
