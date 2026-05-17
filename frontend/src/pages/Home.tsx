@@ -452,11 +452,13 @@ export default function HomePage() {
             <Box
               sx={{
                 display: 'flex',
-                gap: 2.5,
+                gap: 2,
                 overflowX: 'auto',
                 pb: 1,
+                alignItems: 'flex-start',
+                WebkitOverflowScrolling: 'touch',
                 '&::-webkit-scrollbar': {
-                  height: '6px',
+                  height: '8px',
                 },
                 '&::-webkit-scrollbar-track': {
                   background: '#f5f5f5',
