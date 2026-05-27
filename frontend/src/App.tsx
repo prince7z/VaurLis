@@ -1,4 +1,5 @@
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { RecoilRoot } from 'recoil';
 import SidebarDemo from './Component/st';
 import  AddCourse  from './pages/AddCourse';
@@ -23,9 +24,54 @@ import Sender from './pages/LiveSender';
 import Reciever from './pages/LiveReciever';
 import Logs from './pages/Logs';
 import Instructorlist from './pages/Instructorlist';
+import { defaultSeo, getSeoForPath, siteUrl } from './config/seo';
 interface pathElement {
   path: string;
   element: React.JSX.Element;
+}
+
+function SeoManager() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const seo = getSeoForPath(location.pathname);
+    document.title = seo.title;
+
+    const updateMeta = (selector: string, attribute: 'name' | 'property', value: string, content: string) => {
+      let element = document.head.querySelector<HTMLMetaElement>(`${selector}[${attribute}="${value}"]`);
+
+      if (!element) {
+        element = document.createElement('meta');
+        element.setAttribute(attribute, value);
+        document.head.appendChild(element);
+      }
+
+      element.setAttribute('content', content);
+    };
+
+    const updateLink = (rel: string, href: string) => {
+      let element = document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+
+      if (!element) {
+        element = document.createElement('link');
+        element.setAttribute('rel', rel);
+        document.head.appendChild(element);
+      }
+
+      element.setAttribute('href', href);
+    };
+
+    updateMeta('meta', 'name', 'description', seo.description);
+    updateMeta('meta', 'name', 'robots', seo.robots ?? defaultSeo.robots ?? 'index, follow');
+    updateMeta('meta', 'property', 'og:title', seo.title);
+    updateMeta('meta', 'property', 'og:description', seo.description);
+    updateMeta('meta', 'property', 'og:url', `${siteUrl}${location.pathname}`);
+    updateMeta('meta', 'name', 'twitter:title', seo.title);
+    updateMeta('meta', 'name', 'twitter:description', seo.description);
+    updateLink('canonical', `${siteUrl}${location.pathname}`);
+  }, [location.pathname]);
+
+  return null;
 }
 function App() {
 
@@ -62,6 +108,7 @@ const paths: pathElement[] = [
     <div className="w-full min-h-screen">
       <RecoilRoot>
         <BrowserRouter>
+          <SeoManager />
           <SidebarDemo paths={paths} />
         </BrowserRouter>
       </RecoilRoot>
