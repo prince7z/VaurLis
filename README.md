@@ -15,9 +15,7 @@
   <strong>Transforming Education Through Technology</strong>
 </p>
 
-<p align="center">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Demo Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
+
 
 > 
 
