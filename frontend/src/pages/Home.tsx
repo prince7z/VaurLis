@@ -124,31 +124,36 @@ export default function HomePage() {
     <Card
       onClick={() => navigate(`/course/${course._id}`)}
       sx={{
+        width: 280,
         minWidth: 280,
-        height: '100%',
+        maxWidth: 280,
+        height: 345,
         display: 'flex',
         flexDirection: 'column',
-        transition: 'all 0.3s ease',
-        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.08)',
-        borderRadius: 2,
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)',
+        borderRadius: 3,
         overflow: 'hidden',
         cursor: 'pointer',
-        border: '1px solid #f0f0f0',
+        border: '1px solid #eaeeef',
+        bgcolor: '#ffffff',
         flexShrink: 0,
         '&:hover': {
-          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.12)',
+          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.12)',
           transform: 'translateY(-4px)',
+          borderColor: '#d0d7de',
         },
       }}
     >
-      {/* Fixed 16:9 aspect ratio for images */}
+      {/* Fixed aspect ratio banner image */}
       <Box
         sx={{
           position: 'relative',
           width: '100%',
-          paddingBottom: '56.25%', // 16:9 aspect ratio
+          height: 155,
           overflow: 'hidden',
-          bgcolor: '#e8e8e8',
+          bgcolor: '#f1f5f9',
+          flexShrink: 0,
         }}
       >
         <CardMedia
@@ -156,14 +161,36 @@ export default function HomePage() {
           image={course.img || 'https://via.placeholder.com/400x225?text=Course'}
           alt={course.name}
           sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
             width: '100%',
             height: '100%',
             objectFit: 'cover',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.04)',
+            },
           }}
         />
+        {course.institution && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              bgcolor: 'rgba(15, 23, 42, 0.75)',
+              backdropFilter: 'blur(4px)',
+              color: '#ffffff',
+              px: 1.2,
+              py: 0.4,
+              borderRadius: '6px',
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {course.institution}
+          </Box>
+        )}
       </Box>
 
       <CardContent
@@ -171,39 +198,54 @@ export default function HomePage() {
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
           p: 2,
-          gap: 1,
+          '&:last-child': { pb: 2 },
         }}
       >
-        {/* Course Title */}
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            fontSize: '0.95rem',
-            lineHeight: 1.3,
-            color: '#222',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            minHeight: '2.6em',
-          }}
-        >
-          {course.name}
-        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+          {/* Course Title */}
+          <Typography
+            variant="body1"
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.925rem',
+              lineHeight: 1.35,
+              color: '#0f172a',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              height: '2.7em',
+            }}
+          >
+            {course.name}
+          </Typography>
 
-        {/* Instructor */}
-        <Typography
-          variant="caption"
-          sx={{
-            color: '#888',
-            fontSize: '0.8rem',
-            fontWeight: 500,
-          }}
-        >
-          {course.instructor?.username || 'Instructor'}
-        </Typography>
+          {/* Instructor */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+            <Avatar
+              src={course.instructor?.img}
+              alt={course.instructor?.username}
+              sx={{ width: 24, height: 24, fontSize: '0.75rem', bgcolor: '#e2e8f0', color: '#475569' }}
+            >
+              {course.instructor?.username?.charAt(0)?.toUpperCase() || 'I'}
+            </Avatar>
+            <Typography
+              variant="caption"
+              sx={{
+                color: '#64748b',
+                fontSize: '0.8rem',
+                fontWeight: 500,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {course.instructor?.username || 'Instructor'}
+            </Typography>
+          </Box>
+        </Box>
 
         {/* Rating and Price */}
         <Box
@@ -211,26 +253,32 @@ export default function HomePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            mt: 'auto',
-            pt: 0.5,
+            pt: 1.5,
+            borderTop: '1px solid #f1f5f9',
+            mt: 1,
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Rating
               value={course.rating || 0}
+              precision={0.5}
               readOnly
               size="small"
-              sx={{ fontSize: '0.9rem' }}
+              sx={{ fontSize: '0.85rem', color: '#f59e0b' }}
             />
-            <Typography variant="caption" sx={{ color: '#999', fontSize: '0.75rem' }}>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>
               {(course.rating || 0).toFixed(1)}
             </Typography>
           </Box>
           <Typography
             sx={{
-              fontWeight: 600,
-              color: course.price === 0 ? '#4caf50' : '#ff6b35',
-              fontSize: '0.9rem',
+              fontWeight: 700,
+              color: course.price === 0 ? '#16a34a' : '#2563eb',
+              fontSize: '0.85rem',
+              bgcolor: course.price === 0 ? '#f0fdf4' : '#eff6ff',
+              px: 1.2,
+              py: 0.3,
+              borderRadius: '6px',
             }}
           >
             {course.price === 0 ? 'Free' : `$${course.price}`}
@@ -352,7 +400,10 @@ export default function HomePage() {
                 display: 'flex',
                 gap: 2.5,
                 overflowX: 'auto',
-                pb: 1,
+                pt: 1,
+                pb: 1.5,
+                px: 0.5,
+                alignItems: 'stretch',
                 '&::-webkit-scrollbar': {
                   height: '6px',
                 },
@@ -361,10 +412,10 @@ export default function HomePage() {
                   borderRadius: '10px',
                 },
                 '&::-webkit-scrollbar-thumb': {
-                  background: '#ddd',
+                  background: '#cbd5e1',
                   borderRadius: '10px',
                   '&:hover': {
-                    background: '#bbb',
+                    background: '#94a3b8',
                   },
                 },
               }}
@@ -409,7 +460,10 @@ export default function HomePage() {
                 display: 'flex',
                 gap: 2.5,
                 overflowX: 'auto',
-                pb: 1,
+                pt: 1,
+                pb: 1.5,
+                px: 0.5,
+                alignItems: 'stretch',
                 '&::-webkit-scrollbar': {
                   height: '6px',
                 },
@@ -418,10 +472,10 @@ export default function HomePage() {
                   borderRadius: '10px',
                 },
                 '&::-webkit-scrollbar-thumb': {
-                  background: '#ddd',
+                  background: '#cbd5e1',
                   borderRadius: '10px',
                   '&:hover': {
-                    background: '#bbb',
+                    background: '#94a3b8',
                   },
                 },
               }}

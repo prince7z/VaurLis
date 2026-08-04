@@ -1,11 +1,8 @@
 @import 'tailwindcss';
-@plugin "daisyui";
-
-@plugin 'tailwindcss-animate';
-
-/* Import Glacial Indifference Font */
 @import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
-@import "tw-animate-css";
+
+@plugin "daisyui";
+@plugin 'tailwindcss-animate';
 
 @custom-variant dark (&:is(.dark *));
 

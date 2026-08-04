@@ -120,60 +120,127 @@ export default function HomePage() {
 
   const CourseCard = ({ course }: { course: Course }) => (
     <Card
+      onClick={() => navigate(`/course/${course._id}`)}
       sx={{
-        minWidth: 250,
-        height: '100%',
+        width: 280,
+        minWidth: 280,
+        maxWidth: 280,
+        height: 345,
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        '&:hover': { 
-          transform: 'translateY(-4px)', 
-          boxShadow: '0 8px 16px rgba(0,0,0,0.12)' 
-        },
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)',
+        borderRadius: 3,
+        overflow: 'hidden',
         cursor: 'pointer',
+        border: '1px solid #eaeeef',
+        bgcolor: '#ffffff',
         flexShrink: 0,
+        '&:hover': {
+          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.12)',
+          transform: 'translateY(-4px)',
+          borderColor: '#d0d7de',
+        },
       }}
     >
-      <CardMedia
-        component="img"
-        height="200"
-        image={course.img || 'https://via.placeholder.com/300x200?text=Course'}
-        alt={course.name}
-        sx={{ objectFit: 'cover' }}
-      />
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 600, 
-            color: '#000', 
-            mb: 1,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            fontSize: '0.95rem'
+      <Box
+        sx={{
+          position: 'relative',
+          width: '100%',
+          height: 155,
+          overflow: 'hidden',
+          bgcolor: '#f1f5f9',
+          flexShrink: 0,
+        }}
+      >
+        <CardMedia
+          component="img"
+          image={course.img || 'https://via.placeholder.com/400x225?text=Course'}
+          alt={course.name}
+          sx={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'scale(1.04)',
+            },
           }}
-        >
-          {course.name}
-        </Typography>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-          <Rating value={course.rating || 0} readOnly size="small" />
-          <Typography variant="caption" sx={{ color: '#999' }}>
-            {course.rating || '0'}
+        />
+      </Box>
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', p: 2, '&:last-child': { pb: 2 } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              fontWeight: 600, 
+              fontSize: '0.925rem',
+              lineHeight: 1.35,
+              color: '#0f172a',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              height: '2.7em',
+            }}
+          >
+            {course.name}
           </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+            <Avatar
+              src={course.instructor?.img}
+              alt={course.instructor?.username}
+              sx={{ width: 24, height: 24, fontSize: '0.75rem', bgcolor: '#e2e8f0', color: '#475569' }}
+            >
+              {course.instructor?.username?.charAt(0)?.toUpperCase() || 'I'}
+            </Avatar>
+            <Typography
+              variant="caption"
+              sx={{
+                color: '#64748b',
+                fontSize: '0.8rem',
+                fontWeight: 500,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {course.instructor?.username || 'Instructor'}
+            </Typography>
+          </Box>
         </Box>
 
-        <Typography variant="body2" sx={{ color: '#666', mb: 0.5, fontSize: '0.85rem' }}>
-          {course.instructor?.username || 'Unknown'}
-        </Typography>
-
-        <Typography variant="body2" sx={{ color: '#f57c00', fontWeight: 600, mt: 'auto' }}>
-          {course.price === 0 ? 'Free' : `$${course.price}`}
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            pt: 1.5,
+            borderTop: '1px solid #f1f5f9',
+            mt: 1,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Rating value={course.rating || 0} precision={0.5} readOnly size="small" sx={{ fontSize: '0.85rem', color: '#f59e0b' }} />
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>
+              {(course.rating || 0).toFixed(1)}
+            </Typography>
+          </Box>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              color: course.price === 0 ? '#16a34a' : '#2563eb',
+              fontSize: '0.85rem',
+              bgcolor: course.price === 0 ? '#f0fdf4' : '#eff6ff',
+              px: 1.2,
+              py: 0.3,
+              borderRadius: '6px',
+            }}
+          >
+            {course.price === 0 ? 'Free' : `$${course.price}`}
+          </Typography>
+        </Box>
       </CardContent>
     </Card>
   );
