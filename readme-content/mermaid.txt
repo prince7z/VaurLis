@@ -1,0 +1,196 @@
+graph TB
+
+    subgraph ClientLayer
+        A[Web Frontend React]
+        B[Future Mobile App]
+    end
+
+    subgraph SecurityLayer
+        C1[CORS Protection]
+        C2[Helmet Security]
+        C3[Rate Limiter]
+        C4[Mongo Request Logger]
+    end
+
+    subgraph Backend
+        D[Express.js API Server]
+
+        subgraph Middleware
+            E1[JWT Auth]
+            E2[AuthLite]
+            E3[Validation]
+        end
+
+        subgraph Modules
+            F1[Authentication Module]
+            F2[User Module]
+            F3[Course Module]
+            F4[Payment Module]
+            F5[Media Upload Module]
+            F6[Admin Analytics]
+            F7[WebSocket Streaming]
+        end
+    end
+
+    subgraph ExternalServices
+        G1[Razorpay]
+        G2[Cloudinary CDN]
+        G3[SendGrid Email]
+    end
+
+    subgraph Database
+        H[(MongoDB)]
+    end
+
+    A --> D
+    B --> D
+
+    D --> C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+
+    C4 --> E1
+    E1 --> F1
+    E1 --> F2
+    E1 --> F3
+    E1 --> F4
+    E1 --> F5
+    E1 --> F6
+
+    D --> F7
+
+    F1 --> H
+    F2 --> H
+    F3 --> H
+    F4 --> H
+    F5 --> H
+    F6 --> H
+
+    F4 --> G1
+    F5 --> G2
+    F1 --> G3
+///////////////////////////////////////////
+sequenceDiagram
+
+    participant User
+    participant Frontend
+    participant API as Express API
+    participant Auth as JWT Middleware
+    participant Logic as Route Logic
+    participant DB as MongoDB
+    participant External as External Services
+
+    User->>Frontend: Action Request
+
+    Frontend->>API: HTTP Request + JWT
+
+    API->>API: CORS + Helmet + Rate Limit
+
+    API->>Auth: Verify JWT Token
+
+    Auth->>DB: Load User
+
+    DB-->>Auth: User Context
+
+    Auth-->>API: Authorized Request
+
+    API->>Logic: Execute Business Logic
+
+    alt Payment Flow
+        Logic->>External: Razorpay API
+    else Upload Flow
+        Logic->>External: Cloudinary Upload
+    else OTP Flow
+        Logic->>External: SendGrid Email
+    end
+
+    Logic->>DB: Read/Write Data
+
+    DB-->>Logic: Database Response
+
+    Logic-->>API: Result
+
+    API->>DB: Store Audit Logs
+
+    API-->>Frontend: JSON Response
+
+    Frontend-->>User: UI Update
+////////////////////////////////////////////////////
+p2p 
+
+graph LR
+
+    subgraph Instructor
+        A[Instructor]
+    end
+
+    subgraph WebSocketServer
+        B[Room Manager]
+        C[Room class_123]
+    end
+
+    subgraph Students
+        D[Student 1]
+        E[Student 2]
+        F[Student N]
+    end
+
+    A -->|sender-join| B
+
+    D -->|receiver-join| B
+    E -->|receiver-join| B
+    F -->|receiver-join| B
+
+    B --> C
+
+    A -->|WebRTC Offer| D
+    A -->|WebRTC Offer| E
+    A -->|WebRTC Offer| F
+
+    D -->|Answer + ICE| A
+    E -->|Answer + ICE| A
+    F -->|Answer + ICE| A
+
+    A <-->|Chat Messages| D
+    A <-->|Chat Messages| E
+    A <-->|Chat Messages| F
+
+/////////////////////////////////////////////////
+graph TD
+
+    A[User Registration]
+        --> B[Generate OTP]
+
+    B --> C[Store OTP In Memory]
+
+    C --> D[SendGrid Email Delivery]
+
+    D --> E[User Enters OTP]
+
+    E --> F{OTP Valid}
+
+    F -->|No| G[Reject Request]
+
+    F -->|Yes| H[Hash Password Using bcrypt]
+
+    H --> I[Create User Document]
+
+    I --> J[Generate JWT]
+
+    J --> K[Return Token]
+
+    K --> L[Client Stores Token]
+
+    L --> M[Future API Requests]
+
+    M --> N[JWT Verification Middleware]
+
+    N --> O{Token Valid}
+
+    O -->|No| P[401 Unauthorized]
+
+    O -->|Yes| Q[Load User Context]
+
+    Q --> R[Protected Route Access]
+/////////////////////////////////////////////////////////
